@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { supabase } from '@/integrations/supabase/client';
@@ -62,22 +61,40 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   );
   const [syncState, setSyncState] = useLocalStorage<SyncState>('sync-state', defaultSyncState);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   
   // Check if user is authenticated on component mount
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const isLoggedIn = !!session;
-      setIsAuthenticated(isLoggedIn);
-      
-      if (isLoggedIn && session?.user) {
-        setUserProfile({
-          id: session.user.id,
-          email: session.user.email,
-          isPremium: false // Default to non-premium
-        });
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error checking session:', error);
+          setIsAuthenticated(false);
+          setUserProfile(null);
+          return;
+        }
+
+        const isLoggedIn = !!session;
+        setIsAuthenticated(isLoggedIn);
+        
+        if (isLoggedIn && session?.user) {
+          setUserProfile({
+            id: session.user.id,
+            email: session.user.email,
+            isPremium: false // Default to non-premium
+          });
+        } else {
+          setUserProfile(null);
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+        setIsAuthenticated(false);
+        setUserProfile(null);
+      } finally {
+        setIsLoading(false);
       }
     };
     
