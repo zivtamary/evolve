@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 
@@ -9,13 +8,6 @@ interface SearchBarProps {
 const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
   const [searchEngine, setSearchEngine] = useLocalStorage<string>('search-engine', 'google');
   const inputRef = useRef<HTMLInputElement>(null);
-  
-  useEffect(() => {
-    // Auto focus on the search input when the component mounts
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, []);
   
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,12 +71,12 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
   };
   
   return (
-    <div className={`max-w-lg mx-auto w-full ${className}`}>
+    <div className={`w-[400px] mx-auto transition-all duration-500 ease-in-out focus-within:w-[600px] ${className}`}>
       <form onSubmit={handleSearch} className="relative">
-        <div className="glass dark:glass-dark flex items-center rounded-full px-5 py-2 text-white transition-all focus-within:ring focus-within:ring-white/30">
+        <div className="glass dark:glass-dark flex items-center rounded-full px-5 py-2 text-white transition-all duration-500 ease-in-out focus-within:ring focus-within:ring-white/30">
           <button
             type="button"
-            className="mr-3"
+            className="mr-3 shrink-0 transition-opacity duration-300"
             onClick={changeSearchEngine}
             title={`Search with ${searchEngine.charAt(0).toUpperCase() + searchEngine.slice(1)}`}
           >
@@ -94,11 +86,11 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
             ref={inputRef}
             type="text"
             placeholder="Search the web..."
-            className="flex-grow bg-transparent py-2 outline-none placeholder:text-white/70"
+            className="w-full bg-transparent py-2 outline-none placeholder:text-white/70 transition-all duration-500 ease-in-out"
           />
           <button 
             type="submit"
-            className="ml-3 text-white/70 hover:text-white"
+            className="ml-3 shrink-0 text-white/70 hover:text-white transition-colors duration-300"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8" />

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 
@@ -93,7 +92,7 @@ const Notes: React.FC = () => {
   const sortedNotes = [...notes].sort((a, b) => b.updatedAt - a.updatedAt);
   
   return (
-    <div className="glass dark:glass-dark rounded-xl text-white overflow-hidden">
+    <div className="glass dark:glass-dark rounded-xl text-white overflow-hidden h-[400px] flex flex-col">
       <div className="flex items-center justify-between p-4 border-b border-white/10">
         <h2 className="text-xl font-semibold">Notes</h2>
         <button
@@ -108,7 +107,7 @@ const Notes: React.FC = () => {
         </button>
       </div>
       
-      <div className="flex h-64">
+      <div className="flex flex-1 overflow-hidden">
         {/* Notes list */}
         <div className="w-1/3 border-r border-white/10 overflow-y-auto">
           {sortedNotes.length === 0 ? (
@@ -132,7 +131,7 @@ const Notes: React.FC = () => {
                   `}
                   onClick={() => selectNote(note.id)}
                 >
-                  <div className="flex justify-between items-center">
+                  <div className="flex items-center justify-between">
                     <div className="truncate">
                       {note.content ? (
                         <span className="text-sm">{note.content.split('\n')[0] || 'Empty note'}</span>
@@ -165,17 +164,17 @@ const Notes: React.FC = () => {
         </div>
         
         {/* Note editor */}
-        <div className="w-2/3 flex flex-col">
+        <div className="flex-1 flex flex-col overflow-hidden">
           {activeNoteId ? (
             <textarea
               ref={textareaRef}
               value={noteContent}
               onChange={handleContentChange}
               placeholder="Type your note here..."
-              className="flex-grow bg-transparent p-4 outline-none resize-none placeholder:text-white/50"
+              className="flex-1 bg-transparent p-4 outline-none resize-none placeholder:text-white/50"
             />
           ) : (
-            <div className="flex-grow flex items-center justify-center">
+            <div className="flex-1 flex items-center justify-center">
               <div className="text-white/50 text-center">
                 <p>Select a note or create a new one</p>
                 <button

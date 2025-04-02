@@ -1,6 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { cn } from '@/lib/utils';
 
 interface ClockProps {
   className?: string;
@@ -24,7 +24,12 @@ const Clock: React.FC<ClockProps> = ({ className = '' }) => {
     if (format24h) {
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
     }
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    const time = date.toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      hour12: true 
+    });
+    return time.replace(/am|pm/i, (match) => match.toUpperCase());
   };
   
   const formatDate = (date: Date): string => {
@@ -41,10 +46,15 @@ const Clock: React.FC<ClockProps> = ({ className = '' }) => {
   };
   
   return (
-    <div className={`text-center ${className}`}>
+    <div className={cn("text-center", className)}>
       <div className="group relative">
         <h1 
-          className="text-shadow-lg cursor-pointer font-bold text-white text-7xl sm:text-8xl transition-all" 
+          className="font-['Space_Grotesk'] font-light tracking-tight cursor-pointer text-white text-8xl sm:text-9xl transition-all hover:opacity-90"
+          style={{
+            textShadow: '2px 2px 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.2)',
+            fontVariantNumeric: 'tabular-nums',
+            letterSpacing: '-0.02em'
+          }}
           onClick={toggleTimeFormat}
         >
           {formatTime(time)}
@@ -62,7 +72,13 @@ const Clock: React.FC<ClockProps> = ({ className = '' }) => {
           </button>
         </div>
       </div>
-      <p className="text-shadow mt-2 text-white text-xl">
+      <p 
+        className="mt-4 text-white/70 text-2xl font-['Inter'] font-light tracking-wide"
+        style={{ 
+          textShadow: '1px 1px 10px rgba(255, 255, 255, 0.2), 0 0 20px rgba(255, 255, 255, 0.1)',
+          letterSpacing: '0.02em'
+        }}
+      >
         {formatDate(time)}
       </p>
     </div>

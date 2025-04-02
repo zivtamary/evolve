@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useSettings } from '../context/SettingsContext';
@@ -68,40 +67,31 @@ const Index = () => {
         {/* Settings sidebar */}
         <SettingsSidebar />
         
-        {/* Header section with time and weather */}
+        {/* Clock at the top */}
         <header className="mb-8">
           <div className="container mx-auto flex flex-col items-center">
             <Clock className="mb-8 animate-fade-in" />
-            <div className="w-full max-w-xs mb-8 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-              <Weather />
-            </div>
           </div>
         </header>
         
-        {/* Search section */}
-        <section className="mb-10 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-          <SearchBar />
-        </section>
-        
-        {/* Favorites section */}
-        <section className="mb-10 animate-slide-up" style={{ animationDelay: '0.3s' }}>
-          <div className="container mx-auto max-w-4xl">
-            <Favorites />
+        {/* Centered search and weather section */}
+        <div className="flex flex-col items-center justify-center min-h-[50vh]">
+          <div className="w-full max-w-xs mb-8 animate-slide-up opacity-0 animate-delay-200" style={{ animationFillMode: 'forwards' }}>
+            <Weather />
           </div>
-        </section>
+          <div className="animate-slide-up opacity-0 animate-delay-300" style={{ animationFillMode: 'forwards' }}>
+            <SearchBar />
+          </div>
+        </div>
         
         {/* Productivity tools section */}
-        <section className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
+        <section className="animate-slide-up opacity-0 animate-delay-400" style={{ animationFillMode: 'forwards' }}>
           <div className="container mx-auto max-w-4xl">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-6">
-                {widgetVisibility.notes && <Notes />}
-                {widgetVisibility.pomodoro && <Pomodoro />}
-              </div>
-              <div className="space-y-6">
-                {widgetVisibility.todoList && <TodoList />}
-                {widgetVisibility.events && <Events />}
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 [&>*:only-child]:md:col-span-2 [&>*:last-child:nth-child(2n-1)]:md:col-span-2">
+              {widgetVisibility.notes && <Notes />}
+              {widgetVisibility.todoList && <TodoList />}
+              {widgetVisibility.pomodoro && <Pomodoro />}
+              {widgetVisibility.events && <Events />}
             </div>
           </div>
         </section>

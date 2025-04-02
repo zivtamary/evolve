@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 
@@ -43,18 +42,18 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({ children }) => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden bg-black">
       {/* Background image with blur effect */}
-      {!loading && (
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000"
-          style={{ 
-            backgroundImage: `url(${imageUrl})`,
-            filter: 'blur(8px)',
-            transform: 'scale(1.1)',
-          }}
-        />
-      )}
+      <div
+        className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${
+          !loading ? 'opacity-100' : 'opacity-0'
+        }`}
+        style={{ 
+          backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
+          filter: 'blur(8px)',
+          transform: 'scale(1.1)',
+        }}
+      />
       
       {/* Overlay for better text readability */}
       <div className="absolute inset-0 bg-black/20 dark:bg-black/50" />
