@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSettings } from '../../context/SettingsContext';
@@ -21,7 +20,7 @@ import {
   LogIn,
   LogOut,
   Loader2,
-  CloudSync,
+  Cloud,
   Sparkles
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
@@ -140,7 +139,7 @@ const SettingsSidebar = () => {
           
           <div className="py-6">
             <h3 className="mb-4 text-lg font-medium flex items-center gap-2">
-              <CloudSync className="h-5 w-5" />
+              <Cloud className="h-5 w-5" />
               <span>Data Synchronization</span>
               {!isAuthenticated || !userProfile?.isPremium ? (
                 <span className="ml-auto">

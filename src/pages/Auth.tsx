@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +10,7 @@ import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useSettings } from '@/context/SettingsContext';
 import BackgroundImage from '@/components/Background/BackgroundImage';
-import { ArrowRight, CheckCircle, CloudSync, Sparkles } from 'lucide-react';
+import { ArrowRight, CheckCircle, Cloud, Sparkles } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 const Auth = () => {
@@ -25,7 +24,6 @@ const Auth = () => {
   const { isAuthenticated } = useSettings();
   
   useEffect(() => {
-    // If already authenticated, redirect to home
     if (isAuthenticated) {
       navigate('/');
     }
@@ -343,7 +341,7 @@ const Auth = () => {
                 
                 <ul className="space-y-2">
                   <li className="flex items-start">
-                    <CloudSync className="h-5 w-5 mr-2 text-primary flex-shrink-0 mt-0.5" />
+                    <Cloud className="h-5 w-5 mr-2 text-primary flex-shrink-0 mt-0.5" />
                     <span className="text-sm">
                       Cloud sync across all your devices
                     </span>
