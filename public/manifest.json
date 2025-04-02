@@ -1,0 +1,31 @@
+
+{
+  "manifest_version": 3,
+  "name": "Focus Dashboard - Aesthetic Startpage",
+  "short_name": "Focus Dashboard",
+  "version": "1.0.0",
+  "description": "Beautiful productivity dashboard with clock, weather, todo list, notes, pomodoro timer and cloud sync.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_title": "Focus Dashboard",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "author": "Lovable",
+  "homepage_url": "https://lovable.dev"
+}
