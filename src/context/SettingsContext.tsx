@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,6 +16,12 @@ interface SyncState {
   lastSynced: string | null;
 }
 
+interface UserProfile {
+  id: string;
+  email: string | undefined;
+  isPremium: boolean;
+}
+
 interface SettingsContextType {
   isSettingsOpen: boolean;
   setIsSettingsOpen: (value: boolean) => void;
@@ -29,6 +34,8 @@ interface SettingsContextType {
   syncWithCloud: () => Promise<void>;
   signOut: () => Promise<void>;
   isLoading: boolean;
+  userProfile: UserProfile | null;
+  toggleSyncEnabled: () => void;
 }
 
 const defaultWidgetVisibility: WidgetVisibility = {
@@ -54,24 +61,83 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [syncState, setSyncState] = useLocalStorage<SyncState>('sync-state', defaultSyncState);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   
   // Check if user is authenticated on component mount
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session);
+      const isLoggedIn = !!session;
+      setIsAuthenticated(isLoggedIn);
+      
+      if (isLoggedIn && session?.user) {
+        setUserProfile({
+          id: session.user.id,
+          email: session.user.email,
+          isPremium: true
+        });
+      }
     };
     
     checkSession();
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsAuthenticated(!!session);
+      const isLoggedIn = !!session;
+      setIsAuthenticated(isLoggedIn);
+      
+      if (isLoggedIn && session?.user) {
+        setUserProfile({
+          id: session.user.id,
+          email: session.user.email,
+          isPremium: true
+        });
+      } else {
+        setUserProfile(null);
+        if (event === 'SIGNED_OUT') {
+          setSyncState({
+            enabled: false,
+            lastSynced: null
+          });
+        }
+      }
     });
     
     return () => {
       subscription.unsubscribe();
     };
   }, []);
+
+  const toggleSyncEnabled = () => {
+    if (!userProfile?.isPremium && !syncState.enabled) {
+      toast({
+        title: "Premium Feature",
+        description: "Cloud sync is a premium feature. Please upgrade to enable.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (syncState.enabled) {
+      setSyncState({
+        ...syncState,
+        enabled: false
+      });
+      toast({
+        title: "Sync Disabled",
+        description: "Your data will no longer be synced to the cloud.",
+      });
+      return;
+    }
+
+    if (!syncState.enabled) {
+      syncWithCloud().then(() => {
+        setSyncState({
+          ...syncState,
+          enabled: true
+        });
+      });
+    }
+  };
 
   const toggleWidget = (widget: keyof WidgetVisibility) => {
     setWidgetVisibility({
@@ -85,6 +151,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setIsLoading(true);
       await supabase.auth.signOut();
       setIsAuthenticated(false);
+      setUserProfile(null);
       setSyncState({
         enabled: false,
         lastSynced: null,
@@ -104,12 +171,20 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  // This is the main sync implementation
   const syncWithCloud = async () => {
     if (!isAuthenticated) {
       toast({
         title: "Authentication required",
         description: "Please sign in to sync your data with the cloud.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!userProfile?.isPremium) {
+      toast({
+        title: "Premium Feature",
+        description: "Cloud sync is a premium feature. Please upgrade to enable.",
         variant: "destructive"
       });
       return;
@@ -123,22 +198,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         throw new Error("User not found");
       }
       
-      // Sync notes
       await syncNotes(user.id);
-      
-      // Sync todos
       await syncTodos(user.id);
-      
-      // Sync events
       await syncEvents(user.id);
-      
-      // Sync pomodoro settings
       await syncPomodoroSettings(user.id);
       
-      // Update lastSynced timestamp
       setSyncState({
         ...syncState,
-        enabled: true,
         lastSynced: new Date().toISOString(),
       });
       
@@ -157,15 +223,36 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  // Helper function to sync notes
+  const syncOnBlur = async (elementType: string) => {
+    if (isAuthenticated && userProfile?.isPremium && syncState.enabled) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        
+        if (elementType === 'notes') {
+          await syncNotes(user.id);
+        } else if (elementType === 'todos') {
+          await syncTodos(user.id);
+        } else if (elementType === 'events') {
+          await syncEvents(user.id);
+        }
+        
+        setSyncState({
+          ...syncState,
+          lastSynced: new Date().toISOString(),
+        });
+      } catch (error) {
+        console.error("Auto-sync error:", error);
+      }
+    }
+  };
+
   const syncNotes = async (userId: string) => {
-    // Get local notes
     let localNotes = JSON.parse(localStorage.getItem('notes') || '[]');
     if (!Array.isArray(localNotes) || localNotes.length === 0) {
       localNotes = [];
     }
     
-    // Get cloud notes
     const { data: cloudNotes, error } = await supabase
       .from('notes')
       .select('*')
@@ -174,7 +261,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (error) throw error;
     
     if (!cloudNotes || cloudNotes.length === 0) {
-      // No cloud notes, push local notes to cloud
       if (localNotes.length > 0) {
         const notesToUpload = localNotes.map((note: any) => ({
           id: note.id,
@@ -190,8 +276,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (error) throw error;
       }
     } else {
-      // Merge local and cloud notes
-      // Create a map of notes by id
       const localNotesMap = new Map();
       localNotes.forEach((note: any) => {
         const localData = {
@@ -212,18 +296,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         cloudNotesMap.set(note.id, cloudData);
       });
       
-      // Notes to update in cloud
       const notesToUpload = [];
-      
-      // New merged notes to save locally
       const mergedNotes = [];
       
-      // Process local notes
       localNotes.forEach((note: any) => {
         const cloudNote = cloudNotesMap.get(note.id);
         
         if (!cloudNote) {
-          // Note exists only locally, upload to cloud
           notesToUpload.push({
             id: note.id,
             user_id: userId,
@@ -233,9 +312,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           });
           mergedNotes.push(note);
         } else {
-          // Note exists in both places, compare timestamps
           if (note.updatedAt > cloudNote.updatedAt) {
-            // Local note is newer, update cloud
             notesToUpload.push({
               id: note.id,
               user_id: userId,
@@ -244,18 +321,16 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             });
             mergedNotes.push(note);
           } else {
-            // Cloud note is newer or same, use cloud version
             mergedNotes.push({
               id: cloudNote.id,
               content: cloudNote.content,
-              createdAt: note.createdAt, // Keep original creation time
+              createdAt: note.createdAt,
               updatedAt: cloudNote.updatedAt
             });
           }
         }
       });
       
-      // Add cloud-only notes to merged notes
       cloudNotes.forEach((note: any) => {
         if (!localNotesMap.has(note.id)) {
           mergedNotes.push({
@@ -267,7 +342,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       });
       
-      // Upload notes to cloud
       if (notesToUpload.length > 0) {
         const { error } = await supabase
           .from('notes')
@@ -275,20 +349,16 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (error) throw error;
       }
       
-      // Save merged notes locally
       localStorage.setItem('notes', JSON.stringify(mergedNotes));
     }
   };
 
-  // Helper function to sync todos
   const syncTodos = async (userId: string) => {
-    // Get local todos
     let localTodos = JSON.parse(localStorage.getItem('todos') || '[]');
     if (!Array.isArray(localTodos) || localTodos.length === 0) {
       localTodos = [];
     }
     
-    // Get cloud todos
     const { data: cloudTodos, error } = await supabase
       .from('todos')
       .select('*')
@@ -297,7 +367,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (error) throw error;
     
     if (!cloudTodos || cloudTodos.length === 0) {
-      // No cloud todos, push local todos to cloud
       if (localTodos.length > 0) {
         const todosToUpload = localTodos.map((todo: any) => ({
           id: todo.id,
@@ -314,8 +383,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (error) throw error;
       }
     } else {
-      // Merge local and cloud todos
-      // Create a map of todos by id
       const localTodosMap = new Map();
       localTodos.forEach((todo: any) => {
         localTodosMap.set(todo.id, todo);
@@ -332,18 +399,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         });
       });
       
-      // Todos to update in cloud
       const todosToUpload = [];
-      
-      // New merged todos to save locally
       const mergedTodos = [];
       
-      // Process local todos
       localTodos.forEach((todo: any) => {
         const cloudTodo = cloudTodosMap.get(todo.id);
         
         if (!cloudTodo) {
-          // Todo exists only locally, upload to cloud
           todosToUpload.push({
             id: todo.id,
             user_id: userId,
@@ -354,7 +416,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           });
           mergedTodos.push(todo);
         } else {
-          // Use the most recent version (assume local is more up-to-date)
           mergedTodos.push(todo);
           todosToUpload.push({
             id: todo.id,
@@ -366,7 +427,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       });
       
-      // Add cloud-only todos to merged todos
       cloudTodos.forEach((todo: any) => {
         if (!localTodosMap.has(todo.id)) {
           mergedTodos.push({
@@ -378,7 +438,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       });
       
-      // Upload todos to cloud
       if (todosToUpload.length > 0) {
         const { error } = await supabase
           .from('todos')
@@ -386,20 +445,16 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (error) throw error;
       }
       
-      // Save merged todos locally
       localStorage.setItem('todos', JSON.stringify(mergedTodos));
     }
   };
 
-  // Helper function to sync events
   const syncEvents = async (userId: string) => {
-    // Get local events
     let localEvents = JSON.parse(localStorage.getItem('dashboard-events') || '[]');
     if (!Array.isArray(localEvents) || localEvents.length === 0) {
       localEvents = [];
     }
     
-    // Get cloud events
     const { data: cloudEvents, error } = await supabase
       .from('events')
       .select('*')
@@ -408,7 +463,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (error) throw error;
     
     if (!cloudEvents || cloudEvents.length === 0) {
-      // No cloud events, push local events to cloud
       if (localEvents.length > 0) {
         const eventsToUpload = localEvents.map((event: any) => ({
           id: event.id,
@@ -425,7 +479,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (error) throw error;
       }
     } else {
-      // Merge local and cloud events (similar to notes and todos)
       const localEventsMap = new Map();
       localEvents.forEach((event: any) => {
         localEventsMap.set(event.id, event);
@@ -442,16 +495,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         });
       });
       
-      // Events to update in cloud
       const eventsToUpload = [];
-      
-      // New merged events to save locally
       const mergedEvents = [];
       
-      // Process local events (assume local is authoritative)
       localEvents.forEach((event: any) => {
         if (!cloudEventsMap.has(event.id)) {
-          // Event exists only locally, upload to cloud
           eventsToUpload.push({
             id: event.id,
             user_id: userId,
@@ -464,7 +512,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         mergedEvents.push(event);
       });
       
-      // Add cloud-only events to merged events
       cloudEvents.forEach((event: any) => {
         if (!localEventsMap.has(event.id)) {
           mergedEvents.push({
@@ -477,7 +524,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       });
       
-      // Upload events to cloud
       if (eventsToUpload.length > 0) {
         const { error } = await supabase
           .from('events')
@@ -485,17 +531,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (error) throw error;
       }
       
-      // Save merged events locally
       localStorage.setItem('dashboard-events', JSON.stringify(mergedEvents));
     }
   };
 
-  // Helper function to sync pomodoro settings
   const syncPomodoroSettings = async (userId: string) => {
-    // Get local pomodoro sessions
     const localSessions = parseInt(localStorage.getItem('pomodoro-sessions') || '0');
     
-    // Get cloud pomodoro settings
     const { data: cloudSettings, error } = await supabase
       .from('pomodoro_settings')
       .select('*')
@@ -505,7 +547,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (error) throw error;
     
     if (!cloudSettings) {
-      // No cloud settings, create new record
       const { error } = await supabase
         .from('pomodoro_settings')
         .insert([
@@ -517,10 +558,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         
       if (error) throw error;
     } else {
-      // Use the higher session count
       const sessionCount = Math.max(localSessions, cloudSettings.sessions);
       
-      // Update cloud if local is higher
       if (localSessions > cloudSettings.sessions) {
         const { error } = await supabase
           .from('pomodoro_settings')
@@ -529,7 +568,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           
         if (error) throw error;
       } else if (cloudSettings.sessions > localSessions) {
-        // Update local if cloud is higher
         localStorage.setItem('pomodoro-sessions', cloudSettings.sessions.toString());
       }
     }
@@ -548,7 +586,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setIsAuthenticated,
         syncWithCloud,
         signOut,
-        isLoading
+        isLoading,
+        userProfile,
+        toggleSyncEnabled
       }}
     >
       {children}

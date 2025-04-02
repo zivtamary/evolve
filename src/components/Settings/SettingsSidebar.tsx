@@ -17,11 +17,12 @@ import {
   CheckSquare, 
   Timer, 
   CalendarDays, 
-  Save,
   Lock,
   LogIn,
   LogOut,
-  Loader2
+  Loader2,
+  CloudSync,
+  Sparkles
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
@@ -49,22 +50,13 @@ const SettingsSidebar = () => {
     toggleWidget,
     syncState,
     isAuthenticated,
-    syncWithCloud,
+    userProfile,
+    toggleSyncEnabled,
     signOut,
     isLoading
   } = useSettings();
   
   const navigate = useNavigate();
-
-  const handleSyncClick = async () => {
-    if (!isAuthenticated) {
-      navigate('/auth');
-      setIsSettingsOpen(false);
-      return;
-    }
-    
-    await syncWithCloud();
-  };
 
   const handleAuthClick = () => {
     if (isAuthenticated) {
@@ -147,14 +139,22 @@ const SettingsSidebar = () => {
           <Separator />
           
           <div className="py-6">
-            <h3 className="mb-4 text-lg font-medium">Data Synchronization</h3>
+            <h3 className="mb-4 text-lg font-medium flex items-center gap-2">
+              <CloudSync className="h-5 w-5" />
+              <span>Data Synchronization</span>
+              {!isAuthenticated || !userProfile?.isPremium ? (
+                <span className="ml-auto">
+                  <Sparkles className="h-4 w-4 text-yellow-500" />
+                </span>
+              ) : null}
+            </h3>
             
             <div className="space-y-4">
               <div className="text-sm text-muted-foreground">
                 {isAuthenticated ? (
                   <div className="flex items-center gap-1 text-green-500">
                     <Lock className="h-4 w-4" />
-                    <span>Logged in</span>
+                    <span>Logged in as {userProfile?.email}</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-1 text-amber-500">
@@ -168,24 +168,27 @@ const SettingsSidebar = () => {
                 Last synced: <span className="text-muted-foreground">{formatLastSynced()}</span>
               </div>
               
-              <div className="flex flex-col space-y-2">
-                <Button 
-                  onClick={handleSyncClick}
-                  className="w-full"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Syncing...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4 mr-2" />
-                      Sync with Cloud
-                    </>
-                  )}
-                </Button>
+              <div className="flex flex-col space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span>Cloud Sync</span>
+                    {!isAuthenticated || !userProfile?.isPremium ? (
+                      <span className="text-xs bg-yellow-500/10 text-yellow-500 px-2 py-0.5 rounded">Premium</span>
+                    ) : null}
+                  </div>
+                  <Switch 
+                    checked={syncState.enabled}
+                    onCheckedChange={toggleSyncEnabled}
+                    disabled={!isAuthenticated || isLoading || !userProfile?.isPremium}
+                  />
+                </div>
+                
+                {isLoading && (
+                  <div className="flex items-center justify-center text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <span>Syncing data...</span>
+                  </div>
+                )}
                 
                 <Button 
                   variant="outline" 
