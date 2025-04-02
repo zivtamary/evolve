@@ -67,6 +67,7 @@ serve(async (req) => {
       }
     )
   } catch (error) {
+    console.log('Error creating checkout session:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
