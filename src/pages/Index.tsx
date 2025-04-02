@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { SettingsProvider, useSettings } from '../context/SettingsContext';
 import BackgroundImage from '../components/Background/BackgroundImage';
 import Clock from '../components/Clock/Clock';
 import Weather from '../components/Weather/Weather';
@@ -10,9 +11,12 @@ import Notes from '../components/ProductivityTools/Notes';
 import TodoList from '../components/ProductivityTools/TodoList';
 import Pomodoro from '../components/ProductivityTools/Pomodoro';
 import Events from '../components/ProductivityTools/Events';
+import SettingsSidebar from '../components/Settings/SettingsSidebar';
 
-const Index = () => {
+// Inner component that uses the settings context
+const IndexContent = () => {
   const { theme, setTheme } = useTheme();
+  const { widgetVisibility } = useSettings();
   
   const toggleTheme = () => {
     if (theme === 'light') setTheme('dark');
@@ -62,6 +66,9 @@ const Index = () => {
           {getThemeIcon()}
         </button>
         
+        {/* Settings sidebar */}
+        <SettingsSidebar />
+        
         {/* Header section with time and weather */}
         <header className="mb-8">
           <div className="container mx-auto flex flex-col items-center">
@@ -89,18 +96,27 @@ const Index = () => {
           <div className="container mx-auto max-w-4xl">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-6">
-                <Notes />
-                <Pomodoro />
+                {widgetVisibility.notes && <Notes />}
+                {widgetVisibility.pomodoro && <Pomodoro />}
               </div>
               <div className="space-y-6">
-                <TodoList />
-                <Events />
+                {widgetVisibility.todoList && <TodoList />}
+                {widgetVisibility.events && <Events />}
               </div>
             </div>
           </div>
         </section>
       </div>
     </BackgroundImage>
+  );
+};
+
+// Wrapper component that provides the settings context
+const Index = () => {
+  return (
+    <SettingsProvider>
+      <IndexContent />
+    </SettingsProvider>
   );
 };
 

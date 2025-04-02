@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Timer, Play, Pause, RotateCcw } from 'lucide-react';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 type TimerMode = 'work' | 'shortBreak' | 'longBreak';
 
@@ -17,7 +18,7 @@ const Pomodoro = () => {
   const [mode, setMode] = useState<TimerMode>('work');
   const [timeLeft, setTimeLeft] = useState(TIMER_SETTINGS[mode].minutes * 60);
   const [isActive, setIsActive] = useState(false);
-  const [sessions, setSessions] = useState(0);
+  const [sessions, setSessions] = useLocalStorage<number>('pomodoro-sessions', 0);
   const intervalRef = useRef<number | null>(null);
   
   // Reset timer when mode changes
@@ -65,7 +66,7 @@ const Pomodoro = () => {
         window.clearInterval(intervalRef.current);
       }
     };
-  }, [isActive, mode, sessions]);
+  }, [isActive, mode, sessions, setSessions]);
   
   const toggleTimer = () => {
     setIsActive(!isActive);
@@ -85,14 +86,9 @@ const Pomodoro = () => {
   return (
     <Card className="widget bg-card dark:glass-dark backdrop-blur-lg">
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center justify-between text-lg">
-          <div className="flex items-center gap-2">
-            <Timer className="h-5 w-5" />
-            <span>Pomodoro</span>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            Session: {sessions + 1}
-          </div>
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <Timer className="h-5 w-5" />
+          <span>Pomodoro</span>
         </CardTitle>
       </CardHeader>
       <CardContent>

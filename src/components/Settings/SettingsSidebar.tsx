@@ -1,0 +1,181 @@
+
+import React from 'react';
+import { useSettings } from '../../context/SettingsContext';
+import { 
+  Sheet, 
+  SheetContent, 
+  SheetHeader, 
+  SheetTitle, 
+  SheetTrigger,
+  SheetClose
+} from '@/components/ui/sheet';
+import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { 
+  Settings, 
+  StickyNote, 
+  CheckSquare, 
+  Timer, 
+  CalendarDays, 
+  Save,
+  Lock,
+  LogIn
+} from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+
+interface SettingsButtonProps {
+  onClick: () => void;
+}
+
+export const SettingsButton: React.FC<SettingsButtonProps> = ({ onClick }) => {
+  return (
+    <button
+      onClick={onClick}
+      className="absolute top-4 right-14 bg-black/20 text-white p-2 rounded-full backdrop-blur-md hover:bg-black/30 transition-colors z-10"
+      title="Settings"
+    >
+      <Settings size={20} />
+    </button>
+  );
+};
+
+const SettingsSidebar = () => {
+  const { 
+    isSettingsOpen, 
+    setIsSettingsOpen, 
+    widgetVisibility, 
+    toggleWidget,
+    syncState,
+    isAuthenticated,
+    syncWithCloud
+  } = useSettings();
+
+  const handleSyncClick = async () => {
+    if (!isAuthenticated) {
+      // In a real app, this would open an auth modal
+      alert('Please log in to sync your data');
+      return;
+    }
+    
+    await syncWithCloud();
+  };
+
+  const formatLastSynced = () => {
+    if (!syncState.lastSynced) return 'Never';
+    
+    const date = new Date(syncState.lastSynced);
+    return date.toLocaleString();
+  };
+
+  return (
+    <>
+      <SettingsButton onClick={() => setIsSettingsOpen(true)} />
+      
+      <Sheet open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+        <SheetContent className="sm:max-w-md">
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              <span>Settings</span>
+            </SheetTitle>
+          </SheetHeader>
+          
+          <div className="py-6">
+            <h3 className="mb-4 text-lg font-medium">Widget Visibility</h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <StickyNote className="h-4 w-4" />
+                  <span>Notes</span>
+                </div>
+                <Switch 
+                  checked={widgetVisibility.notes} 
+                  onCheckedChange={() => toggleWidget('notes')} 
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <CheckSquare className="h-4 w-4" />
+                  <span>Todo List</span>
+                </div>
+                <Switch 
+                  checked={widgetVisibility.todoList} 
+                  onCheckedChange={() => toggleWidget('todoList')} 
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Timer className="h-4 w-4" />
+                  <span>Pomodoro Timer</span>
+                </div>
+                <Switch 
+                  checked={widgetVisibility.pomodoro} 
+                  onCheckedChange={() => toggleWidget('pomodoro')} 
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <CalendarDays className="h-4 w-4" />
+                  <span>Events</span>
+                </div>
+                <Switch 
+                  checked={widgetVisibility.events} 
+                  onCheckedChange={() => toggleWidget('events')} 
+                />
+              </div>
+            </div>
+          </div>
+          
+          <Separator />
+          
+          <div className="py-6">
+            <h3 className="mb-4 text-lg font-medium">Data Synchronization</h3>
+            
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground">
+                {isAuthenticated ? (
+                  <div className="flex items-center gap-1 text-green-500">
+                    <Lock className="h-4 w-4" />
+                    <span>Logged in</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1 text-amber-500">
+                    <Lock className="h-4 w-4" />
+                    <span>Authentication required for sync</span>
+                  </div>
+                )}
+              </div>
+              
+              <div className="text-sm">
+                Last synced: <span className="text-muted-foreground">{formatLastSynced()}</span>
+              </div>
+              
+              <div className="flex flex-col space-y-2">
+                <Button 
+                  onClick={handleSyncClick}
+                  className="w-full"
+                  disabled={!isAuthenticated}
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  Sync with Cloud
+                </Button>
+                
+                {!isAuthenticated && (
+                  <Button variant="outline" className="w-full">
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Log In
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+    </>
+  );
+};
+
+export default SettingsSidebar;
