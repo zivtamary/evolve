@@ -1,10 +1,16 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { corsHeaders } from '../_shared/cors.ts'
 
 const POLAR_API_KEY = Deno.env.get('POLAR_API_KEY')
 const POLAR_API_URL = 'https://api.polar.sh/api/v1'
 
 serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
   try {
     // Create Supabase client
     const supabaseClient = createClient(
@@ -21,7 +27,7 @@ serve(async (req) => {
     if (authError || !user) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -31,39 +37,37 @@ serve(async (req) => {
     if (!plan_id) {
       return new Response(
         JSON.stringify({ error: 'Plan ID is required' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
     // Create Polar checkout session
-    const response = await fetch(`${POLAR_API_URL}/checkout/create`, {
+    const response = await fetch(`${POLAR_API_URL}/checkout-sessions`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${POLAR_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        customer_id: user.user_metadata.polar_customer_id,
         plan_id,
-        customer_email: user.email,
         success_url: `${req.headers.get('origin')}/settings?status=success`,
         cancel_url: `${req.headers.get('origin')}/settings?status=canceled`,
-        metadata: {
-          user_id: user.id
-        }
       })
     })
 
-    const checkoutData = await response.json()
-
     if (!response.ok) {
-      throw new Error(checkoutData.error || 'Failed to create checkout session')
+      const error = await response.json()
+      throw new Error(error.message || 'Failed to create checkout session')
     }
 
+    const checkout = await response.json()
+
     return new Response(
-      JSON.stringify(checkoutData),
+      JSON.stringify({ checkout_url: checkout.url }),
       { 
-        status: 200, 
-        headers: { 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200 
       }
     )
   } catch (error) {
@@ -71,8 +75,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
-        status: 500, 
-        headers: { 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500 
       }
     )
   }
