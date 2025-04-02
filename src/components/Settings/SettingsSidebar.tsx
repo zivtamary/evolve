@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSettings } from '../../context/SettingsContext';
@@ -21,9 +22,12 @@ import {
   LogOut,
   Loader2,
   Cloud,
-  Sparkles
+  Sparkles,
+  CreditCard
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import SubscriptionModal from './SubscriptionModal';
+import SubscriptionToggle from './SubscriptionToggle';
 
 interface SettingsButtonProps {
   onClick: () => void;
@@ -52,10 +56,12 @@ const SettingsSidebar = () => {
     userProfile,
     toggleSyncEnabled,
     signOut,
-    isLoading
+    isLoading,
+    setUserProfile
   } = useSettings();
   
   const navigate = useNavigate();
+  const [showSubscriptionModal, setShowSubscriptionModal] = React.useState(false);
 
   const handleAuthClick = () => {
     if (isAuthenticated) {
@@ -64,6 +70,10 @@ const SettingsSidebar = () => {
       navigate('/auth');
       setIsSettingsOpen(false);
     }
+  };
+
+  const handleUpgradeClick = () => {
+    setShowSubscriptionModal(true);
   };
 
   const formatLastSynced = () => {
@@ -163,6 +173,21 @@ const SettingsSidebar = () => {
                 )}
               </div>
               
+              {isAuthenticated && (
+                <div className="p-3 border rounded-md bg-amber-50 border-amber-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-yellow-500" />
+                      <span className="font-medium">Premium Status</span>
+                    </div>
+                    <SubscriptionToggle />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Toggle premium status for testing purposes
+                  </p>
+                </div>
+              )}
+              
               <div className="text-sm">
                 Last synced: <span className="text-muted-foreground">{formatLastSynced()}</span>
               </div>
@@ -189,6 +214,17 @@ const SettingsSidebar = () => {
                   </div>
                 )}
                 
+                {isAuthenticated && !userProfile?.isPremium && (
+                  <Button 
+                    variant="default" 
+                    className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600"
+                    onClick={handleUpgradeClick}
+                  >
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Upgrade to Premium
+                  </Button>
+                )}
+                
                 <Button 
                   variant="outline" 
                   className="w-full"
@@ -212,6 +248,11 @@ const SettingsSidebar = () => {
           </div>
         </SheetContent>
       </Sheet>
+      
+      <SubscriptionModal 
+        open={showSubscriptionModal}
+        onOpenChange={setShowSubscriptionModal}
+      />
     </>
   );
 };

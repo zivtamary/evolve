@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,6 +36,7 @@ interface SettingsContextType {
   signOut: () => Promise<void>;
   isLoading: boolean;
   userProfile: UserProfile | null;
+  setUserProfile: (profile: UserProfile | null) => void;
   toggleSyncEnabled: () => void;
 }
 
@@ -74,7 +76,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setUserProfile({
           id: session.user.id,
           email: session.user.email,
-          isPremium: true
+          isPremium: false // Default to non-premium
         });
       }
     };
@@ -89,7 +91,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setUserProfile({
           id: session.user.id,
           email: session.user.email,
-          isPremium: true
+          isPremium: false // Default to non-premium
         });
       } else {
         setUserProfile(null);
@@ -588,6 +590,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         signOut,
         isLoading,
         userProfile,
+        setUserProfile,
         toggleSyncEnabled
       }}
     >
