@@ -1,7 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
-import { useSettings } from '@/context/SettingsContext';
 
 interface Note {
   id: string;
@@ -15,7 +14,6 @@ const Notes: React.FC = () => {
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [noteContent, setNoteContent] = useState<string>('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { isAuthenticated, syncWithCloud } = useSettings();
   
   // Set active note to the most recent note when component mounts
   useEffect(() => {
@@ -64,11 +62,6 @@ const Notes: React.FC = () => {
         setNoteContent('');
       }
     }
-
-    // Sync changes with cloud after deletion
-    if (isAuthenticated) {
-      syncWithCloud();
-    }
   };
   
   const selectNote = (id: string) => {
@@ -93,13 +86,6 @@ const Notes: React.FC = () => {
       );
       
       setNotes(updatedNotes);
-    }
-  };
-  
-  const handleBlur = () => {
-    // Sync changes with cloud when the user finishes editing a note
-    if (isAuthenticated) {
-      syncWithCloud();
     }
   };
   
@@ -185,7 +171,6 @@ const Notes: React.FC = () => {
               ref={textareaRef}
               value={noteContent}
               onChange={handleContentChange}
-              onBlur={handleBlur}
               placeholder="Type your note here..."
               className="flex-grow bg-transparent p-4 outline-none resize-none placeholder:text-white/50"
             />

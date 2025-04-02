@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
-import { useSettings } from '@/context/SettingsContext';
 
 interface TodoItem {
   id: string;
@@ -14,7 +13,6 @@ const TodoList: React.FC = () => {
   const [todos, setTodos] = useLocalStorage<TodoItem[]>('todos', []);
   const [newTodoText, setNewTodoText] = useState<string>('');
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
-  const { isAuthenticated, syncWithCloud } = useSettings();
   
   const addTodo = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,11 +28,6 @@ const TodoList: React.FC = () => {
     
     setTodos([newTodo, ...todos]);
     setNewTodoText('');
-    
-    // Sync changes with cloud after adding a todo
-    if (isAuthenticated) {
-      syncWithCloud();
-    }
   };
   
   const toggleTodo = (id: string) => {
@@ -43,29 +36,14 @@ const TodoList: React.FC = () => {
         todo.id === id ? { ...todo, completed: !todo.completed } : todo
       )
     );
-    
-    // Sync changes with cloud after toggling a todo
-    if (isAuthenticated) {
-      syncWithCloud();
-    }
   };
   
   const deleteTodo = (id: string) => {
     setTodos(todos.filter(todo => todo.id !== id));
-    
-    // Sync changes with cloud after deleting a todo
-    if (isAuthenticated) {
-      syncWithCloud();
-    }
   };
   
   const clearCompleted = () => {
     setTodos(todos.filter(todo => !todo.completed));
-    
-    // Sync changes with cloud after clearing completed todos
-    if (isAuthenticated) {
-      syncWithCloud();
-    }
   };
   
   // Get filtered todos
