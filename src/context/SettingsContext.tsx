@@ -60,6 +60,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setIsAuthenticated(!!session);
+      
+      // If user is authenticated and sync is enabled, sync data on initial load
+      if (session && syncState.enabled) {
+        syncWithCloud();
+      }
     };
     
     checkSession();
@@ -190,7 +195,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (error) throw error;
       }
     } else {
-      // Merge local and cloud notes
+      // Cloud notes exist - prioritize cloud data over local
       // Create a map of notes by id
       const localNotesMap = new Map();
       localNotes.forEach((note: any) => {
@@ -212,13 +217,23 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         cloudNotesMap.set(note.id, cloudData);
       });
       
-      // Notes to update in cloud
+      // Notes to update in cloud (local changes not in cloud yet)
       const notesToUpload = [];
       
-      // New merged notes to save locally
+      // New merged notes to save locally (prefer cloud data)
       const mergedNotes = [];
       
-      // Process local notes
+      // Always include all cloud notes first
+      cloudNotes.forEach((note: any) => {
+        mergedNotes.push({
+          id: note.id,
+          content: note.content,
+          createdAt: new Date(note.created_at).getTime(),
+          updatedAt: new Date(note.updated_at).getTime()
+        });
+      });
+      
+      // Add local-only notes to upload and merged list
       localNotes.forEach((note: any) => {
         const cloudNote = cloudNotesMap.get(note.id);
         
@@ -231,43 +246,14 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             created_at: new Date(note.createdAt).toISOString(),
             updated_at: new Date(note.updatedAt).toISOString()
           });
+          
+          // Also add to merged notes since it's local-only
           mergedNotes.push(note);
-        } else {
-          // Note exists in both places, compare timestamps
-          if (note.updatedAt > cloudNote.updatedAt) {
-            // Local note is newer, update cloud
-            notesToUpload.push({
-              id: note.id,
-              user_id: userId,
-              content: note.content,
-              updated_at: new Date(note.updatedAt).toISOString()
-            });
-            mergedNotes.push(note);
-          } else {
-            // Cloud note is newer or same, use cloud version
-            mergedNotes.push({
-              id: cloudNote.id,
-              content: cloudNote.content,
-              createdAt: note.createdAt, // Keep original creation time
-              updatedAt: cloudNote.updatedAt
-            });
-          }
         }
+        // If note exists in cloud, we already added it from cloud data
       });
       
-      // Add cloud-only notes to merged notes
-      cloudNotes.forEach((note: any) => {
-        if (!localNotesMap.has(note.id)) {
-          mergedNotes.push({
-            id: note.id,
-            content: note.content,
-            createdAt: new Date(note.created_at).getTime(),
-            updatedAt: new Date(note.updated_at).getTime()
-          });
-        }
-      });
-      
-      // Upload notes to cloud
+      // Upload local-only notes to cloud
       if (notesToUpload.length > 0) {
         const { error } = await supabase
           .from('notes')
@@ -275,7 +261,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (error) throw error;
       }
       
-      // Save merged notes locally
+      // Save merged notes locally (cloud data prioritized)
       localStorage.setItem('notes', JSON.stringify(mergedNotes));
     }
   };
@@ -314,35 +300,30 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (error) throw error;
       }
     } else {
-      // Merge local and cloud todos
-      // Create a map of todos by id
+      // Cloud todos exist - prioritize cloud data over local
       const localTodosMap = new Map();
       localTodos.forEach((todo: any) => {
         localTodosMap.set(todo.id, todo);
       });
       
-      const cloudTodosMap = new Map();
+      // New merged todos to save locally (prefer cloud data)
+      const mergedTodos = [];
+      
+      // Always include all cloud todos first
       cloudTodos.forEach((todo: any) => {
-        cloudTodosMap.set(todo.id, {
+        mergedTodos.push({
           id: todo.id,
           text: todo.title,
           completed: todo.completed,
-          createdAt: new Date(todo.created_at).getTime(),
-          updatedAt: new Date(todo.updated_at).getTime()
+          createdAt: new Date(todo.created_at).getTime()
         });
       });
       
-      // Todos to update in cloud
+      // Add local-only todos to cloud
       const todosToUpload = [];
       
-      // New merged todos to save locally
-      const mergedTodos = [];
-      
-      // Process local todos
       localTodos.forEach((todo: any) => {
-        const cloudTodo = cloudTodosMap.get(todo.id);
-        
-        if (!cloudTodo) {
+        if (!cloudTodos.some((cloudTodo: any) => cloudTodo.id === todo.id)) {
           // Todo exists only locally, upload to cloud
           todosToUpload.push({
             id: todo.id,
@@ -352,33 +333,14 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             created_at: new Date(todo.createdAt).toISOString(),
             updated_at: new Date().toISOString()
           });
+          
+          // Also add to merged todos
           mergedTodos.push(todo);
-        } else {
-          // Use the most recent version (assume local is more up-to-date)
-          mergedTodos.push(todo);
-          todosToUpload.push({
-            id: todo.id,
-            user_id: userId,
-            title: todo.text,
-            completed: todo.completed,
-            updated_at: new Date().toISOString()
-          });
         }
+        // If todo exists in cloud, we already added it from cloud data
       });
       
-      // Add cloud-only todos to merged todos
-      cloudTodos.forEach((todo: any) => {
-        if (!localTodosMap.has(todo.id)) {
-          mergedTodos.push({
-            id: todo.id,
-            text: todo.title,
-            completed: todo.completed,
-            createdAt: new Date(todo.created_at).getTime()
-          });
-        }
-      });
-      
-      // Upload todos to cloud
+      // Upload local-only todos to cloud
       if (todosToUpload.length > 0) {
         const { error } = await supabase
           .from('todos')
@@ -386,7 +348,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (error) throw error;
       }
       
-      // Save merged todos locally
+      // Save merged todos locally (cloud data prioritized)
       localStorage.setItem('todos', JSON.stringify(mergedTodos));
     }
   };
@@ -425,15 +387,18 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (error) throw error;
       }
     } else {
-      // Merge local and cloud events (similar to notes and todos)
+      // Cloud events exist - prioritize cloud data over local
       const localEventsMap = new Map();
       localEvents.forEach((event: any) => {
         localEventsMap.set(event.id, event);
       });
       
-      const cloudEventsMap = new Map();
+      // New merged events list (prioritize cloud data)
+      const mergedEvents = [];
+      
+      // Always include all cloud events first
       cloudEvents.forEach((event: any) => {
-        cloudEventsMap.set(event.id, {
+        mergedEvents.push({
           id: event.id,
           title: event.title,
           date: event.date,
@@ -442,15 +407,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         });
       });
       
-      // Events to update in cloud
+      // Add local-only events to cloud
       const eventsToUpload = [];
       
-      // New merged events to save locally
-      const mergedEvents = [];
-      
-      // Process local events (assume local is authoritative)
       localEvents.forEach((event: any) => {
-        if (!cloudEventsMap.has(event.id)) {
+        if (!cloudEvents.some((cloudEvent: any) => cloudEvent.id === event.id)) {
           // Event exists only locally, upload to cloud
           eventsToUpload.push({
             id: event.id,
@@ -460,21 +421,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             time: event.time || null,
             description: event.description || null
           });
+          
+          // Also add to merged events
+          mergedEvents.push(event);
         }
-        mergedEvents.push(event);
-      });
-      
-      // Add cloud-only events to merged events
-      cloudEvents.forEach((event: any) => {
-        if (!localEventsMap.has(event.id)) {
-          mergedEvents.push({
-            id: event.id,
-            title: event.title,
-            date: event.date,
-            time: event.time,
-            description: event.description
-          });
-        }
+        // If event exists in cloud, we already added it from cloud data
       });
       
       // Upload events to cloud
@@ -485,7 +436,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (error) throw error;
       }
       
-      // Save merged events locally
+      // Save merged events locally (cloud data prioritized)
       localStorage.setItem('dashboard-events', JSON.stringify(mergedEvents));
     }
   };
@@ -517,10 +468,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         
       if (error) throw error;
     } else {
-      // Use the higher session count
-      const sessionCount = Math.max(localSessions, cloudSettings.sessions);
+      // Cloud settings exist - prioritize cloud data
+      // Always use cloud session count and update local
+      localStorage.setItem('pomodoro-sessions', cloudSettings.sessions.toString());
       
-      // Update cloud if local is higher
+      // Only update cloud if local is higher (indicates new local sessions)
       if (localSessions > cloudSettings.sessions) {
         const { error } = await supabase
           .from('pomodoro_settings')
@@ -528,9 +480,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           .eq('id', cloudSettings.id);
           
         if (error) throw error;
-      } else if (cloudSettings.sessions > localSessions) {
-        // Update local if cloud is higher
-        localStorage.setItem('pomodoro-sessions', cloudSettings.sessions.toString());
       }
     }
   };
