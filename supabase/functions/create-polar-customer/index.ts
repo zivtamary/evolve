@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 
 const POLAR_API_KEY = Deno.env.get('POLAR_API_KEY');
-const POLAR_API_URL = 'https://api.polar.sh/api/v1';
+const POLAR_API_URL = 'https://sandbox-api.polar.sh/v1';
 
 serve(async (req) => {
   // Handle CORS preflight requests
