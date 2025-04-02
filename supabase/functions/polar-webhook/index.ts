@@ -98,7 +98,7 @@ async function handleCheckoutCreated(supabaseClient: any, body: any) {
         currency: body.data.currency,
         amount: body.data.amount / 100,
         status: body.data.status,
-        user_id: body.data.metadata.customer_external_id,
+        user_id: body.data.customer_external_id,
         id: body.data.id,
       })
       .select();
