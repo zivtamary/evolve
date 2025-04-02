@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
-import { SettingsProvider, useSettings } from '../context/SettingsContext';
+import { useSettings } from '../context/SettingsContext';
 import BackgroundImage from '../components/Background/BackgroundImage';
 import Clock from '../components/Clock/Clock';
 import Weather from '../components/Weather/Weather';
@@ -13,8 +13,7 @@ import Pomodoro from '../components/ProductivityTools/Pomodoro';
 import Events from '../components/ProductivityTools/Events';
 import SettingsSidebar from '../components/Settings/SettingsSidebar';
 
-// Inner component that uses the settings context
-const IndexContent = () => {
+const Index = () => {
   const { theme, setTheme } = useTheme();
   const { widgetVisibility } = useSettings();
   
@@ -108,15 +107,6 @@ const IndexContent = () => {
         </section>
       </div>
     </BackgroundImage>
-  );
-};
-
-// Wrapper component that provides the settings context
-const Index = () => {
-  return (
-    <SettingsProvider>
-      <IndexContent />
-    </SettingsProvider>
   );
 };
 

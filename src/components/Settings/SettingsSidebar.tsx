@@ -1,13 +1,13 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSettings } from '../../context/SettingsContext';
 import { 
   Sheet, 
   SheetContent, 
   SheetHeader, 
   SheetTitle, 
-  SheetTrigger,
-  SheetClose
+  SheetClose 
 } from '@/components/ui/sheet';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,9 @@ import {
   CalendarDays, 
   Save,
   Lock,
-  LogIn
+  LogIn,
+  LogOut,
+  Loader2
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
@@ -47,17 +49,30 @@ const SettingsSidebar = () => {
     toggleWidget,
     syncState,
     isAuthenticated,
-    syncWithCloud
+    syncWithCloud,
+    signOut,
+    isLoading
   } = useSettings();
+  
+  const navigate = useNavigate();
 
   const handleSyncClick = async () => {
     if (!isAuthenticated) {
-      // In a real app, this would open an auth modal
-      alert('Please log in to sync your data');
+      navigate('/auth');
+      setIsSettingsOpen(false);
       return;
     }
     
     await syncWithCloud();
+  };
+
+  const handleAuthClick = () => {
+    if (isAuthenticated) {
+      signOut();
+    } else {
+      navigate('/auth');
+      setIsSettingsOpen(false);
+    }
   };
 
   const formatLastSynced = () => {
@@ -157,18 +172,39 @@ const SettingsSidebar = () => {
                 <Button 
                   onClick={handleSyncClick}
                   className="w-full"
-                  disabled={!isAuthenticated}
+                  disabled={isLoading}
                 >
-                  <Save className="h-4 w-4 mr-2" />
-                  Sync with Cloud
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Syncing...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Sync with Cloud
+                    </>
+                  )}
                 </Button>
                 
-                {!isAuthenticated && (
-                  <Button variant="outline" className="w-full">
-                    <LogIn className="h-4 w-4 mr-2" />
-                    Log In
-                  </Button>
-                )}
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={handleAuthClick}
+                  disabled={isLoading}
+                >
+                  {isAuthenticated ? (
+                    <>
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sign Out
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Sign In
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
           </div>
