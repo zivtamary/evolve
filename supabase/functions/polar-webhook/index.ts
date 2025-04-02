@@ -131,7 +131,7 @@ async function handleCheckoutUpdated(supabaseClient: any, body: any) {
   try {
     const { data, error } = await supabaseClient
       .from("payments")
-      .update({ status: body.data.status, subscriptionId: body.data.subscription_id })
+      .update({ status: body.data.status, subscription_id: body.data.subscription_id })
       .eq("id", body.data.id);
 
     if (error) {
@@ -176,7 +176,7 @@ async function handleSubscriptionCreated(supabaseClient: any, body: any) {
 
       if (data) {
         await supabaseClient.from('payments').update({
-            subscriptionId: body.data.id
+            subscription_id: body.data.id
         }).eq('id', body.data.checkout_id)
       }
 
