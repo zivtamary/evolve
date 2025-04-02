@@ -8,6 +8,8 @@ import SearchBar from '../components/Search/SearchBar';
 import Favorites from '../components/Favorites/Favorites';
 import Notes from '../components/ProductivityTools/Notes';
 import TodoList from '../components/ProductivityTools/TodoList';
+import Pomodoro from '../components/ProductivityTools/Pomodoro';
+import Events from '../components/ProductivityTools/Events';
 
 const Index = () => {
   const { theme, setTheme } = useTheme();
@@ -86,8 +88,14 @@ const Index = () => {
         <section className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
           <div className="container mx-auto max-w-4xl">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Notes />
-              <TodoList />
+              <div className="space-y-6">
+                <Notes />
+                <Pomodoro />
+              </div>
+              <div className="space-y-6">
+                <TodoList />
+                <Events />
+              </div>
             </div>
           </div>
         </section>
