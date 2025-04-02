@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSettings } from '../../context/SettingsContext';
@@ -23,11 +22,13 @@ import {
   Loader2,
   Cloud,
   Sparkles,
-  CreditCard
+  CreditCard,
+  Info
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import SubscriptionModal from './SubscriptionModal';
 import SubscriptionToggle from './SubscriptionToggle';
+import Logo from '../Logo/Logo';
 
 interface SettingsButtonProps {
   onClick: () => void;
@@ -99,6 +100,7 @@ const SettingsSidebar = () => {
           <div className="py-6">
             <h3 className="mb-4 text-lg font-medium">Widget Visibility</h3>
             <div className="space-y-4">
+              
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <StickyNote className="h-4 w-4" />
@@ -243,6 +245,42 @@ const SettingsSidebar = () => {
                     </>
                   )}
                 </Button>
+              </div>
+            </div>
+          </div>
+          
+          <Separator />
+          
+          <div className="py-6">
+            <h3 className="mb-4 text-lg font-medium flex items-center gap-2">
+              <Info className="h-5 w-5" />
+              <span>About</span>
+            </h3>
+            
+            <div className="space-y-4">
+              <div className="flex justify-center mb-4">
+                <Logo size="sm" />
+              </div>
+              
+              <div className="text-center space-y-1">
+                <p className="text-sm font-medium">Version 1.0.0</p>
+                <p className="text-xs text-muted-foreground">© 2023-2024 Lovable</p>
+                <p className="text-xs text-muted-foreground">All Rights Reserved</p>
+              </div>
+              
+              <div className="p-3 border rounded-md bg-muted/50">
+                <p className="text-xs text-center text-muted-foreground">
+                  Developed with ❤️ by Lovable
+                  <br />
+                  <a 
+                    href="https://lovable.dev" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline"
+                  >
+                    lovable.dev
+                  </a>
+                </p>
               </div>
             </div>
           </div>
