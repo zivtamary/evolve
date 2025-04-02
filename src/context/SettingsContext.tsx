@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { Database } from '@/integrations/supabase/types';
 
 interface WidgetVisibility {
   notes: boolean;
@@ -159,8 +160,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Helper function to sync notes
   const syncNotes = async (userId: string) => {
     // Get local notes
-    const localNotes = JSON.parse(localStorage.getItem('notes') || '[]');
-    if (!localNotes.length) localNotes = [];
+    let localNotes = JSON.parse(localStorage.getItem('notes') || '[]');
+    if (!Array.isArray(localNotes) || localNotes.length === 0) {
+      localNotes = [];
+    }
     
     // Get cloud notes
     const { data: cloudNotes, error } = await supabase
@@ -181,7 +184,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           updated_at: new Date(note.updatedAt).toISOString()
         }));
         
-        const { error } = await supabase.from('notes').upsert(notesToUpload);
+        const { error } = await supabase
+          .from('notes')
+          .upsert(notesToUpload);
         if (error) throw error;
       }
     } else {
@@ -264,7 +269,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       
       // Upload notes to cloud
       if (notesToUpload.length > 0) {
-        const { error } = await supabase.from('notes').upsert(notesToUpload);
+        const { error } = await supabase
+          .from('notes')
+          .upsert(notesToUpload);
         if (error) throw error;
       }
       
@@ -276,8 +283,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Helper function to sync todos
   const syncTodos = async (userId: string) => {
     // Get local todos
-    const localTodos = JSON.parse(localStorage.getItem('todos') || '[]');
-    if (!localTodos.length) localTodos = [];
+    let localTodos = JSON.parse(localStorage.getItem('todos') || '[]');
+    if (!Array.isArray(localTodos) || localTodos.length === 0) {
+      localTodos = [];
+    }
     
     // Get cloud todos
     const { data: cloudTodos, error } = await supabase
@@ -299,7 +308,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           updated_at: new Date().toISOString()
         }));
         
-        const { error } = await supabase.from('todos').upsert(todosToUpload);
+        const { error } = await supabase
+          .from('todos')
+          .upsert(todosToUpload);
         if (error) throw error;
       }
     } else {
@@ -369,7 +380,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       
       // Upload todos to cloud
       if (todosToUpload.length > 0) {
-        const { error } = await supabase.from('todos').upsert(todosToUpload);
+        const { error } = await supabase
+          .from('todos')
+          .upsert(todosToUpload);
         if (error) throw error;
       }
       
@@ -381,8 +394,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Helper function to sync events
   const syncEvents = async (userId: string) => {
     // Get local events
-    const localEvents = JSON.parse(localStorage.getItem('dashboard-events') || '[]');
-    if (!localEvents.length) localEvents = [];
+    let localEvents = JSON.parse(localStorage.getItem('dashboard-events') || '[]');
+    if (!Array.isArray(localEvents) || localEvents.length === 0) {
+      localEvents = [];
+    }
     
     // Get cloud events
     const { data: cloudEvents, error } = await supabase
@@ -404,7 +419,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           description: event.description || null
         }));
         
-        const { error } = await supabase.from('events').upsert(eventsToUpload);
+        const { error } = await supabase
+          .from('events')
+          .upsert(eventsToUpload);
         if (error) throw error;
       }
     } else {
@@ -462,7 +479,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       
       // Upload events to cloud
       if (eventsToUpload.length > 0) {
-        const { error } = await supabase.from('events').upsert(eventsToUpload);
+        const { error } = await supabase
+          .from('events')
+          .upsert(eventsToUpload);
         if (error) throw error;
       }
       
