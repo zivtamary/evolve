@@ -175,6 +175,7 @@ async function handleSubscriptionCreated(supabaseClient: any, body: any) {
       .select();
 
       if (data) {
+        console.log(`Subscription created, now updating payment with subscription_id: ${body.data.id}, the payment checkout_id is: ${body.data.checkout_id}`)
         await supabaseClient.from('payments').update({
             subscription_id: body.data.id
         }).eq('id', body.data.checkout_id)
