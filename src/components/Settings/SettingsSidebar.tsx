@@ -216,7 +216,7 @@ const SettingsSidebar = () => {
                 </h3>
 
                 <div className="space-y-4">
-                  {isAuthenticated && !isPremium && (
+                  {!isPremium && (
                     <button 
                       className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors animate-shimmer relative"
                       onClick={handleUpgradeClick}
