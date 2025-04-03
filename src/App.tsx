@@ -7,7 +7,6 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { SettingsProvider, useSettings } from "./context/SettingsContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
-import NotFound from "./pages/NotFound";
 import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Settings from "./pages/Settings";
@@ -43,8 +42,8 @@ const AppRoutes = () => {
             <Settings />
           </ProtectedRoute>
         } />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
+        {/* Redirect all unmatched routes to home page */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </HashRouter>
   );
