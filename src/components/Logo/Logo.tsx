@@ -19,9 +19,6 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', className = '' }) => {
       <div className="bg-gradient-to-r from-orange-400 to-pink-400 p-1.5 rounded-md">
        <LeafIcon className="w-4 h-4 text-white" />
       </div>
-      <span className={`font-bold ${sizeClasses[size]} text-white`}>
-        Evolve
-      </span>
     </div>
   );
 };

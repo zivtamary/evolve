@@ -71,12 +71,12 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
   };
   
   return (
-    <div className={`w-[400px] mx-auto transition-all duration-500 ease-in-out focus-within:w-[600px] ${className}`}>
+    <div className={`w-[90vw] sm:w-[400px] mx-auto transition-all duration-500 ease-in-out focus-within:w-[95vw] sm:focus-within:w-[600px] ${className}`}>
       <form onSubmit={handleSearch} className="relative">
-        <div className="glass dark:glass-dark flex items-center rounded-full px-5 py-2 text-white transition-all duration-500 ease-in-out focus-within:ring focus-within:ring-white/30">
+        <div className="glass dark:glass-dark flex items-center rounded-full px-3 sm:px-5 py-2 text-white transition-all duration-500 ease-in-out focus-within:ring focus-within:ring-white/30">
           <button
             type="button"
-            className="mr-3 shrink-0 transition-opacity duration-300"
+            className="mr-2 sm:mr-3 shrink-0 transition-opacity duration-300"
             onClick={changeSearchEngine}
             title={`Search with ${searchEngine.charAt(0).toUpperCase() + searchEngine.slice(1)}`}
           >
@@ -86,11 +86,11 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
             ref={inputRef}
             type="text"
             placeholder="Search the web..."
-            className="w-full bg-transparent py-2 outline-none placeholder:text-white/70 transition-all duration-500 ease-in-out"
+            className="w-full bg-transparent py-2 outline-none placeholder:text-white/70 transition-all duration-500 ease-in-out text-sm sm:text-base"
           />
           <button 
             type="submit"
-            className="ml-3 shrink-0 text-white/70 hover:text-white transition-colors duration-300"
+            className="ml-2 sm:ml-3 shrink-0 text-white/70 hover:text-white transition-colors duration-300"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8" />
