@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useTransition, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,8 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [view, setView] = useState<'signin' | 'signup' | 'reset_password' | 'success'>('signin');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const isSigningIn = useRef(false);
   const navigate = useNavigate();
   const { isAuthenticated } = useSettings();
   
@@ -164,29 +166,25 @@ const Auth = () => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      setLoading(true);
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin + '/',
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
-    } catch (error) {
+  const handleGoogleSignIn = () => {
+    if (loading) return;
+    
+    setLoading(true);
+    
+    supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + '/',
+      },
+    }).catch((error) => {
       const errorMessage = error instanceof Error ? error.message : "An error occurred during Google sign in";
       toast({
         title: "Google sign in failed",
         description: errorMessage,
         variant: "destructive"
       });
-    } finally {
       setLoading(false);
-    }
+    });
   };
   
   return (
@@ -314,10 +312,10 @@ const Auth = () => {
                         variant="outline"
                         className="w-full"
                         onClick={handleGoogleSignIn}
-                        disabled={loading}
+                        disabled={loading || isPending}
                       >
                         <FcGoogle className="mr-2 h-4 w-4" />
-                        {loading ? "Signing in..." : "Sign in with Google"}
+                        {loading || isPending ? "Signing in..." : "Sign in with Google"}
                       </Button>
                     </div>
                   </form>
