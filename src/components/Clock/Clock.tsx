@@ -49,7 +49,7 @@ const Clock: React.FC<ClockProps> = ({ className = '' }) => {
     <div className={cn("text-center", className)}>
       <div className="group relative">
         <h1 
-          className="font-['Space_Grotesk'] font-light tracking-tight cursor-pointer text-white text-6xl sm:text-8xl lg:text-9xl transition-all hover:opacity-90"
+          className="font-['Space_Grotesk'] font-light tracking-tight cursor-pointer text-white text-5xl sm:text-7xl lg:text-8xl transition-all hover:opacity-90"
           style={{
             textShadow: '2px 2px 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.2)',
             fontVariantNumeric: 'tabular-nums',

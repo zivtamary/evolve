@@ -26,7 +26,8 @@ import {
   Sparkles,
   CreditCard,
   Info,
-  Download
+  Download,
+  Sidebar
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import SubscriptionModal from './SubscriptionModal';
@@ -40,10 +41,10 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({ onClick }) => {
   return (
     <button
       onClick={onClick}
-      className="absolute top-4 right-14 bg-black/20 text-white p-2 rounded-full backdrop-blur-md hover:bg-black/30 transition-colors z-10"
+      className="absolute top-4 right-14 bg-black/20 dark:bg-transparent text-white p-2 rounded-full backdrop-blur-md hover:bg-black/30 transition-colors z-10"
       title="Settings"
     >
-      <Settings size={20} />
+      <Sidebar size={20} />
     </button>
   );
 };

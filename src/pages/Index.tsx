@@ -54,11 +54,11 @@ const Index = () => {
   
   return (
     <BackgroundImage>
-      <div className="min-h-screen px-6 py-10">
+      <div className="min-h-screen px-6 py-10 relative">
         {/* Theme toggle button */}
         <button
           onClick={toggleTheme}
-          className="absolute top-4 right-4 bg-black/20 text-white p-2 rounded-full backdrop-blur-md hover:bg-black/30 transition-colors z-10"
+          className="absolute top-4 right-4 bg-black/20 dark:bg-transparent text-white p-2 rounded-full backdrop-blur-md hover:bg-black/30 transition-colors z-10"
           title={`Current theme: ${theme}`}
         >
           {getThemeIcon()}
@@ -67,15 +67,16 @@ const Index = () => {
         {/* Settings sidebar */}
         <SettingsSidebar />
         
+        
         {/* Clock at the top */}
-        <header className="mb-8">
+        <div className="absolute top-32 left-1/2 -translate-x-1/2 w-full">
           <div className="container mx-auto flex flex-col items-center">
-            <Clock className="mb-8 animate-fade-in" />
+            <Clock className="animate-fade-in" />
           </div>
-        </header>
+        </div>
         
         {/* Centered search and weather section */}
-        <div className="flex flex-col items-center justify-center min-h-[50vh]">
+        <div className="flex flex-col items-center justify-center min-h-[60vh]">
           <div className="w-full max-w-xs mb-8 animate-slide-up opacity-0 animate-delay-200" style={{ animationFillMode: 'forwards' }}>
             <Weather />
           </div>

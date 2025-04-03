@@ -1,6 +1,20 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { supabase } from '../../integrations/supabase/client';
+import { 
+  Sun, 
+  CloudSun, 
+  Cloud, 
+  Cloudy, 
+  CloudRain, 
+  CloudSunRain, 
+  CloudLightning, 
+  CloudSnow, 
+  CloudFog,
+  Moon,
+  MoonStar,
+  RefreshCw
+} from 'lucide-react';
 
 interface WeatherData {
   temperature: number;
@@ -113,159 +127,29 @@ const Weather: React.FC = () => {
   }
   
   const getWeatherIcon = (iconCode: string) => {
-    // Map icon codes to weather icons with colors
+    // Map icon codes to Lucide icons
     const iconMap: Record<string, React.ReactNode> = {
-      '01d': (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFD700" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="5" />
-          <path d="M12 1v2" />
-          <path d="M12 21v2" />
-          <path d="M4.2 4.2l1.4 1.4" />
-          <path d="M18.4 18.4l1.4 1.4" />
-          <path d="M1 12h2" />
-          <path d="M21 12h2" />
-          <path d="M4.2 19.8l1.4-1.4" />
-          <path d="M18.4 5.6l1.4-1.4" />
-        </svg>
-      ),
-      '02d': (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFD700" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2v2" />
-          <path d="M12 20v2" />
-          <path d="m4.93 4.93 1.41 1.41" />
-          <path d="m17.66 17.66 1.41 1.41" />
-          <path d="M2 12h2" />
-          <path d="M20 12h2" />
-          <path d="m6.34 17.66-1.41 1.41" />
-          <path d="m19.07 4.93-1.41 1.41" />
-          <path d="M10 15H4a2 2 0 1 1 0-4h1a3 3 0 0 1 5 0" />
-          <path d="M17 13h-3a2 2 0 1 0 0 4h2v.5" />
-          <path d="M12 13V7" />
-        </svg>
-      ),
-      '03d': (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A9A9A9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M17 22H5a3 3 0 1 1 .17-5.99A5.01 5.01 0 0 1 9 12.1c0-.17.02-.34.05-.5" />
-          <path d="M17 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
-          <path d="M18.21 9.5a5 5 0 1 0-3.72 8.5" />
-        </svg>
-      ),
-      '04d': (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M17 22H5a3 3 0 1 1 .17-5.99A5.01 5.01 0 0 1 9 12.1c0-.17.02-.34.05-.5" />
-          <path d="M17 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
-          <path d="M18.21 9.5a5 5 0 1 0-3.72 8.5" />
-        </svg>
-      ),
-      '09d': (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4169E1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9" />
-          <path d="M16 14v6" />
-          <path d="M8 14v6" />
-          <path d="M12 16v6" />
-        </svg>
-      ),
-      '10d': (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4169E1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9" />
-          <path d="M16 14v6" />
-          <path d="M8 14v6" />
-          <path d="M12 16v6" />
-        </svg>
-      ),
-      '11d': (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF4500" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9" />
-          <path d="M12 8v8" />
-          <path d="M8 12h8" />
-        </svg>
-      ),
-      '13d': (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2v2" />
-          <path d="M12 20v2" />
-          <path d="m4.93 4.93 1.41 1.41" />
-          <path d="m17.66 17.66 1.41 1.41" />
-          <path d="M2 12h2" />
-          <path d="M20 12h2" />
-          <path d="m6.34 17.66-1.41 1.41" />
-          <path d="m19.07 4.93-1.41 1.41" />
-          <path d="M12 6v6l4 2" />
-        </svg>
-      ),
-      '50d': (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D3D3D3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M17 22H5a3 3 0 1 1 .17-5.99A5.01 5.01 0 0 1 9 12.1c0-.17.02-.34.05-.5" />
-          <path d="M17 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
-          <path d="M18.21 9.5a5 5 0 1 0-3.72 8.5" />
-        </svg>
-      ),
-      '01n': (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFD700" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-        </svg>
-      ),
-      '02n': (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFD700" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-          <path d="M10 15H4a2 2 0 1 1 0-4h1a3 3 0 0 1 5 0" />
-          <path d="M17 13h-3a2 2 0 1 0 0 4h2v.5" />
-          <path d="M12 13V7" />
-        </svg>
-      ),
-      '03n': (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A9A9A9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-          <path d="M17 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
-          <path d="M18.21 9.5a5 5 0 1 0-3.72 8.5" />
-        </svg>
-      ),
-      '04n': (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#808080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-          <path d="M17 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
-          <path d="M18.21 9.5a5 5 0 1 0-3.72 8.5" />
-        </svg>
-      ),
-      '09n': (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4169E1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-          <path d="M16 14v6" />
-          <path d="M8 14v6" />
-          <path d="M12 16v6" />
-        </svg>
-      ),
-      '10n': (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4169E1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-          <path d="M16 14v6" />
-          <path d="M8 14v6" />
-          <path d="M12 16v6" />
-        </svg>
-      ),
-      '11n': (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF4500" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-          <path d="M12 8v8" />
-          <path d="M8 12h8" />
-        </svg>
-      ),
-      '13n': (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-          <path d="M12 6v6l4 2" />
-        </svg>
-      ),
-      '50n': (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D3D3D3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-          <path d="M17 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
-          <path d="M18.21 9.5a5 5 0 1 0-3.72 8.5" />
-        </svg>
-      ),
+      '01d': <Sun size={24} />,
+      '02d': <CloudSun size={24} />,
+      '03d': <Cloud size={24} />,
+      '04d': <Cloudy size={24} />,
+      '09d': <CloudRain size={24} />,
+      '10d': <CloudSunRain size={24} />,
+      '11d': <CloudLightning size={24} />,
+      '13d': <CloudSnow size={24} />,
+      '50d': <CloudFog size={24} />,
+      '01n': <Moon size={24} />,
+      '02n': <MoonStar size={24} />,
+      '03n': <Cloud size={24} />,
+      '04n': <Cloudy size={24} />,
+      '09n': <CloudRain size={24} />,
+      '10n': <CloudRain size={24} />,
+      '11n': <CloudLightning size={24} />,
+      '13n': <CloudSnow size={24} />,
+      '50n': <CloudFog size={24} />
     };
     
-    return iconMap[iconCode] || iconMap['03d']; // Default to cloudy if icon not found
+    return iconMap[iconCode] || <Cloud size={24} />; // Default to cloudy if icon not found
   };
   
   return (
@@ -286,12 +170,7 @@ const Weather: React.FC = () => {
           className="rounded-full p-1 text-white/70 hover:bg-white/10 hover:text-white"
           title="Refresh weather"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-            <path d="M21 3v5h-5" />
-            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-            <path d="M3 21v-5h5" />
-          </svg>
+          <RefreshCw size={16} />
         </button>
       </div>
     </div>
