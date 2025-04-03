@@ -76,10 +76,11 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
         <div className="glass dark:glass-dark flex items-center rounded-full px-3 sm:px-5 py-2 text-white transition-all duration-500 ease-in-out focus-within:ring focus-within:ring-white/30">
           <button
             type="button"
-            className="mr-2 sm:mr-3 shrink-0 transition-opacity duration-300"
+            className="relative mr-2 sm:mr-3 shrink-0 transition-opacity duration-300"
             onClick={changeSearchEngine}
             title={`Search with ${searchEngine.charAt(0).toUpperCase() + searchEngine.slice(1)}`}
           >
+            <div className="absolute -top-0.5 right-0 w-1 h-1 bg-white/60 rounded-full animate-pulse" />
             {getSearchEngineLogo()}
           </button>
           <input

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useSettings } from '../../context/SettingsContext';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Check } from 'lucide-react';
+import { Check, CheckSquare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface TodoItem {
@@ -160,7 +160,10 @@ const TodoList: React.FC = () => {
   return (
     <div className="glass dark:glass-dark rounded-xl text-white overflow-hidden h-[400px] flex flex-col">
       <div className="flex items-center justify-between p-4 border-b border-white/10">
-        <h2 className="text-xl font-semibold">Todo List</h2>
+        <h2 className="text-xl font-semibold flex items-center gap-2">
+          <CheckSquare className="h-5 w-5" />
+          <span>Todo List</span>
+        </h2>
         <div className="text-xs text-white/70">
           {activeTodosCount} items left
         </div>

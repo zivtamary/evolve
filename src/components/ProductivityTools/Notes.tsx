@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useSettings } from '../../context/SettingsContext';
 import { supabase } from '@/integrations/supabase/client';
+import { StickyNote } from 'lucide-react';
 
 interface Note {
   id: string;
@@ -162,7 +163,10 @@ const Notes: React.FC = () => {
   return (
     <div className="glass dark:glass-dark rounded-xl text-white overflow-hidden h-[400px] flex flex-col">
       <div className="flex items-center justify-between p-4 border-b border-white/10">
-        <h2 className="text-xl font-semibold">Notes</h2>
+        <h2 className="text-xl font-semibold flex items-center gap-2">
+          <StickyNote className="h-5 w-5" />
+          <span>Notes</span>
+        </h2>
         <button
           onClick={createNewNote}
           className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10"
