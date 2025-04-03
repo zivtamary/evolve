@@ -23,7 +23,7 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', className = '' }) => {
     <div className={`flex items-center gap-2 select-none pointer-events-none ${className}`}>
       <img 
         src="/icons/icon-128.png" 
-        alt="Aesthetic Startpage Logo"
+        alt="Evolve - Aesthetic Startpage Logo"
         className={`${sizeClasses[size]} object-contain`}
       />
       <span className={`font-semibold text-black dark:text-white ${textSizeClasses[size]}`}>

@@ -27,7 +27,7 @@
 ## Store Listing Information
 
 ### Title
-Focus Dashboard - Aesthetic Startpage
+Evolve - Aesthetic Startpage
 
 ### Description
 Transform your new tab into a beautiful and productive dashboard with Focus Dashboard. This elegantly designed startpage combines aesthetics with functionality to help you stay organized and focused throughout your day.

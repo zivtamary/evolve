@@ -14,7 +14,7 @@ export const supabase = createClient<Database>(
   {
     auth: {
       persistSession: true,
-      storageKey: 'aesthetic-startpage-auth',
+      storageKey: 'evolve-auth',
       storage: window.localStorage,
       autoRefreshToken: true,
       detectSessionInUrl: true,

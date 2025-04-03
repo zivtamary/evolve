@@ -275,7 +275,7 @@ const SettingsSidebar = () => {
                   <span>Version 1.0.0-beta.1</span>
                 </div>
                 <div className="text-xs text-black/30 dark:text-white/30 text-center">
-                  <div>© 2024 Aesthetic Startpage</div>
+                  <div>© {new Date().getFullYear()} Evolve - Aesthetic Startpage</div>
                   <div>Developed by zivtamary</div>
                   <div>Support: zivtamary@gmail.com</div>
                 </div>
