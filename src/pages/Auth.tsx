@@ -12,6 +12,7 @@ import { useSettings } from '@/context/SettingsContext';
 import BackgroundImage from '@/components/Background/BackgroundImage';
 import { ArrowRight, CheckCircle, Cloud, Sparkles } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { FcGoogle } from 'react-icons/fc';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -68,10 +69,11 @@ const Auth = () => {
           description: "Please check your email to confirm your account",
         });
       }
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "An error occurred during sign up";
       toast({
         title: "Sign up failed",
-        description: error.message || "An error occurred during sign up",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -110,10 +112,11 @@ const Auth = () => {
         
         navigate('/');
       }
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "An error occurred during sign in";
       toast({
         title: "Sign in failed",
-        description: error.message || "An error occurred during sign in",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -149,10 +152,36 @@ const Auth = () => {
       });
       
       setView('signin');
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "An error occurred during password reset";
       toast({
         title: "Password reset failed",
-        description: error.message || "An error occurred during password reset",
+        description: errorMessage,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/',
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "An error occurred during Google sign in";
+      toast({
+        title: "Google sign in failed",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -267,6 +296,28 @@ const Auth = () => {
                         disabled={loading}
                       >
                         {loading ? "Signing in..." : "Sign In"}
+                      </Button>
+
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                          <span className="bg-background px-2 text-muted-foreground">
+                            Or continue with
+                          </span>
+                        </div>
+                      </div>
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleGoogleSignIn}
+                        disabled={loading}
+                      >
+                        <FcGoogle className="mr-2 h-4 w-4" />
+                        {loading ? "Signing in..." : "Sign in with Google"}
                       </Button>
                     </div>
                   </form>
