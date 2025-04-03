@@ -15,19 +15,18 @@ import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
+// Auth wrapper component
+const AuthWrapper = ({ children }: { children: React.ReactNode }) => {
+  const { isLoading } = useSettings();
+  
+  // Don't show loading spinner during initial auth check
+  // The app will render immediately and handle auth state changes in the background
+  return <>{children}</>;
+};
+
 // Route guard component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useSettings();
-  
-  // Show loading state while checking authentication
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
+  const { isAuthenticated } = useSettings();
   return isAuthenticated ? <>{children}</> : <Navigate to="/auth" />;
 };
 
@@ -55,11 +54,13 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <SettingsProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <AppRoutes />
-        </TooltipProvider>
+        <AuthWrapper>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <AppRoutes />
+          </TooltipProvider>
+        </AuthWrapper>
       </SettingsProvider>
     </ThemeProvider>
   </QueryClientProvider>

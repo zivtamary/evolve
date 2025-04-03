@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSettings } from '../../context/SettingsContext';
+import { supabase } from '../../integrations/supabase/client';
+import { Database } from '../../integrations/supabase/types';
 import { 
   Sheet, 
   SheetContent, 
@@ -23,11 +25,11 @@ import {
   Cloud,
   Sparkles,
   CreditCard,
-  Info
+  Info,
+  Download
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import SubscriptionModal from './SubscriptionModal';
-import SubscriptionToggle from './SubscriptionToggle';
 import Logo from '../Logo/Logo';
 
 interface SettingsButtonProps {
@@ -46,23 +48,27 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({ onClick }) => {
   );
 };
 
+type Subscription = Database['public']['Tables']['subscriptions']['Row'];
+
 const SettingsSidebar = () => {
   const { 
     isSettingsOpen, 
     setIsSettingsOpen, 
     widgetVisibility, 
     toggleWidget,
-    syncState,
     isAuthenticated,
     userProfile,
     toggleSyncEnabled,
     signOut,
     isLoading,
-    setUserProfile
+    isSyncing,
+    subscription
   } = useSettings();
   
   const navigate = useNavigate();
   const [showSubscriptionModal, setShowSubscriptionModal] = React.useState(false);
+
+  const isPremium = subscription?.status === 'active';
 
   const handleAuthClick = () => {
     if (isAuthenticated) {
@@ -78,9 +84,9 @@ const SettingsSidebar = () => {
   };
 
   const formatLastSynced = () => {
-    if (!syncState.lastSynced) return 'Never';
+    if (!userProfile?.last_synced) return 'Never';
     
-    const date = new Date(syncState.lastSynced);
+    const date = new Date(userProfile.last_synced);
     return date.toLocaleString();
   };
 
@@ -152,7 +158,7 @@ const SettingsSidebar = () => {
                 <h3 className="mb-4 text-lg font-medium text-black dark:text-white flex items-center gap-2">
                   <Cloud className="h-5 w-5" />
                   <span>Data Synchronization</span>
-                  {!isAuthenticated || !userProfile?.isPremium ? (
+                  {!isAuthenticated || !isPremium ? (
                     <span className="ml-auto">
                       <Sparkles className="h-4 w-4 text-yellow-500" />
                     </span>
@@ -164,7 +170,7 @@ const SettingsSidebar = () => {
                     {isAuthenticated ? (
                       <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
                         <Lock className="h-4 w-4" />
-                        <span>Logged in as {userProfile?.email}</span>
+                        <span>Logged in</span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
@@ -174,21 +180,6 @@ const SettingsSidebar = () => {
                     )}
                   </div>
                   
-                  {isAuthenticated && (
-                    <div className="p-3 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2 text-black dark:text-white">
-                          <Sparkles className="h-4 w-4 text-yellow-500" />
-                          <span className="font-medium">Premium Status</span>
-                        </div>
-                        <SubscriptionToggle />
-                      </div>
-                      <p className="text-xs text-black/50 dark:text-white/50">
-                        Toggle premium status for testing purposes
-                      </p>
-                    </div>
-                  )}
-                  
                   <div className="text-sm text-black/70 dark:text-white/70">
                     Last synced: <span className="text-black/50 dark:text-white/50">{formatLastSynced()}</span>
                   </div>
@@ -197,25 +188,25 @@ const SettingsSidebar = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
                         <span>Cloud Sync</span>
-                        {!isAuthenticated || !userProfile?.isPremium ? (
+                        {!isAuthenticated || !isPremium ? (
                           <span className="text-xs bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 px-2 py-0.5 rounded">Premium</span>
                         ) : null}
                       </div>
                       <Switch 
-                        checked={syncState.enabled}
+                        checked={userProfile?.cloud_sync_enabled || false}
                         onCheckedChange={toggleSyncEnabled}
-                        disabled={!isAuthenticated || isLoading || !userProfile?.isPremium}
+                        disabled={!isAuthenticated || isSyncing || !isPremium}
                       />
                     </div>
                     
-                    {isLoading && (
+                    {isSyncing && (
                       <div className="flex items-center justify-center text-sm text-black/50 dark:text-white/50">
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                         <span>Syncing data...</span>
                       </div>
                     )}
                     
-                    {isAuthenticated && !userProfile?.isPremium && (
+                    {isAuthenticated && !isPremium && (
                       <button 
                         className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors"
                         onClick={handleUpgradeClick}
@@ -224,25 +215,107 @@ const SettingsSidebar = () => {
                         Upgrade to Premium
                       </button>
                     )}
-                    
-                    <button 
-                      className="w-full bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 text-black dark:text-white px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors"
-                      onClick={handleAuthClick}
-                      disabled={isLoading}
-                    >
-                      {isAuthenticated ? (
-                        <>
-                          <LogOut className="h-4 w-4" />
-                          Sign Out
-                        </>
-                      ) : (
-                        <>
-                          <LogIn className="h-4 w-4" />
-                          Sign In
-                        </>
-                      )}
-                    </button>
+
+                    {isAuthenticated && userProfile?.polar_customer_id && (
+                      <button
+                        onClick={async () => {
+                          try {
+                            const { data, error } = await supabase.functions.invoke('create-billing-session');
+                            if (error) throw error;
+                            window.location.href = data.url;
+                          } catch (error) {
+                            console.error('Error creating billing session:', error);
+                          }
+                        }}
+                        className="w-full bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 text-black dark:text-white px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors"
+                      >
+                        <CreditCard className="h-4 w-4" />
+                        Manage Billing
+                      </button>
+                    )}
+
+                    {isAuthenticated && (
+                      <button
+                        onClick={async () => {
+                          try {
+                            const { data: notes } = await supabase
+                              .from('notes')
+                              .select('*')
+                              .eq('user_id', userProfile?.id);
+                            
+                            const { data: todos } = await supabase
+                              .from('todos')
+                              .select('*')
+                              .eq('user_id', userProfile?.id);
+                            
+                            const { data: events } = await supabase
+                              .from('events')
+                              .select('*')
+                              .eq('user_id', userProfile?.id);
+
+                            const exportData = {
+                              notes,
+                              todos,
+                              events,
+                              exportDate: new Date().toISOString()
+                            };
+
+                            const dataStr = JSON.stringify(exportData, null, 2);
+                            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                            const url = window.URL.createObjectURL(dataBlob);
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.download = `evolve-data-${new Date().toISOString().split('T')[0]}.json`;
+                            document.body.appendChild(link);
+                            link.click();
+                            window.URL.revokeObjectURL(url);
+                            document.body.removeChild(link);
+                          } catch (error) {
+                            console.error('Error downloading data:', error);
+                          }
+                        }}
+                        className="w-full bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 text-black dark:text-white px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors"
+                      >
+                        <Download className="h-4 w-4" />
+                        Download My Data
+                      </button>
+                    )}
                   </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-6 border-t border-black/10 dark:border-white/10">
+              {isAuthenticated ? (
+                <button 
+                  className="w-full mb-6 bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 text-black dark:text-white px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors"
+                  onClick={handleAuthClick}
+                  disabled={isSyncing}
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </button>
+              ) : (
+                <button 
+                  className="w-full mb-6 bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 text-black dark:text-white px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors"
+                  onClick={handleAuthClick}
+                  disabled={isSyncing}
+                >
+                  <LogIn className="h-4 w-4" />
+                  Sign In
+                </button>
+              )}
+
+              <div className="flex flex-col items-center gap-4">
+                <Logo className="h-8 w-8 flex justify-center items-center" />
+                <div className="flex items-center gap-2 text-sm text-black/50 dark:text-white/50">
+                  <Info className="h-4 w-4" />
+                  <span>Version 1.0.0-beta.1</span>
+                </div>
+                <div className="text-xs text-black/30 dark:text-white/30 text-center">
+                  <div>© 2024 Aesthetic Startpage</div>
+                  <div>Developed by zivtamary</div>
+                  <div>Support: zivtamary@gmail.com</div>
                 </div>
               </div>
             </div>

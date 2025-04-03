@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { useSettings } from '../../context/SettingsContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Note {
   id: string;
@@ -8,11 +10,59 @@ interface Note {
   updatedAt: number;
 }
 
+interface StoredNotes {
+  value: Note[];
+  timestamp: number;
+}
+
 const Notes: React.FC = () => {
+  const { syncNotesOnBlur, isAuthenticated, userProfile } = useSettings();
   const [notes, setNotes] = useLocalStorage<Note[]>('notes', []);
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [noteContent, setNoteContent] = useState<string>('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  // Function to fetch notes from cloud
+  const fetchCloudNotes = async () => {
+    if (!isAuthenticated || !userProfile?.cloud_sync_enabled) return;
+    
+    try {
+      console.log('Fetching notes from cloud...');
+      const { data: cloudNotes, error } = await supabase
+        .from('notes')
+        .select('*')
+        .eq('user_id', userProfile.id);
+        
+      if (error) throw error;
+      
+      if (cloudNotes) {
+        const localNotes = cloudNotes.map(note => ({
+          id: note.id,
+          content: note.content,
+          createdAt: new Date(note.created_at).getTime(),
+          updatedAt: new Date(note.updated_at).getTime()
+        }));
+        setNotes(localNotes);
+        console.log('Local notes updated with cloud data');
+      }
+    } catch (error) {
+      console.error('Error fetching notes from cloud:', error);
+    }
+  };
+
+  // Set up periodic sync
+  useEffect(() => {
+    if (!isAuthenticated || !userProfile?.cloud_sync_enabled) return;
+
+    // Initial fetch
+    fetchCloudNotes();
+
+    // Set up interval for periodic sync (every 30 seconds)
+    const intervalId = setInterval(fetchCloudNotes, 30000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId);
+  }, [isAuthenticated, userProfile?.cloud_sync_enabled, userProfile?.id]);
   
   // Set active note to the most recent note when component mounts
   useEffect(() => {
@@ -32,13 +82,12 @@ const Notes: React.FC = () => {
   
   const createNewNote = () => {
     const newNote: Note = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       content: '',
       createdAt: Date.now(),
       updatedAt: Date.now()
     };
-    
-    setNotes([newNote, ...notes]);
+    setNotes([...notes, newNote]);
     setActiveNoteId(newNote.id);
     setNoteContent('');
     
@@ -47,8 +96,9 @@ const Notes: React.FC = () => {
     }
   };
   
-  const deleteNote = (id: string) => {
-    setNotes(notes.filter(note => note.id !== id));
+  const deleteNote = async (id: string) => {
+    const updatedNotes = notes.filter(note => note.id !== id);
+    setNotes(updatedNotes);
     
     if (activeNoteId === id) {
       if (notes.length > 1) {
@@ -60,6 +110,14 @@ const Notes: React.FC = () => {
         setActiveNoteId(null);
         setNoteContent('');
       }
+    }
+
+    try {
+      console.log('Note deleted, attempting to sync...');
+      await syncNotesOnBlur();
+      console.log('Notes sync completed');
+    } catch (error) {
+      console.error('Error syncing notes:', error);
     }
   };
   
@@ -73,7 +131,7 @@ const Notes: React.FC = () => {
     }
   };
   
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleContentChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const content = e.target.value;
     setNoteContent(content);
     
@@ -87,6 +145,16 @@ const Notes: React.FC = () => {
       setNotes(updatedNotes);
     }
   };
+
+  const handleBlur = async () => {
+    try {
+      console.log('Note blur event triggered');
+      await syncNotesOnBlur();
+      console.log('Notes sync completed');
+    } catch (error) {
+      console.error('Error syncing notes:', error);
+    }
+  };
   
   // Sort notes by last updated, most recent first
   const sortedNotes = [...notes].sort((a, b) => b.updatedAt - a.updatedAt);
@@ -98,92 +166,47 @@ const Notes: React.FC = () => {
         <button
           onClick={createNewNote}
           className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10"
-          title="New note"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 12h14" />
-            <path d="M12 5v14" />
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
         </button>
       </div>
       
-      <div className="flex flex-1 overflow-hidden">
-        {/* Notes list */}
+      <div className="flex-1 overflow-hidden flex">
         <div className="w-1/3 border-r border-white/10 overflow-y-auto">
-          {sortedNotes.length === 0 ? (
-            <div className="p-4 text-white/50 text-center">
-              <p>No notes yet</p>
-              <button
-                onClick={createNewNote}
-                className="mt-2 text-white/70 hover:text-white underline"
-              >
-                Create one
-              </button>
+          {sortedNotes.map(note => (
+            <div
+              key={note.id}
+              onClick={() => selectNote(note.id)}
+              className={`p-4 cursor-pointer hover:bg-white/5 ${
+                activeNoteId === note.id ? 'bg-white/10' : ''
+              }`}
+            >
+              <div className="text-sm text-white/70">
+                {new Date(note.updatedAt).toLocaleDateString()}
+              </div>
+              <div className="truncate">
+                {note.content || 'Empty note'}
+              </div>
             </div>
-          ) : (
-            <ul>
-              {sortedNotes.map(note => (
-                <li 
-                  key={note.id}
-                  className={`
-                    p-3 cursor-pointer border-b border-white/10 hover:bg-white/5
-                    ${activeNoteId === note.id ? 'bg-white/10' : ''}
-                  `}
-                  onClick={() => selectNote(note.id)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="truncate">
-                      {note.content ? (
-                        <span className="text-sm">{note.content.split('\n')[0] || 'Empty note'}</span>
-                      ) : (
-                        <span className="text-white/50 text-sm">Empty note</span>
-                      )}
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteNote(note.id);
-                      }}
-                      className="text-white/50 hover:text-white/90 ml-2"
-                      title="Delete note"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M3 6h18" />
-                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                      </svg>
-                    </button>
-                  </div>
-                  <div className="text-xs text-white/50 mt-1">
-                    {new Date(note.updatedAt).toLocaleDateString()}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+          ))}
         </div>
         
-        {/* Note editor */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 p-4">
           {activeNoteId ? (
             <textarea
               ref={textareaRef}
               value={noteContent}
               onChange={handleContentChange}
-              placeholder="Type your note here..."
-              className="flex-1 bg-transparent p-4 outline-none resize-none placeholder:text-white/50"
+              onBlur={handleBlur}
+              className="w-full h-full bg-transparent outline-none resize-none"
+              placeholder="Start typing..."
             />
           ) : (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-white/50 text-center">
-                <p>Select a note or create a new one</p>
-                <button
-                  onClick={createNewNote}
-                  className="mt-2 px-4 py-2 rounded bg-white/10 hover:bg-white/20 transition-colors"
-                >
-                  Create Note
-                </button>
-              </div>
+            <div className="h-full flex items-center justify-center text-white/50">
+              Select a note or create a new one
             </div>
           )}
         </div>

@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { useSettings } from '../../context/SettingsContext';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Check } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TodoItem {
   id: string;
@@ -10,41 +12,140 @@ interface TodoItem {
   createdAt: number;
 }
 
+interface StoredTodos {
+  value: TodoItem[];
+  timestamp: number;
+}
+
 const TodoList: React.FC = () => {
+  const { syncTodosOnBlur, isAuthenticated, userProfile } = useSettings();
   const [todos, setTodos] = useLocalStorage<TodoItem[]>('todos', []);
-  const [newTodoText, setNewTodoText] = useState<string>('');
+  const [newTodo, setNewTodo] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
   
-  const addTodo = (e: React.FormEvent) => {
+  // Function to fetch todos from cloud
+  const fetchCloudTodos = async () => {
+    if (!isAuthenticated || !userProfile?.cloud_sync_enabled) return;
+    
+    try {
+      console.log('Fetching todos from cloud...');
+      const { data: cloudTodos, error } = await supabase
+        .from('todos')
+        .select('*')
+        .eq('user_id', userProfile.id);
+        
+      if (error) throw error;
+      
+      if (cloudTodos) {
+        const localTodos = cloudTodos.map(todo => ({
+          id: todo.id,
+          text: todo.title,
+          completed: todo.completed,
+          createdAt: new Date(todo.created_at).getTime()
+        }));
+        setTodos(localTodos);
+        console.log('Local todos updated with cloud data');
+      }
+    } catch (error) {
+      console.error('Error fetching todos from cloud:', error);
+    }
+  };
+
+  // Set up periodic sync
+  useEffect(() => {
+    if (!isAuthenticated || !userProfile?.cloud_sync_enabled) return;
+
+    // Initial fetch
+    fetchCloudTodos();
+
+    // Set up interval for periodic sync (every 30 seconds)
+    const intervalId = setInterval(fetchCloudTodos, 30000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId);
+  }, [isAuthenticated, userProfile?.cloud_sync_enabled, userProfile?.id]);
+
+  const addTodo = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!newTodoText.trim()) return;
-    
-    const newTodo: TodoItem = {
-      id: Date.now().toString(),
-      text: newTodoText.trim(),
+    if (!newTodo.trim()) return;
+
+    const todo: TodoItem = {
+      id: crypto.randomUUID(),
+      text: newTodo.trim(),
       completed: false,
       createdAt: Date.now()
     };
-    
-    setTodos([newTodo, ...todos]);
-    setNewTodoText('');
+
+    setTodos([...todos, todo]);
+    setNewTodo('');
+
+    try {
+      console.log('Todo added, attempting to sync...');
+      await syncTodosOnBlur();
+      console.log('Todos sync completed');
+    } catch (error) {
+      console.error('Error syncing todos:', error);
+    }
   };
   
-  const toggleTodo = (id: string) => {
-    setTodos(
-      todos.map(todo => 
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
+  const toggleTodo = async (id: string) => {
+    const updatedTodos = todos.map(todo =>
+      todo.id === id ? { ...todo, completed: !todo.completed } : todo
     );
+    setTodos(updatedTodos);
+
+    try {
+      console.log('Todo toggled, attempting to sync...');
+      await syncTodosOnBlur();
+      console.log('Todos sync completed');
+    } catch (error) {
+      console.error('Error syncing todos:', error);
+    }
   };
   
-  const deleteTodo = (id: string) => {
-    setTodos(todos.filter(todo => todo.id !== id));
-  };
-  
-  const clearCompleted = () => {
-    setTodos(todos.filter(todo => !todo.completed));
+  const deleteTodo = async (id: string) => {
+    try {
+      // First delete from Supabase if authenticated and sync is enabled
+      if (isAuthenticated && userProfile?.cloud_sync_enabled) {
+        console.log('Deleting todo from cloud:', id);
+        const { error } = await supabase
+          .from('todos')
+          .delete()
+          .eq('id', id);
+          
+        if (error) throw error;
+        console.log('Todo deleted from cloud successfully');
+
+        // After successful delete, fetch updated todos
+        console.log('Fetching updated todos...');
+        const { data: updatedTodos, error: fetchError } = await supabase
+          .from('todos')
+          .select('*')
+          .eq('user_id', userProfile.id);
+          
+        if (fetchError) throw fetchError;
+        
+        // Update local storage with fetched todos
+        if (updatedTodos) {
+          const localTodos = updatedTodos.map(todo => ({
+            id: todo.id,
+            text: todo.title,
+            completed: todo.completed,
+            createdAt: new Date(todo.created_at).getTime()
+          }));
+          setTodos(localTodos);
+          console.log('Local todos updated with cloud data');
+        }
+      } else {
+        // If not authenticated or sync disabled, just update local storage
+        const updatedTodos = todos.filter(todo => todo.id !== id);
+        setTodos(updatedTodos);
+        console.log('Todo deleted from local storage only');
+      }
+    } catch (error) {
+      console.error('Error deleting todo:', error);
+    }
   };
   
   // Get filtered todos
@@ -68,9 +169,10 @@ const TodoList: React.FC = () => {
       <form onSubmit={addTodo} className="p-4 border-b border-white/10">
         <div className="flex">
           <input
+            ref={inputRef}
             type="text"
-            value={newTodoText}
-            onChange={(e) => setNewTodoText(e.target.value)}
+            value={newTodo}
+            onChange={(e) => setNewTodo(e.target.value)}
             placeholder="What needs to be done?"
             className="flex-grow bg-black/20 px-4 py-2 rounded-l outline-none placeholder:text-white/50"
           />
@@ -157,14 +259,6 @@ const TodoList: React.FC = () => {
               Completed
             </button>
           </div>
-          
-          <button
-            onClick={clearCompleted}
-            className="text-sm text-white/70 hover:text-white transition-colors"
-            disabled={!todos.some(todo => todo.completed)}
-          >
-            Clear completed
-          </button>
         </div>
       </div>
     </div>

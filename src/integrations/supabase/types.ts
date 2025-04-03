@@ -92,19 +92,46 @@ export type Database = {
       }
       profiles: {
         Row: {
-          created_at: string
           id: string
+          created_at: string
           updated_at: string
+          widget_visibility: {
+            notes: boolean
+            todoList: boolean
+            pomodoro: boolean
+            events: boolean
+          }
+          cloud_sync_enabled: boolean
+          last_synced: string | null
+          polar_customer_id: string | null
         }
         Insert: {
-          created_at?: string
           id: string
+          created_at?: string
           updated_at?: string
+          widget_visibility?: {
+            notes: boolean
+            todoList: boolean
+            pomodoro: boolean
+            events: boolean
+          }
+          cloud_sync_enabled?: boolean
+          last_synced?: string | null
+          polar_customer_id?: string | null
         }
         Update: {
-          created_at?: string
           id?: string
+          created_at?: string
           updated_at?: string
+          widget_visibility?: {
+            notes: boolean
+            todoList: boolean
+            pomodoro: boolean
+            events: boolean
+          }
+          cloud_sync_enabled?: boolean
+          last_synced?: string | null
+          polar_customer_id?: string | null
         }
         Relationships: []
       }

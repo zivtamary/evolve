@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Timer, Play, Pause, RotateCcw } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useSettings } from '../../context/SettingsContext';
 
 type TimerMode = 'work' | 'shortBreak' | 'longBreak';
 
@@ -13,23 +13,42 @@ const TIMER_SETTINGS = {
   longBreak: { minutes: 15, label: 'Long Break' },
 };
 
-const Pomodoro = () => {
+interface PomodoroSettings {
+  workDuration: number;
+  breakDuration: number;
+  longBreakDuration: number;
+  sessions: number;
+}
+
+const Pomodoro: React.FC = () => {
+  const { syncPomodoroOnBlur } = useSettings();
+  const [settings, setSettings] = useLocalStorage<PomodoroSettings>('pomodoro-settings', {
+    workDuration: 25,
+    breakDuration: 5,
+    longBreakDuration: 15,
+    sessions: 4
+  });
   const [mode, setMode] = useState<TimerMode>('work');
-  const [timeLeft, setTimeLeft] = useState(TIMER_SETTINGS[mode].minutes * 60);
+  const [timeLeft, setTimeLeft] = useState(settings.workDuration * 60);
   const [isActive, setIsActive] = useState(false);
-  const [sessions, setSessions] = useLocalStorage<number>('pomodoro-sessions', 0);
+  const [sessionCount, setSessionCount] = useState(0);
   const intervalRef = useRef<number | null>(null);
   
   // Reset timer when mode changes
   useEffect(() => {
-    setTimeLeft(TIMER_SETTINGS[mode].minutes * 60);
+    const duration = mode === 'work' 
+      ? settings.workDuration 
+      : mode === 'shortBreak' 
+        ? settings.breakDuration 
+        : settings.longBreakDuration;
+    setTimeLeft(duration * 60);
     setIsActive(false);
     
     if (intervalRef.current) {
       window.clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-  }, [mode]);
+  }, [mode, settings.workDuration, settings.breakDuration, settings.longBreakDuration]);
   
   // Handle timer countdown
   useEffect(() => {
@@ -39,18 +58,8 @@ const Pomodoro = () => {
           if (prevTime <= 1) {
             // Timer completed
             setIsActive(false);
-            if (mode === 'work') {
-              setSessions(prev => prev + 1);
-              // After 4 sessions, take a long break
-              if ((sessions + 1) % 4 === 0) {
-                setMode('longBreak');
-              } else {
-                setMode('shortBreak');
-              }
-            } else {
-              setMode('work');
-            }
-            return TIMER_SETTINGS[mode].minutes * 60;
+            handleTimerComplete();
+            return 0;
           }
           return prevTime - 1;
         });
@@ -65,7 +74,7 @@ const Pomodoro = () => {
         window.clearInterval(intervalRef.current);
       }
     };
-  }, [isActive, mode, sessions, setSessions]);
+  }, [isActive]);
   
   const toggleTimer = () => {
     setIsActive(!isActive);
@@ -73,7 +82,34 @@ const Pomodoro = () => {
   
   const resetTimer = () => {
     setIsActive(false);
-    setTimeLeft(TIMER_SETTINGS[mode].minutes * 60);
+    const duration = mode === 'work' 
+      ? settings.workDuration 
+      : mode === 'shortBreak' 
+        ? settings.breakDuration 
+        : settings.longBreakDuration;
+    setTimeLeft(duration * 60);
+  };
+  
+  const handleTimerComplete = async () => {
+    if (mode === 'work') {
+      if (sessionCount + 1 >= settings.sessions) {
+        setMode('longBreak');
+        setSessionCount(0);
+      } else {
+        setMode('shortBreak');
+        setSessionCount(prev => prev + 1);
+      }
+    } else {
+      setMode('work');
+    }
+
+    try {
+      console.log('Timer completed, attempting to sync...');
+      await syncPomodoroOnBlur();
+      console.log('Pomodoro sync completed');
+    } catch (error) {
+      console.error('Error syncing pomodoro:', error);
+    }
   };
   
   const formatTime = (seconds: number) => {
@@ -90,7 +126,7 @@ const Pomodoro = () => {
           <h2 className="text-xl font-semibold">Pomodoro</h2>
         </div>
         <div className="text-xs text-white/70">
-          Session {sessions + 1}
+          Session {sessionCount + 1}
         </div>
       </div>
 

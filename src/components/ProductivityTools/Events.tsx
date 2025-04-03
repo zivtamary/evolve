@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { CalendarDays, Calendar as CalendarIcon, Clock, X, MoreVertical, Edit2, Trash2 } from 'lucide-react';
@@ -20,63 +20,44 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useSettings } from '../../context/SettingsContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Event {
   id: string;
   title: string;
   date: string;
-  time?: string;
-  description?: string;
+  time: string;
+  description: string;
+  createdAt: number;
+}
+
+interface NewEvent {
+  title: string;
+  date: string;
+  time: string;
+  description: string;
+}
+
+interface StoredEvents {
+  value: Event[];
+  timestamp: number;
 }
 
 const Events = () => {
   const { theme } = useTheme();
-  const [events, setEvents] = useLocalStorage<Event[]>('dashboard-events', []);
+  const { syncEventsOnBlur, isAuthenticated, userProfile } = useSettings();
+  const [events, setEvents] = useLocalStorage<Event[]>('events', []);
   const [activeTab, setActiveTab] = useState("today");
   const [dialogState, setDialogState] = useState<'closed' | 'create' | 'edit'>('closed');
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
-  const [newEvent, setNewEvent] = useState<Omit<Event, 'id'>>({
+  const [newEvent, setNewEvent] = useState<NewEvent>({
     title: '',
     date: new Date().toISOString().split('T')[0],
     time: '',
     description: ''
   });
-  
-  // Example events - in a real app, these would come from an API or user input
-  useEffect(() => {
-    if (events.length === 0) {
-      const today = new Date();
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      
-      const nextWeek = new Date(today);
-      nextWeek.setDate(nextWeek.getDate() + 5);
-      
-      setEvents([
-        {
-          id: '1',
-          title: 'Team Meeting',
-          date: today.toISOString().split('T')[0],
-          time: '10:00',
-          description: 'Weekly team sync'
-        },
-        {
-          id: '2',
-          title: 'Project Deadline',
-          date: tomorrow.toISOString().split('T')[0],
-          time: '18:00',
-          description: 'Submit final project draft'
-        },
-        {
-          id: '3',
-          title: 'Client Presentation',
-          date: nextWeek.toISOString().split('T')[0],
-          time: '14:30',
-          description: 'Present new designs to client'
-        }
-      ]);
-    }
-  }, [events.length, setEvents]);
+  const inputRef = useRef<HTMLInputElement>(null);
   
   // Filter events based on active tab
   const getFilteredEvents = () => {
@@ -107,12 +88,8 @@ const Events = () => {
   };
   
   const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { 
-      weekday: 'short', 
-      month: 'short', 
-      day: 'numeric' 
-    };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    const date = new Date(dateString);
+    return date.toLocaleString();
   };
   
   const filteredEvents = getFilteredEvents();
@@ -122,34 +99,75 @@ const Events = () => {
     setNewEvent({
       title: event.title,
       date: event.date,
-      time: event.time || '',
-      description: event.description || ''
+      time: event.time,
+      description: event.description
     });
     setDialogState('edit');
   };
 
-  const handleDeleteEvent = (eventId: string) => {
-    setEvents(events.filter(event => event.id !== eventId));
+  const handleDeleteEvent = async (eventId: string) => {
+    const updatedEvents = events.filter(event => event.id !== eventId);
+    setEvents(updatedEvents);
+
+    try {
+      if (isAuthenticated && userProfile?.cloud_sync_enabled) {
+        console.log('Deleting event from Supabase...');
+        const { error } = await supabase
+          .from('events')
+          .delete()
+          .eq('id', eventId)
+          .eq('user_id', userProfile.id);
+
+        if (error) throw error;
+        console.log('Event deleted from Supabase successfully');
+      }
+    } catch (error) {
+      console.error('Error deleting event from Supabase:', error);
+    }
   };
 
-  const saveEvent = (e: React.FormEvent) => {
+  const addEvent = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingEvent) {
-      // Update existing event
-      setEvents(events.map(event => 
-        event.id === editingEvent.id 
-          ? { ...event, ...newEvent }
-          : event
-      ));
-    } else {
-      // Create new event
-      const event: Event = {
-        id: Date.now().toString(),
-        ...newEvent
-      };
-      setEvents([...events, event]);
+    if (!newEvent.title.trim() || !newEvent.date) return;
+
+    const event: Event = {
+      id: crypto.randomUUID(),
+      title: newEvent.title.trim(),
+      date: newEvent.date,
+      time: newEvent.time || '',
+      description: newEvent.description.trim(),
+      createdAt: Date.now()
+    };
+
+    setEvents([...events, event]);
+    setNewEvent({ 
+      title: '', 
+      date: new Date().toISOString().split('T')[0],
+      time: '', 
+      description: '' 
+    });
+
+    try {
+      if (isAuthenticated && userProfile?.cloud_sync_enabled) {
+        console.log('Adding event to Supabase...');
+        const { error } = await supabase
+          .from('events')
+          .insert([{
+            id: event.id,
+            user_id: userProfile.id,
+            title: event.title,
+            date: event.date,
+            time: event.time,
+            description: event.description,
+            created_at: new Date(event.createdAt).toISOString()
+          }]);
+
+        if (error) throw error;
+        console.log('Event added to Supabase successfully');
+      }
+    } catch (error) {
+      console.error('Error adding event to Supabase:', error);
     }
-    resetForm();
   };
   
   const resetForm = () => {
@@ -162,7 +180,101 @@ const Events = () => {
     setEditingEvent(null);
     setDialogState('closed');
   };
-  
+
+  const handleEventBlur = async () => {
+    try {
+      console.log('Event blur event triggered');
+      await syncEventsOnBlur();
+      console.log('Events sync completed');
+    } catch (error) {
+      console.error('Error syncing events:', error);
+    }
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingEvent || !newEvent.title.trim() || !newEvent.date) return;
+
+    const updatedEvent: Event = {
+      ...editingEvent,
+      title: newEvent.title.trim(),
+      date: newEvent.date,
+      time: newEvent.time || '',
+      description: newEvent.description.trim()
+    };
+
+    const updatedEvents = events.map(event => 
+      event.id === editingEvent.id ? updatedEvent : event
+    );
+    setEvents(updatedEvents);
+    resetForm();
+
+    try {
+      if (isAuthenticated && userProfile?.cloud_sync_enabled) {
+        console.log('Updating event in Supabase...');
+        const { error } = await supabase
+          .from('events')
+          .update({
+            title: updatedEvent.title,
+            date: updatedEvent.date,
+            time: updatedEvent.time,
+            description: updatedEvent.description
+          })
+          .eq('id', updatedEvent.id)
+          .eq('user_id', userProfile.id);
+
+        if (error) throw error;
+        console.log('Event updated in Supabase successfully');
+      }
+    } catch (error) {
+      console.error('Error updating event in Supabase:', error);
+    }
+  };
+
+  // Function to fetch events from cloud
+  const fetchCloudEvents = async () => {
+    if (!isAuthenticated || !userProfile?.cloud_sync_enabled) return;
+    
+    try {
+      console.log('Fetching events from cloud...');
+      const { data: cloudEvents, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('user_id', userProfile.id);
+        
+      if (error) throw error;
+      
+      if (cloudEvents) {
+        const localEvents = cloudEvents.map(event => ({
+          id: event.id,
+          title: event.title,
+          date: event.date,
+          time: event.time,
+          description: event.description,
+          createdAt: new Date(event.created_at).getTime()
+        }));
+        setEvents(localEvents);
+        console.log('Local events updated with cloud data');
+      }
+    } catch (error) {
+      console.error('Error fetching events from cloud:', error);
+    }
+  };
+
+  // Set up periodic sync
+  useEffect(() => {
+    if (!isAuthenticated || !userProfile?.cloud_sync_enabled) return;
+
+    // Initial fetch
+    fetchCloudEvents();
+
+    // Set up interval for periodic sync (every 30 seconds)
+    const intervalId = setInterval(fetchCloudEvents, 30000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId);
+  }, [isAuthenticated, userProfile?.cloud_sync_enabled, userProfile?.id]);
+
   return (
     <div className="glass dark:glass-dark rounded-xl text-white overflow-hidden h-[400px] flex flex-col relative">
       <div className="flex items-center justify-between p-4 border-b border-white/10">
@@ -189,13 +301,15 @@ const Events = () => {
               {dialogState === 'edit' ? 'Edit Event' : 'Create New Event'}
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={saveEvent} className="space-y-4 mt-4">
+          <form onSubmit={dialogState === 'edit' ? handleSaveEdit : addEvent} className="space-y-4 mt-4">
             <div>
               <label className="block text-sm mb-1">Title</label>
               <input
+                ref={inputRef}
                 type="text"
                 value={newEvent.title}
                 onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+                onBlur={handleEventBlur}
                 className="w-full bg-black/10 dark:bg-black/20 px-4 py-2 rounded outline-none border border-black/10 dark:border-white/10 focus:border-black/30 dark:focus:border-white/30"
                 placeholder="Event title"
                 required
@@ -207,18 +321,23 @@ const Events = () => {
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className={`w-full flex items-center justify-between px-4 py-2 rounded border bg-black/10 dark:bg-black/20 border-black/10 dark:border-white/10 focus:border-black/30 dark:focus:border-white/30 ${theme === 'dark' ? 'text-white' : 'text-black'}`}
+                    className="w-full bg-black/10 dark:bg-black/20 px-4 py-2 rounded outline-none border border-black/10 dark:border-white/10 focus:border-black/30 dark:focus:border-white/30 flex items-center justify-between"
                   >
-                    {format(new Date(newEvent.date), 'PPP')}
-                    <CalendarIcon className="h-4 w-4 opacity-50" />
+                    {newEvent.date ? format(new Date(newEvent.date), 'PPP') : 'Pick a date'}
+                    <CalendarIcon className="h-4 w-4 opacity-70" />
                   </button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={new Date(newEvent.date)}
-                    onSelect={(date) => date && setNewEvent({ ...newEvent, date: date.toISOString().split('T')[0] })}
+                    selected={newEvent.date ? new Date(newEvent.date) : undefined}
+                    onSelect={(date) => {
+                      if (date) {
+                        setNewEvent({ ...newEvent, date: date.toISOString().split('T')[0] });
+                      }
+                    }}
                     initialFocus
+                    className="rounded-md border bg-background dark:bg-black/95 dark:border-white/10"
                   />
                 </PopoverContent>
               </Popover>
@@ -229,16 +348,19 @@ const Events = () => {
                 type="time"
                 value={newEvent.time}
                 onChange={(e) => setNewEvent({ ...newEvent, time: e.target.value })}
+                onBlur={handleEventBlur}
                 className="w-full bg-black/10 dark:bg-black/20 px-4 py-2 rounded outline-none border border-black/10 dark:border-white/10 focus:border-black/30 dark:focus:border-white/30"
               />
             </div>
             <div>
-              <label className="block text-sm mb-1">Description (optional)</label>
+              <label className="block text-sm mb-1">Description</label>
               <textarea
                 value={newEvent.description}
                 onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
-                className="w-full bg-black/10 dark:bg-black/20 px-4 py-2 rounded outline-none border border-black/10 dark:border-white/10 focus:border-black/30 dark:focus:border-white/30 resize-none h-20"
+                onBlur={handleEventBlur}
+                className="w-full bg-black/10 dark:bg-black/20 px-4 py-2 rounded outline-none border border-black/10 dark:border-white/10 focus:border-black/30 dark:focus:border-white/30"
                 placeholder="Event description"
+                rows={3}
               />
             </div>
             <DialogFooter>
@@ -301,15 +423,15 @@ const Events = () => {
                             <CalendarIcon className="h-3.5 w-3.5" />
                             <span>{formatDate(event.date)}</span>
                           </div>
-                          {event.time && (
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-3.5 w-3.5" />
-                              <span>{event.time}</span>
-                            </div>
-                          )}
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3.5 w-3.5" />
+                            <span>{event.time}</span>
+                          </div>
                         </div>
                         {event.description && (
-                          <div className="text-sm mt-1 text-white/70 line-clamp-2">{event.description}</div>
+                          <div className="text-sm text-white/70 mt-2">
+                            {event.description}
+                          </div>
                         )}
                       </div>
                       <DropdownMenu>

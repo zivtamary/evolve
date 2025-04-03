@@ -57,7 +57,7 @@ serve(async (req) => {
 
     let createdCustomer: PolarCustomer | null = null;
 
-    if (!customer) {
+    if (!customerRequest.ok || !customer.id) {
       // Create customer https://sandbox-api.polar.sh/v1/customers/
       const response = await fetch(`${POLAR_API_URL}/customers`, {
         method: 'POST',
@@ -73,7 +73,10 @@ serve(async (req) => {
             supabase_user_id: user.id
           }
         })
-      })
+      }).catch(err => {
+        console.error(err);
+        throw new Error(err.message || 'Failed to create customer');
+      });
       const responseData = await response.json();
 
       console.log('Create customer response:', responseData)
