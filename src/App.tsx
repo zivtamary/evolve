@@ -11,8 +11,6 @@ import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Settings from "./pages/Settings";
 import { Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
-import SplashScreen from "./components/SplashScreen";
 
 const queryClient = new QueryClient();
 
@@ -51,32 +49,20 @@ const AppRoutes = () => {
   );
 };
 
-const App = () => {
-  const [showSplash, setShowSplash] = useState(true);
-
-  const handleSplashComplete = () => {
-    setShowSplash(false);
-  };
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <SettingsProvider>
-          <AuthWrapper>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              {showSplash ? (
-                <SplashScreen onComplete={handleSplashComplete} />
-              ) : (
-                <AppRoutes />
-              )}
-            </TooltipProvider>
-          </AuthWrapper>
-        </SettingsProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
-  );
-};
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider>
+      <SettingsProvider>
+        <AuthWrapper>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <AppRoutes />
+          </TooltipProvider>
+        </AuthWrapper>
+      </SettingsProvider>
+    </ThemeProvider>
+  </QueryClientProvider>
+);
 
 export default App;
