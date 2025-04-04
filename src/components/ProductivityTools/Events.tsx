@@ -48,7 +48,7 @@ const Events = () => {
   const { theme } = useTheme();
   const { syncEventsOnBlur, isAuthenticated, userProfile } = useSettings();
   const [events, setEvents] = useLocalStorage<Event[]>('events', []);
-  const [activeTab, setActiveTab] = useState("today");
+  const [activeTab, setActiveTab] = useState("all");
   const [dialogState, setDialogState] = useState<'closed' | 'create' | 'edit'>('closed');
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [newEvent, setNewEvent] = useState<NewEvent>({
@@ -64,9 +64,6 @@ const Events = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    const endOfToday = new Date(today);
-    endOfToday.setHours(23, 59, 59, 999);
-    
     const endOfWeek = new Date(today);
     endOfWeek.setDate(today.getDate() + (7 - today.getDay()));
     
@@ -76,15 +73,26 @@ const Events = () => {
       const eventDate = new Date(event.date);
       eventDate.setHours(0, 0, 0, 0);
       
-      if (activeTab === "today") {
-        return eventDate >= today && eventDate <= endOfToday;
-      } else if (activeTab === "week") {
+      if (activeTab === "week") {
         return eventDate >= today && eventDate <= endOfWeek;
       } else if (activeTab === "month") {
         return eventDate >= today && eventDate <= endOfMonth;
       }
-      return true;
-    }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      return true; // For "all" tab, return all events
+    }).sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      dateA.setHours(0, 0, 0, 0);
+      dateB.setHours(0, 0, 0, 0);
+      
+      // If both dates are in the past or both are in the future, sort by date
+      if ((dateA < today && dateB < today) || (dateA >= today && dateB >= today)) {
+        return dateA.getTime() - dateB.getTime();
+      }
+      
+      // Put future dates before past dates
+      return dateB < today ? -1 : 1;
+    });
   };
   
   const formatDate = (dateString: string) => {
@@ -92,8 +100,44 @@ const Events = () => {
     return date.toLocaleString();
   };
   
+  const getEventCategory = (date: string) => {
+    const eventDate = new Date(date);
+    eventDate.setHours(0, 0, 0, 0);
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const nextWeek = new Date(today);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    
+    if (eventDate.getTime() === today.getTime()) {
+      return "Today";
+    } else if (eventDate.getTime() === tomorrow.getTime()) {
+      return "Tomorrow";
+    } else if (eventDate > today && eventDate <= nextWeek) {
+      return "This Week";
+    } else if (eventDate > nextWeek) {
+      return "Later";
+    } else {
+      return "Past";
+    }
+  };
+
   const filteredEvents = getFilteredEvents();
   
+  // Group events by category
+  const groupedEvents = filteredEvents.reduce((acc, event) => {
+    const category = getEventCategory(event.date);
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(event);
+    return acc;
+  }, {} as Record<string, Event[]>);
+
   const handleEditEvent = (event: Event) => {
     setEditingEvent(event);
     setNewEvent({
@@ -168,6 +212,7 @@ const Events = () => {
     } catch (error) {
       console.error('Error adding event to Supabase:', error);
     }
+    resetForm();
   };
   
   const resetForm = () => {
@@ -385,13 +430,13 @@ const Events = () => {
       </Dialog>
 
       <div className="p-4 flex-1 overflow-hidden">
-        <Tabs defaultValue="today" value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
           <TabsList className="grid grid-cols-3 mb-4 bg-black/20">
             <TabsTrigger 
-              value="today" 
+              value="all" 
               className="text-white/70 data-[state=active]:text-white data-[state=active]:bg-white/20"
             >
-              Today
+              All
             </TabsTrigger>
             <TabsTrigger 
               value="week" 
@@ -409,53 +454,58 @@ const Events = () => {
           
           <TabsContent value={activeTab} className="mt-0 flex-1 overflow-hidden">
             {filteredEvents.length > 0 ? (
-              <div className="space-y-3 h-full overflow-y-auto pr-1">
-                {filteredEvents.map((event) => (
-                  <div 
-                    key={event.id} 
-                    className="p-3 rounded-md bg-black/20 hover:bg-black/30 border border-white/10 transition-colors group"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="font-medium text-white">{event.title}</div>
-                        <div className="flex items-center justify-between text-sm text-white/70 mt-1">
-                          <div className="flex items-center gap-1">
-                            <CalendarIcon className="h-3.5 w-3.5" />
-                            <span>{formatDate(event.date)}</span>
+              <div className="space-y-4 h-full overflow-y-auto pr-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-white/20">
+                {Object.entries(groupedEvents).map(([category, events]) => (
+                  <div key={category} className="space-y-2">
+                    <h3 className="text-sm font-medium text-white/70 px-2">{category}</h3>
+                    {events.map((event) => (
+                      <div 
+                        key={event.id} 
+                        className="p-3 rounded-md bg-black/20 hover:bg-black/30 border border-white/10 transition-colors group"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-white">{event.title}</div>
+                            <div className="flex items-center justify-between text-sm text-white/70 mt-1">
+                              <div className="flex items-center gap-1">
+                                <CalendarIcon className="h-3.5 w-3.5" />
+                                <span>{formatDate(event.date)}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-3.5 w-3.5" />
+                                <span>{event.time}</span>
+                              </div>
+                            </div>
+                            {event.description && (
+                              <div className="text-sm text-white/70 mt-2">
+                                {event.description}
+                              </div>
+                            )}
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5" />
-                            <span>{event.time}</span>
-                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger className="opacity-0 group-hover:opacity-100 p-1 hover:bg-white/10 rounded-md transition-all">
+                              <MoreVertical className="h-4 w-4 text-white/70" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="bg-black/95 border border-white/10">
+                              <DropdownMenuItem 
+                                onClick={() => handleEditEvent(event)}
+                                className="flex items-center gap-2 text-white hover:bg-white/10 cursor-pointer"
+                              >
+                                <Edit2 className="h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => handleDeleteEvent(event.id)}
+                                className="flex items-center gap-2 text-red-400 hover:text-red-300 hover:bg-white/10 cursor-pointer"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
-                        {event.description && (
-                          <div className="text-sm text-white/70 mt-2">
-                            {event.description}
-                          </div>
-                        )}
                       </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger className="opacity-0 group-hover:opacity-100 p-1 hover:bg-white/10 rounded-md transition-all">
-                          <MoreVertical className="h-4 w-4 text-white/70" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="bg-black/95 border border-white/10">
-                          <DropdownMenuItem 
-                            onClick={() => handleEditEvent(event)}
-                            className="flex items-center gap-2 text-white hover:bg-white/10 cursor-pointer"
-                          >
-                            <Edit2 className="h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => handleDeleteEvent(event.id)}
-                            className="flex items-center gap-2 text-red-400 hover:text-red-300 hover:bg-white/10 cursor-pointer"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+                    ))}
                   </div>
                 ))}
               </div>

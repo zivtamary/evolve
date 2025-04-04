@@ -8,6 +8,7 @@ interface BackgroundImageProps {
 const BackgroundImage: React.FC<BackgroundImageProps> = ({ children }) => {
   const [imageUrl, setImageUrl] = useLocalStorage<string>('background-image', '');
   const [loading, setLoading] = useState<boolean>(true);
+  const [isSpinning, setIsSpinning] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchRandomImage = async () => {
@@ -38,7 +39,12 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({ children }) => {
   }, [imageUrl, setImageUrl]);
 
   const handleRefreshBackground = () => {
+    setIsSpinning(true);
     setImageUrl('');
+    // Stop spinning after the background change animation completes
+    setTimeout(() => {
+      setIsSpinning(false);
+    }, 1000);
   };
 
   return (
@@ -65,7 +71,7 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({ children }) => {
         {/* Refresh button */}
         <button 
           onClick={handleRefreshBackground}
-          className="absolute bottom-4 right-4 rounded-full bg-black/20 p-2 text-white backdrop-blur-md hover:bg-black/30"
+          className={`absolute bottom-4 right-4 rounded-full bg-black/20 p-2 text-white backdrop-blur-md hover:bg-black/30 ${isSpinning ? 'animate-spin' : ''}`}
           title="Refresh Background"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

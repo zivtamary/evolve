@@ -159,11 +159,6 @@ const SettingsSidebar = () => {
                 <h3 className="mb-4 text-lg font-medium text-black dark:text-white flex items-center gap-2">
                   <Cloud className="h-5 w-5" />
                   <span>Data Synchronization</span>
-                  {!isAuthenticated || !isPremium ? (
-                    <span className="ml-auto">
-                      <Sparkles className="h-4 w-4 text-yellow-500" />
-                    </span>
-                  ) : null}
                 </h3>
                 
                 <div className="space-y-4">
@@ -210,42 +205,44 @@ const SettingsSidebar = () => {
                 </div>
               </div>
 
-              <div className="p-6 border-t border-black/10 dark:border-white/10">
-                <h3 className="mb-4 text-lg font-medium text-black dark:text-white flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" />
-                  <span>Billing</span>
-                </h3>
+              {(isAuthenticated && (!isPremium || userProfile?.polar_customer_id)) && (
+                <div className="p-6 border-t border-black/10 dark:border-white/10">
+                  <h3 className="mb-4 text-lg font-medium text-black dark:text-white flex items-center gap-2">
+                    <CreditCard className="h-5 w-5" />
+                    <span>Billing</span>
+                  </h3>
 
-                <div className="space-y-4">
-                  {!isPremium && (
-                    <button 
-                      className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors animate-shimmer relative"
-                      onClick={handleUpgradeClick}
-                    >
-                      <CreditCard className="h-4 w-4 relative z-10" />
-                      <span className="relative z-10">Upgrade to Premium</span>
-                    </button>
-                  )}
+                  <div className="space-y-4">
+                    {isAuthenticated && !isPremium && (
+                      <button 
+                        className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors animate-shimmer relative"
+                        onClick={handleUpgradeClick}
+                      >
+                        <CreditCard className="h-4 w-4 relative z-10" />
+                        <span className="relative z-10">Upgrade to Premium</span>
+                      </button>
+                    )}
 
-                  {isAuthenticated && userProfile?.polar_customer_id && (
-                    <button
-                      onClick={async () => {
-                        try {
-                          const { data, error } = await supabase.functions.invoke('create-billing-session');
-                          if (error) throw error;
-                          window.location.href = data.url;
-                        } catch (error) {
-                          console.error('Error creating billing session:', error);
-                        }
-                      }}
-                      className="w-full bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 text-black dark:text-white px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors"
-                    >
-                      <CreditCard className="h-4 w-4" />
-                      Manage Billing
-                    </button>
-                  )}
+                    {isAuthenticated && userProfile?.polar_customer_id && (
+                      <button
+                        onClick={async () => {
+                          try {
+                            const { data, error } = await supabase.functions.invoke('create-billing-session');
+                            if (error) throw error;
+                            window.location.href = data.url;
+                          } catch (error) {
+                            console.error('Error creating billing session:', error);
+                          }
+                        }}
+                        className="w-full bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 text-black dark:text-white px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors"
+                      >
+                        <CreditCard className="h-4 w-4" />
+                        Manage Billing
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
             
             <div className="p-6 border-t border-black/10 dark:border-white/10">
