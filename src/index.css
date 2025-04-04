@@ -67,27 +67,44 @@
 
   /* Custom scrollbar styles */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    background: transparent;
+    background: rgb(0 0 0 / 0.05);
   }
 
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted));
-    border-radius: 4px;
+    background: rgb(0 0 0 / 0.2);
+    border-radius: 9999px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground));
+    background: rgb(0 0 0 / 0.3);
+  }
+
+  /* Dark mode scrollbar */
+  .dark ::-webkit-scrollbar-track {
+    background: rgb(255 255 255 / 0.05);
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: rgb(255 255 255 / 0.2);
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: rgb(255 255 255 / 0.3);
   }
 
   /* Firefox scrollbar */
   * {
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--muted)) transparent;
+    scrollbar-color: rgb(0 0 0 / 0.2) rgb(0 0 0 / 0.05);
+  }
+
+  .dark * {
+    scrollbar-color: rgb(255 255 255 / 0.2) rgb(255 255 255 / 0.05);
   }
 }
 

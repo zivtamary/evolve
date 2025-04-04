@@ -7,8 +7,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useClickOutside } from '../../hooks/use-click-outside';
 
+interface CloudNote {
+  id: string;
+  title?: string;
+  content: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
 interface Note {
   id: string;
+  title: string;
   content: string;
   createdAt: number;
   updatedAt: number;
@@ -23,6 +33,7 @@ const Notes: React.FC = () => {
   const { syncNotesOnBlur, isAuthenticated, userProfile, setExpandedWidget, expandedWidget, widgetPositions } = useSettings();
   const [notes, setNotes] = useLocalStorage<Note[]>('notes', []);
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
+  const [noteTitle, setNoteTitle] = useState<string>('');
   const [noteContent, setNoteContent] = useState<string>('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const notesRef = useRef<HTMLDivElement>(null);
@@ -42,8 +53,9 @@ const Notes: React.FC = () => {
       if (error) throw error;
       
       if (cloudNotes) {
-        const localNotes = cloudNotes.map(note => ({
+        const localNotes = (cloudNotes as CloudNote[]).map(note => ({
           id: note.id,
+          title: note.title || 'Untitled Note',
           content: note.content,
           createdAt: new Date(note.created_at).getTime(),
           updatedAt: new Date(note.updated_at).getTime()
@@ -75,6 +87,7 @@ const Notes: React.FC = () => {
     if (notes.length > 0 && !activeNoteId) {
       const sortedNotes = [...notes].sort((a, b) => b.updatedAt - a.updatedAt);
       setActiveNoteId(sortedNotes[0].id);
+      setNoteTitle(sortedNotes[0].title);
       setNoteContent(sortedNotes[0].content);
     }
   }, [notes, activeNoteId]);
@@ -89,12 +102,14 @@ const Notes: React.FC = () => {
   const createNewNote = () => {
     const newNote: Note = {
       id: crypto.randomUUID(),
+      title: 'Untitled Note',
       content: '',
       createdAt: Date.now(),
       updatedAt: Date.now()
     };
     setNotes([...notes, newNote]);
     setActiveNoteId(newNote.id);
+    setNoteTitle('Untitled Note');
     setNoteContent('');
     
     if (textareaRef.current) {
@@ -102,7 +117,10 @@ const Notes: React.FC = () => {
     }
   };
   
-  const deleteNote = async (id: string) => {
+  const deleteNote = async (id: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     const updatedNotes = notes.filter(note => note.id !== id);
     setNotes(updatedNotes);
     
@@ -111,9 +129,11 @@ const Notes: React.FC = () => {
         const remainingNotes = notes.filter(note => note.id !== id);
         const nextNote = remainingNotes[0];
         setActiveNoteId(nextNote.id);
+        setNoteTitle(nextNote.title);
         setNoteContent(nextNote.content);
       } else {
         setActiveNoteId(null);
+        setNoteTitle('');
         setNoteContent('');
       }
     }
@@ -133,10 +153,26 @@ const Notes: React.FC = () => {
     const selectedNote = notes.find(note => note.id === id);
     if (selectedNote) {
       setActiveNoteId(id);
+      setNoteTitle(selectedNote.title);
       setNoteContent(selectedNote.content);
     }
   };
   
+  const handleTitleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const title = e.target.value;
+    setNoteTitle(title);
+    
+    if (activeNoteId) {
+      const updatedNotes = notes.map(note => 
+        note.id === activeNoteId 
+          ? { ...note, title, updatedAt: Date.now() } 
+          : note
+      );
+      
+      setNotes(updatedNotes);
+    }
+  };
+
   const handleContentChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const content = e.target.value;
     setNoteContent(content);
@@ -316,7 +352,7 @@ const Notes: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 onClick={() => selectNote(note.id)}
-                className={`p-4 cursor-pointer hover:bg-white/5 ${
+                className={`p-4 cursor-pointer hover:bg-white/5 group relative h-[4.5rem] ${
                   activeNoteId === note.id ? 'bg-white/10' : ''
                 }`}
                 transition={{ 
@@ -331,11 +367,25 @@ const Notes: React.FC = () => {
                   }
                 }}
               >
-                <div className="text-sm text-white/70">
-                  {new Date(note.updatedAt).toLocaleDateString()}
+                <div className="flex flex-col">
+                  <div className="text-sm text-white/70">
+                    {new Date(note.updatedAt).toLocaleDateString()}
+                  </div>
+                  <div className="font-medium text-white truncate">
+                    {note.title || note.content || 'Untitled Note'}
+                  </div>
                 </div>
-                <div className="truncate">
-                  {note.content || 'Empty note'}
+                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={(e) => deleteNote(note.id, e)}
+                    className="text-white/50 hover:text-white p-1 rounded-full hover:bg-white/10 transition-all duration-200"
+                    title="Delete note"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 6 6 18" />
+                      <path d="m6 6 12 12" />
+                    </svg>
+                  </button>
                 </div>
               </motion.div>
             ))}
@@ -358,26 +408,39 @@ const Notes: React.FC = () => {
           }}
         >
           {activeNoteId ? (
-            <motion.textarea
+            <motion.div
               layout="position"
-              ref={textareaRef}
-              value={noteContent}
-              onChange={handleContentChange}
-              onBlur={handleBlur}
-              className="w-full h-full bg-transparent outline-none resize-none"
-              placeholder="Start typing..."
-              transition={{ 
-                duration: 0.2,
-                layout: {
-                  type: "spring",
-                  stiffness: 200,
-                  damping: 25,
-                  duration: 0.4,
-                  bounce: 0,
-                  mass: 1
-                }
-              }}
-            />
+              className="flex flex-col h-full gap-4 opacity-[100!important]"
+            >
+              <motion.input
+                layout="position"
+                type="text"
+                value={noteTitle}
+                onChange={handleTitleChange}
+                className="w-full bg-transparent outline-none text-xl font-semibold text-white placeholder:text-white/60"
+                placeholder="Note title..."
+              />
+              <motion.textarea
+                layout="position"
+                ref={textareaRef}
+                value={noteContent}
+                onChange={handleContentChange}
+                onBlur={handleBlur}
+                className="w-full flex-1 bg-transparent outline-none resize-none text-base text-white placeholder:text-white/60"
+                placeholder="Start typing..."
+                transition={{ 
+                  duration: 0.2,
+                  layout: {
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 25,
+                    duration: 0.4,
+                    bounce: 0,
+                    mass: 1
+                  }
+                }}
+              />
+            </motion.div>
           ) : (
             <motion.div
               initial={{ opacity: 0 }}
