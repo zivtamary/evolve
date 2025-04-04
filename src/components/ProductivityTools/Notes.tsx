@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { StickyNote, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useClickOutside } from '../../hooks/use-click-outside';
 
 interface Note {
   id: string;
@@ -19,12 +20,13 @@ interface StoredNotes {
 }
 
 const Notes: React.FC = () => {
-  const { syncNotesOnBlur, isAuthenticated, userProfile, setTemporaryHideWidgets } = useSettings();
+  const { syncNotesOnBlur, isAuthenticated, userProfile, setExpandedWidget, expandedWidget, widgetPositions } = useSettings();
   const [notes, setNotes] = useLocalStorage<Note[]>('notes', []);
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [noteContent, setNoteContent] = useState<string>('');
-  const [isExpanded, setIsExpanded] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const notesRef = useRef<HTMLDivElement>(null);
+  const isExpanded = expandedWidget === 'notes';
   
   // Function to fetch notes from cloud
   const fetchCloudNotes = async () => {
@@ -161,23 +163,48 @@ const Notes: React.FC = () => {
   };
   
   const toggleExpand = () => {
-    const newExpandedState = !isExpanded;
-    setIsExpanded(newExpandedState);
-    setTemporaryHideWidgets(newExpandedState);
+    setExpandedWidget(isExpanded ? null : 'notes');
   };
 
-  // Cleanup temporary hide state on unmount
+  // Cleanup expanded state on unmount
   useEffect(() => {
     return () => {
-      setTemporaryHideWidgets(false);
+      if (isExpanded) {
+        setExpandedWidget(null);
+      }
     };
-  }, []);
+  }, [isExpanded, setExpandedWidget]);
 
   // Sort notes by last updated, most recent first
   const sortedNotes = [...notes].sort((a, b) => b.updatedAt - a.updatedAt);
   
+  // Calculate transform origin based on position
+  const getTransformOrigin = () => {
+    switch (widgetPositions.notes) {
+      case 1: // Top left
+        return 'top left';
+      case 2: // Top right
+        return 'top right';
+      case 3: // Bottom left
+        return 'bottom left';
+      case 4: // Bottom right
+        return 'bottom right';
+      default:
+        return 'center';
+    }
+  };
+
+  const handleClickOutside = () => {
+    if (isExpanded) {
+      setExpandedWidget(null);
+    }
+  };
+
+  useClickOutside(notesRef, handleClickOutside);
+
   return (
     <motion.div
+      ref={notesRef}
       layout
       initial={false}
       animate={{
@@ -199,7 +226,7 @@ const Notes: React.FC = () => {
       )}
       style={{
         boxShadow: isExpanded ? '0 0 0 100vw rgba(0, 0, 0, 0.5)' : 'none',
-        transformOrigin: 'center'
+        transformOrigin: getTransformOrigin()
       }}
     >
       <motion.div 

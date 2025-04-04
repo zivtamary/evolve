@@ -17,7 +17,7 @@ import { motion } from 'framer-motion';
 
 const Index = () => {
   const { theme, setTheme } = useTheme();
-  const { widgetVisibility, temporaryHideWidgets } = useSettings();
+  const { widgetVisibility, expandedWidget, widgetPositions } = useSettings();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
@@ -93,6 +93,23 @@ const Index = () => {
   const handleWelcomeComplete = () => {
     setShowWelcome(false);
   };
+
+  // Get widgets in their correct positions
+  const getOrderedWidgets = () => {
+    const widgets = [
+      { type: 'notes', position: widgetPositions.notes, component: Notes },
+      { type: 'todoList', position: widgetPositions.todoList, component: TodoList },
+      { type: 'pomodoro', position: widgetPositions.pomodoro, component: Pomodoro },
+      { type: 'events', position: widgetPositions.events, component: Events }
+    ];
+
+    return widgets
+      .sort((a, b) => a.position - b.position)
+      .map(widget => ({
+        type: widget.type,
+        component: widget.component
+      }));
+  };
   
   return (
     <>
@@ -152,14 +169,11 @@ const Index = () => {
                       <section>
                         <div className="container mx-auto max-w-4xl">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 [&>*:only-child]:md:col-span-2 [&>*:last-child:nth-child(2n-1)]:md:col-span-2">
-                            {widgetVisibility.notes && <Notes />}
-                            {!temporaryHideWidgets && (
-                              <>
-                                {widgetVisibility.todoList && <TodoList />}
-                                {widgetVisibility.pomodoro && <Pomodoro />}
-                                {widgetVisibility.events && <Events />}
-                              </>
-                            )}
+                            {getOrderedWidgets().map(({ type, component: Component }) => {
+                              if (!widgetVisibility[type]) return null;
+                              if (expandedWidget && expandedWidget !== type) return null;
+                              return <Component key={type} />;
+                            })}
                           </div>
                         </div>
                       </section>

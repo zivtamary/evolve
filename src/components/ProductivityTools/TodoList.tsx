@@ -2,8 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useSettings } from '../../context/SettingsContext';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Check, CheckSquare } from 'lucide-react';
+import { Check, CheckSquare, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import { useClickOutside } from '../../hooks/use-click-outside';
 
 interface TodoItem {
   id: string;
@@ -18,11 +21,13 @@ interface StoredTodos {
 }
 
 const TodoList: React.FC = () => {
-  const { syncTodosOnBlur, isAuthenticated, userProfile } = useSettings();
+  const { syncTodosOnBlur, isAuthenticated, userProfile, setExpandedWidget, expandedWidget, widgetPositions } = useSettings();
   const [todos, setTodos] = useLocalStorage<TodoItem[]>('todos', []);
   const [newTodo, setNewTodo] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const todoListRef = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
+  const isExpanded = expandedWidget === 'todoList';
   
   // Function to fetch todos from cloud
   const fetchCloudTodos = async () => {
@@ -155,21 +160,103 @@ const TodoList: React.FC = () => {
     return true;
   });
   
+  const toggleExpand = () => {
+    setExpandedWidget(isExpanded ? null : 'todoList');
+  };
+
+  const handleClickOutside = () => {
+    if (isExpanded) {
+      setExpandedWidget(null);
+    }
+  };
+
+  useClickOutside(todoListRef, handleClickOutside);
+
   const activeTodosCount = todos.filter(todo => !todo.completed).length;
   
+  // Calculate transform origin based on position
+  const getTransformOrigin = () => {
+    switch (widgetPositions.todoList) {
+      case 1: // Top left
+        return 'top left';
+      case 2: // Top right
+        return 'top right';
+      case 3: // Bottom left
+        return 'bottom left';
+      case 4: // Bottom right
+        return 'bottom right';
+      default:
+        return 'center';
+    }
+  };
+
   return (
-    <div className="glass dark:glass-dark rounded-xl text-white overflow-hidden h-[400px] flex flex-col">
-      <div className="flex items-center justify-between p-4 border-b border-white/10">
-        <h2 className="text-xl font-semibold flex items-center gap-2">
+    <motion.div
+      ref={todoListRef}
+      layout
+      initial={false}
+      animate={{
+        width: isExpanded ? '800px' : '100%',
+        height: isExpanded ? '800px' : '400px',
+        x: widgetPositions.todoList,
+        y: widgetPositions.todoList,
+        zIndex: isExpanded ? 50 : 0,
+      }}
+      transition={{
+        type: "spring",
+        stiffness: 200,
+        damping: 25,
+        duration: 0.4,
+        bounce: 0,
+        mass: 1
+      }}
+      className={cn(
+        "glass dark:glass-dark rounded-xl text-white overflow-hidden flex flex-col relative",
+        isExpanded ? "w-[800px]" : "w-full"
+      )}
+      style={{
+        boxShadow: isExpanded ? '0 0 0 100vw rgba(0, 0, 0, 0.5)' : 'none',
+        transformOrigin: getTransformOrigin()
+      }}
+    >
+      <motion.div 
+        layout="position"
+        className="flex items-center justify-between p-4 border-b border-white/10"
+        transition={{ duration: 0.2 }}
+      >
+        <h2 
+          onClick={toggleExpand}
+          className="text-xl font-semibold flex items-center gap-2 cursor-pointer hover:text-white/80 transition-colors"
+        >
           <CheckSquare className="h-5 w-5" />
           <span>Todo List</span>
         </h2>
-        <div className="text-xs text-white/70">
-          {activeTodosCount} items left
+        <div className="flex items-center gap-2">
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                onClick={toggleExpand}
+                className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10"
+              >
+                <X className="h-5 w-5" />
+              </motion.button>
+            )}
+          </AnimatePresence>
+          <div className="text-xs text-white/70">
+            {activeTodosCount} items left
+          </div>
         </div>
-      </div>
+      </motion.div>
       
-      <form onSubmit={addTodo} className="p-4 border-b border-white/10">
+      <motion.form 
+        layout="position"
+        onSubmit={addTodo} 
+        className="p-4 border-b border-white/10"
+        transition={{ duration: 0.2 }}
+      >
         <div className="flex">
           <input
             ref={inputRef}
@@ -186,62 +273,85 @@ const TodoList: React.FC = () => {
             Add
           </button>
         </div>
-      </form>
+      </motion.form>
       
-      <div className="flex-1 overflow-hidden flex flex-col">
-        <div className="flex-1 overflow-y-auto">
+      <motion.div 
+        layout="position"
+        className="flex-1 overflow-hidden flex flex-col"
+        transition={{ duration: 0.2 }}
+      >
+        <motion.div 
+          layout="position"
+          className="flex-1 overflow-y-auto"
+          transition={{ duration: 0.2 }}
+        >
           {filteredTodos.length === 0 ? (
-            <div className="p-4 text-center text-white/50">
+            <motion.div 
+              layout="position"
+              className="p-4 text-center text-white/50"
+              transition={{ duration: 0.2 }}
+            >
               {filter === 'all' 
                 ? 'No todos yet. Add one above!' 
                 : filter === 'active' 
                   ? 'No active todos' 
                   : 'No completed todos'}
-            </div>
+            </motion.div>
           ) : (
-            <ul>
-              {filteredTodos.map(todo => (
-                <li 
-                  key={todo.id}
-                  className="flex items-center px-4 py-3 border-b border-white/10 group hover:bg-white/5 transition-colors"
-                >
-                  <div className="flex items-center flex-1 gap-3">
-                    <Checkbox
-                      id={todo.id}
-                      checked={todo.completed}
-                      onCheckedChange={() => toggleTodo(todo.id)}
-                      className="h-5 w-5 border-white/30 bg-white/10 hover:bg-white/20 data-[state=checked]:bg-white/20 data-[state=checked]:text-white transition-colors"
-                    >
-                      <Check className="h-4 w-4" />
-                    </Checkbox>
-                    <label 
-                      htmlFor={todo.id}
-                      className={`flex-1 cursor-pointer transition-all duration-200 ${
-                        todo.completed 
-                          ? 'line-through text-white/50' 
-                          : 'hover:text-white'
-                      }`}
-                    >
-                      {todo.text}
-                    </label>
-                  </div>
-                  <button
-                    onClick={() => deleteTodo(todo.id)}
-                    className="opacity-0 group-hover:opacity-100 text-white/50 hover:text-white ml-2 p-1 transition-all duration-200"
-                    title="Delete todo"
+            <motion.ul layout="position">
+              <AnimatePresence mode="wait">
+                {filteredTodos.map(todo => (
+                  <motion.li 
+                    key={todo.id}
+                    layout="position"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="flex items-center px-4 py-3 border-b border-white/10 group hover:bg-white/5 transition-colors"
+                    transition={{ duration: 0.2 }}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M18 6 6 18" />
-                      <path d="m6 6 12 12" />
-                    </svg>
-                  </button>
-                </li>
-              ))}
-            </ul>
+                    <div className="flex items-center flex-1 gap-3">
+                      <Checkbox
+                        id={todo.id}
+                        checked={todo.completed}
+                        onCheckedChange={() => toggleTodo(todo.id)}
+                        className="h-5 w-5 border-white/30 bg-white/10 hover:bg-white/20 data-[state=checked]:bg-white/20 data-[state=checked]:text-white transition-colors"
+                      >
+                        <Check className="h-4 w-4" />
+                      </Checkbox>
+                      <label 
+                        htmlFor={todo.id}
+                        className={`flex-1 cursor-pointer transition-all duration-200 ${
+                          todo.completed 
+                            ? 'line-through text-white/50' 
+                            : 'hover:text-white'
+                        }`}
+                      >
+                        {todo.text}
+                      </label>
+                    </div>
+                    <button
+                      onClick={() => deleteTodo(todo.id)}
+                      className="opacity-0 group-hover:opacity-100 text-white/50 hover:text-white ml-2 p-1 transition-all duration-200"
+                      title="Delete todo"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 6 6 18" />
+                        <path d="m6 6 12 12" />
+                      </svg>
+                    </button>
+                  </motion.li>
+                ))}
+              </AnimatePresence>
+            </motion.ul>
           )}
-        </div>
+        </motion.div>
         
-        <div className="p-4 border-t border-white/10">
+        <motion.div 
+          layout="position"
+          className="p-4 border-t border-white/10"
+          transition={{ duration: 0.2 }}
+        >
           <div className="flex space-x-2 text-sm mb-2">
             <button
               onClick={() => setFilter('all')}
@@ -262,9 +372,9 @@ const TodoList: React.FC = () => {
               Completed
             </button>
           </div>
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 

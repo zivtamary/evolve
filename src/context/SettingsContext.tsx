@@ -79,6 +79,8 @@ interface SettingsContextType {
   setIsSettingsOpen: (value: boolean) => void;
   widgetVisibility: WidgetVisibility;
   toggleWidget: (widget: keyof WidgetVisibility) => void;
+  expandedWidget: keyof WidgetVisibility | null;
+  setExpandedWidget: (widget: keyof WidgetVisibility | null) => void;
   temporaryHideWidgets: boolean;
   setTemporaryHideWidgets: (value: boolean) => void;
   isAuthenticated: boolean;
@@ -96,6 +98,13 @@ interface SettingsContextType {
   syncTodosOnBlur: () => Promise<void>;
   syncEventsOnBlur: () => Promise<void>;
   syncPomodoroOnBlur: () => Promise<void>;
+  widgetPositions: {
+    notes: number;
+    todoList: number;
+    pomodoro: number;
+    events: number;
+  };
+  setWidgetPositions: (positions: { notes: number; todoList: number; pomodoro: number; events: number; }) => void;
 }
 
 const defaultWidgetVisibility: WidgetVisibility = {
@@ -113,6 +122,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
   const [temporaryHideWidgets, setTemporaryHideWidgets] = useState(false);
+  const [expandedWidget, setExpandedWidget] = useState<keyof WidgetVisibility | null>(null);
   const [userProfile, setUserProfile] = useState<Profile | null>({
     id: 'local',
     widget_visibility: defaultWidgetVisibility,
@@ -122,6 +132,12 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const isAuthenticatedRef = useRef(isAuthenticated);
   const isCheckingSessionRef = useRef(false);
+  const [widgetPositions, setWidgetPositions] = useState({
+    notes: 1,
+    todoList: 2,
+    pomodoro: 3,
+    events: 4
+  });
 
   // Update ref when state changes
   useEffect(() => {
@@ -829,6 +845,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         setIsSettingsOpen,
     widgetVisibility: userProfile?.widget_visibility || defaultWidgetVisibility,
         toggleWidget,
+        expandedWidget,
+        setExpandedWidget,
         temporaryHideWidgets,
         setTemporaryHideWidgets,
         isAuthenticated,
@@ -845,7 +863,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     syncNotesOnBlur,
     syncTodosOnBlur,
     syncEventsOnBlur,
-    syncPomodoroOnBlur
+    syncPomodoroOnBlur,
+    widgetPositions,
+    setWidgetPositions,
   };
 
   return (
