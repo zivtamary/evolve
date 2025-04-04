@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useSettings } from '../context/SettingsContext';
 import BackgroundImage from '../components/Background/BackgroundImage';
+import BackgroundTypeToggle from '../components/Background/BackgroundTypeToggle';
+import BackgroundColors from '../components/Background/BackgroundColors';
 import Clock from '../components/Clock/Clock';
 import Weather from '../components/Weather/Weather';
 import SearchBar from '../components/Search/SearchBar';
@@ -12,6 +14,8 @@ import Pomodoro from '../components/ProductivityTools/Pomodoro';
 import Events from '../components/ProductivityTools/Events';
 import SettingsSidebar from '../components/Settings/SettingsSidebar';
 import WelcomeIntro from '../components/Welcome/WelcomeIntro';
+import MotivationPhrase from '../components/Motivation/MotivationPhrase';
+import TimeGreeting from '../components/Greeting/TimeGreeting';
 import { AnimatePresence } from 'framer-motion';
 import { motion } from 'framer-motion';
 
@@ -22,6 +26,9 @@ const Index = () => {
   const [isScrolling, setIsScrolling] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
   const [showMainContent, setShowMainContent] = useState(true);
+  const [backgroundType, setBackgroundType] = useState<'image' | 'gradient' | 'solid'>('image');
+  const [backgroundStyle, setBackgroundStyle] = useState('');
+  const [isBackgroundOptionsOpen, setIsBackgroundOptionsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   
   const toggleTheme = () => {
@@ -111,6 +118,26 @@ const Index = () => {
       }));
   };
   
+  const handleBackgroundTypeChange = (type: 'image' | 'gradient' | 'solid') => {
+    // If switching to image, reset the background style and close options
+    if (type === 'image') {
+      setBackgroundStyle('');
+      setIsBackgroundOptionsOpen(false);
+    } else {
+      // If switching to gradient or solid, open the options
+      setIsBackgroundOptionsOpen(true);
+    }
+    
+    // Update the background type
+    setBackgroundType(type);
+  };
+  
+  const handleReturnToImage = () => {
+    setBackgroundType('image');
+    setBackgroundStyle('');
+    setIsBackgroundOptionsOpen(false);
+  };
+
   return (
     <>
       <AnimatePresence>
@@ -127,7 +154,30 @@ const Index = () => {
             transition={{ duration: 0.5 }}
           >
             <BackgroundImage>
-              <div className="min-h-screen relative overflow-hidden">
+              <div className={`min-h-screen relative overflow-hidden ${
+                backgroundType !== 'image' && backgroundStyle ? (
+                  backgroundType === 'gradient' 
+                    ? `bg-gradient-to-br ${backgroundStyle}` 
+                    : backgroundStyle
+                ) : ''
+              }`}>
+                {/* Background type toggle */}
+                <BackgroundTypeToggle
+                  currentType={backgroundType}
+                  onTypeChange={handleBackgroundTypeChange}
+                />
+                
+                {/* Background color picker */}
+                {backgroundType !== 'image' && (
+                  <BackgroundColors
+                    type={backgroundType}
+                    onSelect={setBackgroundStyle}
+                    onReturnToImage={handleReturnToImage}
+                    isOpen={isBackgroundOptionsOpen}
+                    onClose={() => setIsBackgroundOptionsOpen(false)}
+                  />
+                )}
+                
                 {/* Theme toggle button */}
                 <button
                   onClick={toggleTheme}
@@ -155,6 +205,9 @@ const Index = () => {
                       </div>
                       
                       <div className="flex flex-col items-center justify-center flex-1">
+                        <div className="mb-12">
+                          <TimeGreeting />
+                        </div>
                         <div className="w-full max-w-xs mb-8 animate-slide-up opacity-0 animate-delay-200" style={{ animationFillMode: 'forwards' }}>
                           <Weather />
                         </div>
@@ -166,20 +219,38 @@ const Index = () => {
                     
                     {/* Second slide - Productivity Tools */}
                     <div className="h-full w-full flex items-center justify-center px-6 shrink-0">
-                      <section>
-                        <div className="container mx-auto max-w-4xl">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 [&>*:only-child]:md:col-span-2 [&>*:last-child:nth-child(2n-1)]:md:col-span-2">
-                            {getOrderedWidgets().map(({ type, component: Component }) => {
-                              if (!widgetVisibility[type]) return null;
-                              if (expandedWidget && expandedWidget !== type) return null;
-                              return <Component key={type} />;
-                            })}
-                          </div>
+                      <section className="w-full">
+                        <div className="container mx-auto max-w-4xl w-full">
+                          {expandedWidget ? (
+                            // When a widget is expanded, render it in a centered container
+                            <div className="flex justify-center items-center w-full">
+                              {getOrderedWidgets().map(({ type, component: Component }) => {
+                                if (!widgetVisibility[type]) return null;
+                                if (expandedWidget !== type) return null;
+                                return <Component key={type} />;
+                              })}
+                            </div>
+                          ) : (
+                            // Normal grid layout when no widget is expanded
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 [&>*:only-child]:md:col-span-2 [&>*:last-child:nth-child(2n-1)]:md:col-span-2 w-full">
+                              {getOrderedWidgets().map(({ type, component: Component }) => {
+                                if (!widgetVisibility[type]) return null;
+                                return <Component key={type} />;
+                              })}
+                            </div>
+                          )}
                         </div>
                       </section>
                     </div>
                   </div>
                 </div>
+                
+                {/* Motivation Phrase - Only visible on first slide */}
+                {currentSlide === 0 && (
+                  <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-full">
+                    <MotivationPhrase />
+                  </div>
+                )}
                 
                 {/* Navigation dots */}
                 <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">

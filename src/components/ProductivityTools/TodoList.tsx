@@ -196,10 +196,7 @@ const TodoList: React.FC = () => {
       layout
       initial={false}
       animate={{
-        width: isExpanded ? '800px' : '100%',
         height: isExpanded ? '800px' : '400px',
-        x: widgetPositions.todoList,
-        y: widgetPositions.todoList,
         zIndex: isExpanded ? 50 : 0,
       }}
       transition={{
@@ -212,9 +209,10 @@ const TodoList: React.FC = () => {
       }}
       className={cn(
         "glass dark:glass-dark rounded-xl text-white overflow-hidden flex flex-col relative",
-        isExpanded ? "w-[800px]" : "w-full"
+        isExpanded ? "mx-auto" : "w-full"
       )}
       style={{
+        width: isExpanded ? '800px' : '100%',
         boxShadow: isExpanded ? '0 0 0 100vw rgba(0, 0, 0, 0.5)' : 'none',
         transformOrigin: getTransformOrigin()
       }}
@@ -222,7 +220,17 @@ const TodoList: React.FC = () => {
       <motion.div 
         layout="position"
         className="flex items-center justify-between p-4 border-b border-white/10"
-        transition={{ duration: 0.2 }}
+        transition={{ 
+          duration: 0.2,
+          layout: {
+            type: "spring",
+            stiffness: 200,
+            damping: 25,
+            duration: 0.4,
+            bounce: 0,
+            mass: 1
+          }
+        }}
       >
         <h2 
           onClick={toggleExpand}
@@ -255,7 +263,17 @@ const TodoList: React.FC = () => {
         layout="position"
         onSubmit={addTodo} 
         className="p-4 border-b border-white/10"
-        transition={{ duration: 0.2 }}
+        transition={{ 
+          duration: 0.2,
+          layout: {
+            type: "spring",
+            stiffness: 200,
+            damping: 25,
+            duration: 0.4,
+            bounce: 0,
+            mass: 1
+          }
+        }}
       >
         <div className="flex">
           <input
@@ -278,18 +296,48 @@ const TodoList: React.FC = () => {
       <motion.div 
         layout="position"
         className="flex-1 overflow-hidden flex flex-col"
-        transition={{ duration: 0.2 }}
+        transition={{ 
+          duration: 0.2,
+          layout: {
+            type: "spring",
+            stiffness: 200,
+            damping: 25,
+            duration: 0.4,
+            bounce: 0,
+            mass: 1
+          }
+        }}
       >
         <motion.div 
           layout="position"
           className="flex-1 overflow-y-auto"
-          transition={{ duration: 0.2 }}
+          transition={{ 
+            duration: 0.2,
+            layout: {
+              type: "spring",
+              stiffness: 200,
+              damping: 25,
+              duration: 0.4,
+              bounce: 0,
+              mass: 1
+            }
+          }}
         >
           {filteredTodos.length === 0 ? (
             <motion.div 
               layout="position"
               className="p-4 text-center text-white/50"
-              transition={{ duration: 0.2 }}
+              transition={{ 
+                duration: 0.2,
+                layout: {
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 25,
+                  duration: 0.4,
+                  bounce: 0,
+                  mass: 1
+                }
+              }}
             >
               {filter === 'all' 
                 ? 'No todos yet. Add one above!' 
@@ -308,7 +356,17 @@ const TodoList: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     className="flex items-center px-4 py-3 border-b border-white/10 group hover:bg-white/5 transition-colors"
-                    transition={{ duration: 0.2 }}
+                    transition={{ 
+                      duration: 0.2,
+                      layout: {
+                        type: "spring",
+                        stiffness: 200,
+                        damping: 25,
+                        duration: 0.4,
+                        bounce: 0,
+                        mass: 1
+                      }
+                    }}
                   >
                     <div className="flex items-center flex-1 gap-3">
                       <Checkbox
@@ -350,7 +408,17 @@ const TodoList: React.FC = () => {
         <motion.div 
           layout="position"
           className="p-4 border-t border-white/10"
-          transition={{ duration: 0.2 }}
+          transition={{ 
+            duration: 0.2,
+            layout: {
+              type: "spring",
+              stiffness: 200,
+              damping: 25,
+              duration: 0.4,
+              bounce: 0,
+              mass: 1
+            }
+          }}
         >
           <div className="flex space-x-2 text-sm mb-2">
             <button

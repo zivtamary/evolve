@@ -208,7 +208,6 @@ const Notes: React.FC = () => {
       layout
       initial={false}
       animate={{
-        width: isExpanded ? '800px' : '100%',
         height: isExpanded ? '800px' : '400px',
         zIndex: isExpanded ? 50 : 0,
       }}
@@ -222,9 +221,10 @@ const Notes: React.FC = () => {
       }}
       className={cn(
         "glass dark:glass-dark rounded-xl text-white overflow-hidden flex flex-col relative",
-        isExpanded ? "w-[800px]" : "w-full"
+        isExpanded ? "mx-auto" : "w-full"
       )}
       style={{
+        width: isExpanded ? '800px' : '100%',
         boxShadow: isExpanded ? '0 0 0 100vw rgba(0, 0, 0, 0.5)' : 'none',
         transformOrigin: getTransformOrigin()
       }}
@@ -232,7 +232,17 @@ const Notes: React.FC = () => {
       <motion.div 
         layout="position"
         className="flex items-center justify-between p-4 border-b border-white/10"
-        transition={{ duration: 0.2 }}
+        transition={{ 
+          duration: 0.2,
+          layout: {
+            type: "spring",
+            stiffness: 200,
+            damping: 25,
+            duration: 0.4,
+            bounce: 0,
+            mass: 1
+          }
+        }}
       >
         <h2 
           onClick={toggleExpand}
@@ -270,12 +280,32 @@ const Notes: React.FC = () => {
       <motion.div 
         layout="position" 
         className="flex-1 overflow-hidden flex"
-        transition={{ duration: 0.2 }}
+        transition={{ 
+          duration: 0.2,
+          layout: {
+            type: "spring",
+            stiffness: 200,
+            damping: 25,
+            duration: 0.4,
+            bounce: 0,
+            mass: 1
+          }
+        }}
       >
         <motion.div 
           layout="position"
           className="w-1/3 border-r border-white/10 overflow-y-auto"
-          transition={{ duration: 0.2 }}
+          transition={{ 
+            duration: 0.2,
+            layout: {
+              type: "spring",
+              stiffness: 200,
+              damping: 25,
+              duration: 0.4,
+              bounce: 0,
+              mass: 1
+            }
+          }}
         >
           <AnimatePresence mode="wait">
             {sortedNotes.map(note => (
@@ -289,7 +319,17 @@ const Notes: React.FC = () => {
                 className={`p-4 cursor-pointer hover:bg-white/5 ${
                   activeNoteId === note.id ? 'bg-white/10' : ''
                 }`}
-                transition={{ duration: 0.2 }}
+                transition={{ 
+                  duration: 0.2,
+                  layout: {
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 25,
+                    duration: 0.4,
+                    bounce: 0,
+                    mass: 1
+                  }
+                }}
               >
                 <div className="text-sm text-white/70">
                   {new Date(note.updatedAt).toLocaleDateString()}
@@ -305,7 +345,17 @@ const Notes: React.FC = () => {
         <motion.div 
           layout="position" 
           className="flex-1 p-4"
-          transition={{ duration: 0.2 }}
+          transition={{ 
+            duration: 0.2,
+            layout: {
+              type: "spring",
+              stiffness: 200,
+              damping: 25,
+              duration: 0.4,
+              bounce: 0,
+              mass: 1
+            }
+          }}
         >
           {activeNoteId ? (
             <motion.textarea
@@ -316,14 +366,34 @@ const Notes: React.FC = () => {
               onBlur={handleBlur}
               className="w-full h-full bg-transparent outline-none resize-none"
               placeholder="Start typing..."
-              transition={{ duration: 0.2 }}
+              transition={{ 
+                duration: 0.2,
+                layout: {
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 25,
+                  duration: 0.4,
+                  bounce: 0,
+                  mass: 1
+                }
+              }}
             />
           ) : (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="h-full flex items-center justify-center text-white/50"
-              transition={{ duration: 0.2 }}
+              transition={{ 
+                duration: 0.2,
+                layout: {
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 25,
+                  duration: 0.4,
+                  bounce: 0,
+                  mass: 1
+                }
+              }}
             >
               Select a note or create a new one
             </motion.div>
