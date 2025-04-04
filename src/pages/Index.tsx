@@ -75,6 +75,15 @@ const Index = () => {
     const handleWheel = (e: WheelEvent) => {
       if (isScrolling) return;
       
+      // Check if the scroll event originated from a widget
+      const target = e.target as HTMLElement;
+      const isWidgetScroll = target.closest('.widget') || 
+                            target.closest('.overflow-y-auto') || 
+                            target.closest('.overflow-auto');
+      
+      // If scrolling within a widget or if a widget is expanded, don't change slides
+      if (isWidgetScroll || expandedWidget) return;
+      
       setIsScrolling(true);
       setTimeout(() => setIsScrolling(false), 1000); // Debounce scroll events
       
@@ -90,7 +99,7 @@ const Index = () => {
 
     window.addEventListener('wheel', handleWheel, { passive: true });
     return () => window.removeEventListener('wheel', handleWheel);
-  }, [currentSlide, isScrolling]);
+  }, [currentSlide, isScrolling, expandedWidget]);
 
   // Remove the scroll event listener since we're using transform now
   useEffect(() => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sun, Moon, Coffee, Bed } from 'lucide-react';
+import { Sun, Moon, Coffee, Bed, MoonStarIcon } from 'lucide-react';
 
 const TimeGreeting = () => {
   const getGreetingAndIcon = () => {
@@ -24,7 +24,7 @@ const TimeGreeting = () => {
     } else {
       return {
         greeting: "Good night, Ziv.",
-        icon: <Bed className="w-8 h-8 md:w-10 md:h-10" />
+        icon: <MoonStarIcon className="w-8 h-8 md:w-10 md:h-10" />
       };
     }
   };
