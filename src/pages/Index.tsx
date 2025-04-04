@@ -17,7 +17,17 @@ const Index = () => {
   const { widgetVisibility } = useSettings();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
+  const [pageLoaded, setPageLoaded] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    // Trigger page loaded animation after a short delay
+    const timer = setTimeout(() => {
+      setPageLoaded(true);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, []);
   
   const toggleTheme = () => {
     if (theme === 'light') setTheme('dark');
@@ -87,18 +97,24 @@ const Index = () => {
   
   return (
     <BackgroundImage>
-      <div className="min-h-screen relative overflow-hidden">
+      <div className={`min-h-screen relative overflow-hidden transition-opacity duration-1000 ${pageLoaded ? 'opacity-100' : 'opacity-0'}`}>
         {/* Theme toggle button */}
         <button
           onClick={toggleTheme}
-          className="absolute top-4 right-4 bg-black/20 dark:bg-transparent text-white p-2 rounded-full backdrop-blur-md hover:bg-black/30 transition-colors z-10"
+          className={`absolute top-4 right-4 bg-black/20 dark:bg-transparent text-white p-2 rounded-full backdrop-blur-md hover:bg-black/30 transition-all duration-500 z-10 ${
+            pageLoaded ? 'translate-y-0 opacity-100' : '-translate-y-10 opacity-0'
+          }`}
           title={`Current theme: ${theme}`}
         >
           {getThemeIcon()}
         </button>
         
         {/* Settings sidebar */}
-        <SettingsSidebar />
+        <div className={`transition-all duration-700 delay-300 ${
+          pageLoaded ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
+        }`}>
+          <SettingsSidebar />
+        </div>
         
         {/* Slides container */}
         <div className="fixed inset-0">
@@ -108,17 +124,23 @@ const Index = () => {
           >
             {/* First slide - Clock, Weather, Search */}
             <div className="h-full w-full flex flex-col items-center justify-center px-6 shrink-0">
-              <div className="absolute top-32 left-1/2 -translate-x-1/2 w-full">
+              <div className={`absolute top-32 left-1/2 -translate-x-1/2 w-full transition-all duration-1000 delay-500 ${
+                pageLoaded ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+              }`}>
                 <div className="container mx-auto flex flex-col items-center">
                   <Clock className="animate-fade-in" />
                 </div>
               </div>
               
               <div className="flex flex-col items-center justify-center flex-1">
-                <div className="w-full max-w-xs mb-8 animate-slide-up opacity-0 animate-delay-200" style={{ animationFillMode: 'forwards' }}>
+                <div className={`w-full max-w-xs mb-8 transition-all duration-1000 delay-700 ${
+                  pageLoaded ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+                }`}>
                   <Weather />
                 </div>
-                <div className="animate-slide-up opacity-0 animate-delay-300" style={{ animationFillMode: 'forwards' }}>
+                <div className={`transition-all duration-1000 delay-900 ${
+                  pageLoaded ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+                }`}>
                   <SearchBar />
                 </div>
               </div>
@@ -126,7 +148,9 @@ const Index = () => {
             
             {/* Second slide - Productivity Tools */}
             <div className="h-full w-full flex items-center justify-center px-6 shrink-0">
-              <section>
+              <section className={`transition-all duration-1000 delay-500 ${
+                pageLoaded ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+              }`}>
                 <div className="container mx-auto max-w-4xl">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 [&>*:only-child]:md:col-span-2 [&>*:last-child:nth-child(2n-1)]:md:col-span-2">
                     {widgetVisibility.notes && <Notes />}
@@ -141,7 +165,9 @@ const Index = () => {
         </div>
         
         {/* Navigation dots */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+        <div className={`absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10 transition-all duration-1000 delay-1000 ${
+          pageLoaded ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+        }`}>
           <button
             onClick={() => {
               setCurrentSlide(0);
