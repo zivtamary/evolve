@@ -214,17 +214,17 @@ const SettingsSidebar = () => {
 
                   <div className="space-y-4">
                     {isAuthenticated && !isPremium && (
-                      <button 
-                        className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors animate-shimmer relative"
+                      <Button 
+                        className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white animate-shimmer relative"
                         onClick={handleUpgradeClick}
                       >
                         <CreditCard className="h-4 w-4 relative z-10" />
                         <span className="relative z-10">Upgrade to Premium</span>
-                      </button>
+                      </Button>
                     )}
 
                     {isAuthenticated && userProfile?.polar_customer_id && (
-                      <button
+                      <Button
                         onClick={async () => {
                           try {
                             const { data, error } = await supabase.functions.invoke('create-billing-session');
@@ -234,11 +234,12 @@ const SettingsSidebar = () => {
                             console.error('Error creating billing session:', error);
                           }
                         }}
-                        className="w-full bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 text-black dark:text-white px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors"
+                        variant="outline"
+                        className="w-full"
                       >
                         <CreditCard className="h-4 w-4" />
                         Manage Billing
-                      </button>
+                      </Button>
                     )}
                   </div>
                 </div>
@@ -247,23 +248,25 @@ const SettingsSidebar = () => {
             
             <div className="p-6 border-t border-black/10 dark:border-white/10">
               {isAuthenticated ? (
-                <button 
-                  className="w-full mb-6 bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 text-black dark:text-white px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors"
+                <Button 
+                  className="w-full mb-6"
+                  variant="outline"
                   onClick={handleAuthClick}
                   disabled={isSyncing}
                 >
                   <LogOut className="h-4 w-4" />
                   Sign Out
-                </button>
+                </Button>
               ) : (
-                <button 
-                  className="w-full mb-6 bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 text-black dark:text-white px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors"
+                <Button 
+                  className="w-full mb-6"
+                  variant="outline"
                   onClick={handleAuthClick}
                   disabled={isSyncing}
                 >
                   <LogIn className="h-4 w-4" />
                   Sign In
-                </button>
+                </Button>
               )}
 
               <div className="flex flex-col items-center gap-4">

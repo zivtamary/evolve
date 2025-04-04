@@ -10,9 +10,17 @@ import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useSettings } from '@/context/SettingsContext';
 import BackgroundImage from '@/components/Background/BackgroundImage';
-import { ArrowRight, CheckCircle, Cloud, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Cloud, Sparkles } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { FcGoogle } from 'react-icons/fc';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const slideAnimation = {
+  initial: { opacity: 0, x: 20 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -20 },
+  transition: { type: "spring", duration: 0.4, bounce: 0.1 }
+};
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -187,230 +195,295 @@ const Auth = () => {
     });
   };
   
+  const renderHeader = () => {
+    if (view === 'reset_password') {
+      return (
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setView('signin')}
+              className="h-8 w-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <CardTitle>Authentication</CardTitle>
+          </div>
+          <CardDescription>
+            Sign in or create an account to sync your data across devices
+          </CardDescription>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <CardTitle>Authentication</CardTitle>
+        <CardDescription>
+          Sign in or create an account to sync your data across devices
+        </CardDescription>
+      </>
+    );
+  };
+
+  const renderAuthContent = () => {
+    if (view === 'success') {
+      return (
+        <motion.div {...slideAnimation} className="space-y-6">
+          <div className="flex flex-col items-center justify-center py-8 space-y-4 text-center">
+            <CheckCircle className="h-16 w-16 text-green-500" />
+            <h2 className="text-2xl font-bold">Account Created!</h2>
+            <p className="text-muted-foreground">
+              Please check your email to confirm your account before logging in.
+            </p>
+            <Button onClick={() => setView('signin')} className="mt-4">
+              Return to Sign In
+            </Button>
+          </div>
+        </motion.div>
+      );
+    }
+
+    if (view === 'reset_password') {
+      return (
+        <motion.div {...slideAnimation}>
+          <form onSubmit={handleResetPassword} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="reset-email">Email</Label>
+              <Input 
+                id="reset-email" 
+                type="email" 
+                placeholder="your@email.com" 
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                required
+              />
+            </div>
+            
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={loading}
+            >
+              {loading ? "Sending reset email..." : "Send Reset Link"}
+            </Button>
+          </form>
+        </motion.div>
+      );
+    }
+
+    return (
+      <motion.div {...slideAnimation}>
+        <Tabs defaultValue={view} onValueChange={(value) => setView(value as 'signin' | 'signup')}>
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="signin">Sign In</TabsTrigger>
+            <TabsTrigger value="signup">Create Account</TabsTrigger>
+          </TabsList>
+          
+          <AnimatePresence mode="wait">
+            <TabsContent value="signin" asChild key="signin">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
+              >
+                <form onSubmit={handleSignIn}>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signin-email">Email</Label>
+                      <Input 
+                        id="signin-email" 
+                        type="email" 
+                        placeholder="your@email.com" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="signin-password">Password</Label>
+                        <Button 
+                          variant="link" 
+                          className="p-0 h-auto text-xs" 
+                          onClick={() => setView('reset_password')}
+                        >
+                          Forgot password?
+                        </Button>
+                      </div>
+                      <Input 
+                        id="signin-password" 
+                        type="password" 
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full" 
+                      disabled={loading}
+                    >
+                      {loading ? "Signing in..." : "Sign In"}
+                    </Button>
+
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">
+                          Or continue with
+                        </span>
+                      </div>
+                    </div>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={handleGoogleSignIn}
+                      disabled={loading || isPending}
+                    >
+                      <FcGoogle className="mr-2 h-4 w-4" />
+                      {loading || isPending ? "Signing in..." : "Sign in with Google"}
+                    </Button>
+                  </div>
+                </form>
+              </motion.div>
+            </TabsContent>
+            
+            <TabsContent value="signup" asChild key="signup">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
+              >
+                <form onSubmit={handleSignUp}>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email">Email</Label>
+                      <Input 
+                        id="signup-email" 
+                        type="email" 
+                        placeholder="your@email.com" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password">Password</Label>
+                      <Input 
+                        id="signup-password" 
+                        type="password" 
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Password must be at least 6 characters
+                      </p>
+                    </div>
+
+                    <div className="flex items-start space-x-2 pt-2">
+                      <Checkbox 
+                        id="terms" 
+                        checked={agreedToTerms}
+                        onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
+                      />
+                      <Label htmlFor="terms" className="text-xs leading-tight">
+                        I agree to the{" "}
+                        <Link to="/terms-of-service" className="text-primary hover:underline" target="_blank">
+                          Terms of Service
+                        </Link>{" "}
+                        and{" "}
+                        <Link to="/privacy-policy" className="text-primary hover:underline" target="_blank">
+                          Privacy Policy
+                        </Link>
+                      </Label>
+                    </div>
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full" 
+                      disabled={loading || !agreedToTerms}
+                    >
+                      {loading ? "Creating account..." : "Create Account"}
+                    </Button>
+                  </div>
+                </form>
+              </motion.div>
+            </TabsContent>
+          </AnimatePresence>
+        </Tabs>
+
+        <Separator className="my-6" />
+
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.3 }}
+          className="space-y-4"
+        >
+          <h3 className="text-lg font-medium flex items-center">
+            <Sparkles className="h-5 w-5 mr-2 text-yellow-500" />
+            Premium Benefits
+          </h3>
+          
+          <ul className="space-y-2">
+            <motion.li 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="flex items-start"
+            >
+              <Cloud className="h-5 w-5 mr-2 text-primary flex-shrink-0 mt-0.5" />
+              <span className="text-sm">Cloud sync across all your devices</span>
+            </motion.li>
+            <motion.li 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+              className="flex items-start"
+            >
+              <CheckCircle className="h-5 w-5 mr-2 text-primary flex-shrink-0 mt-0.5" />
+              <span className="text-sm">Secure backup of all your notes, todos and events</span>
+            </motion.li>
+            <motion.li 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 }}
+              className="flex items-start"
+            >
+              <ArrowRight className="h-5 w-5 mr-2 text-primary flex-shrink-0 mt-0.5" />
+              <span className="text-sm">Access your productivity dashboard from anywhere</span>
+            </motion.li>
+          </ul>
+        </motion.div>
+      </motion.div>
+    );
+  };
+
   return (
     <BackgroundImage>
       <div className="flex justify-center items-center min-h-screen p-4">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md overflow-hidden">
           <CardHeader>
-            <CardTitle>Authentication</CardTitle>
-            <CardDescription>
-              Sign in or create an account to sync your data across devices
-            </CardDescription>
+            {renderHeader()}
           </CardHeader>
           
-          {view === 'success' ? (
-            <CardContent className="space-y-6">
-              <div className="flex flex-col items-center justify-center py-8 space-y-4 text-center">
-                <CheckCircle className="h-16 w-16 text-green-500" />
-                <h2 className="text-2xl font-bold">Account Created!</h2>
-                <p className="text-muted-foreground">
-                  Please check your email to confirm your account before logging in.
-                </p>
-                <Button onClick={() => setView('signin')} className="mt-4">
-                  Return to Sign In
-                </Button>
-              </div>
-            </CardContent>
-          ) : view === 'reset_password' ? (
-            <CardContent>
-              <form onSubmit={handleResetPassword} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="reset-email">Email</Label>
-                  <Input 
-                    id="reset-email" 
-                    type="email" 
-                    placeholder="your@email.com" 
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={loading}
-                >
-                  {loading ? "Sending reset email..." : "Send Reset Link"}
-                </Button>
-                
-                <p className="text-center text-sm">
-                  <Button 
-                    variant="link" 
-                    className="p-0 h-auto" 
-                    onClick={() => setView('signin')}
-                  >
-                    Back to sign in
-                  </Button>
-                </p>
-              </form>
-            </CardContent>
-          ) : (
-            <CardContent>
-              <Tabs defaultValue={view} onValueChange={(value) => setView(value as 'signin' | 'signup')}>
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="signin">Sign In</TabsTrigger>
-                  <TabsTrigger value="signup">Create Account</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="signin">
-                  <form onSubmit={handleSignIn}>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="signin-email">Email</Label>
-                        <Input 
-                          id="signin-email" 
-                          type="email" 
-                          placeholder="your@email.com" 
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          required
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="signin-password">Password</Label>
-                          <Button 
-                            variant="link" 
-                            className="p-0 h-auto text-xs" 
-                            onClick={() => setView('reset_password')}
-                          >
-                            Forgot password?
-                          </Button>
-                        </div>
-                        <Input 
-                          id="signin-password" 
-                          type="password" 
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          required
-                        />
-                      </div>
-                      
-                      <Button 
-                        type="submit" 
-                        className="w-full" 
-                        disabled={loading}
-                      >
-                        {loading ? "Signing in..." : "Sign In"}
-                      </Button>
-
-                      <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                          <span className="w-full border-t" />
-                        </div>
-                        <div className="relative flex justify-center text-xs uppercase">
-                          <span className="bg-background px-2 text-muted-foreground">
-                            Or continue with
-                          </span>
-                        </div>
-                      </div>
-
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="w-full"
-                        onClick={handleGoogleSignIn}
-                        disabled={loading || isPending}
-                      >
-                        <FcGoogle className="mr-2 h-4 w-4" />
-                        {loading || isPending ? "Signing in..." : "Sign in with Google"}
-                      </Button>
-                    </div>
-                  </form>
-                </TabsContent>
-                
-                <TabsContent value="signup">
-                  <form onSubmit={handleSignUp}>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="signup-email">Email</Label>
-                        <Input 
-                          id="signup-email" 
-                          type="email" 
-                          placeholder="your@email.com" 
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          required
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="signup-password">Password</Label>
-                        <Input 
-                          id="signup-password" 
-                          type="password" 
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          required
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          Password must be at least 6 characters
-                        </p>
-                      </div>
-
-                      <div className="flex items-start space-x-2 pt-2">
-                        <Checkbox 
-                          id="terms" 
-                          checked={agreedToTerms}
-                          onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
-                        />
-                        <Label htmlFor="terms" className="text-xs leading-tight">
-                          I agree to the{" "}
-                          <Link to="/terms-of-service" className="text-primary hover:underline" target="_blank">
-                            Terms of Service
-                          </Link>{" "}
-                          and{" "}
-                          <Link to="/privacy-policy" className="text-primary hover:underline" target="_blank">
-                            Privacy Policy
-                          </Link>
-                        </Label>
-                      </div>
-                      
-                      <Button 
-                        type="submit" 
-                        className="w-full" 
-                        disabled={loading || !agreedToTerms}
-                      >
-                        {loading ? "Creating account..." : "Create Account"}
-                      </Button>
-                    </div>
-                  </form>
-                </TabsContent>
-              </Tabs>
-
-              <Separator className="my-6" />
-
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium flex items-center">
-                  <Sparkles className="h-5 w-5 mr-2 text-yellow-500" />
-                  Premium Benefits
-                </h3>
-                
-                <ul className="space-y-2">
-                  <li className="flex items-start">
-                    <Cloud className="h-5 w-5 mr-2 text-primary flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">
-                      Cloud sync across all your devices
-                    </span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="h-5 w-5 mr-2 text-primary flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">
-                      Secure backup of all your notes, todos and events
-                    </span>
-                  </li>
-                  <li className="flex items-start">
-                    <ArrowRight className="h-5 w-5 mr-2 text-primary flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">
-                      Access your productivity dashboard from anywhere
-                    </span>
-                  </li>
-                </ul>
-              </div>
-            </CardContent>
-          )}
+          <CardContent>
+            <AnimatePresence mode="wait" initial={false}>
+              {renderAuthContent()}
+            </AnimatePresence>
+          </CardContent>
           
           <CardFooter>
             <Button 

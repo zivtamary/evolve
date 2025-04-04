@@ -79,6 +79,8 @@ interface SettingsContextType {
   setIsSettingsOpen: (value: boolean) => void;
   widgetVisibility: WidgetVisibility;
   toggleWidget: (widget: keyof WidgetVisibility) => void;
+  temporaryHideWidgets: boolean;
+  setTemporaryHideWidgets: (value: boolean) => void;
   isAuthenticated: boolean;
   setIsAuthenticated: (value: boolean) => void;
   syncWithCloud: () => Promise<void>;
@@ -110,6 +112,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [temporaryHideWidgets, setTemporaryHideWidgets] = useState(false);
   const [userProfile, setUserProfile] = useState<Profile | null>({
     id: 'local',
     widget_visibility: defaultWidgetVisibility,
@@ -826,6 +829,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         setIsSettingsOpen,
     widgetVisibility: userProfile?.widget_visibility || defaultWidgetVisibility,
         toggleWidget,
+        temporaryHideWidgets,
+        setTemporaryHideWidgets,
         isAuthenticated,
         setIsAuthenticated,
         syncWithCloud,

@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import SplashScreen from './SplashScreen';
 
 interface WelcomeIntroProps {
   onComplete: () => void;
 }
 
 const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete }) => {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
   const [name, setName] = useState('');
 
   const handleNext = () => {
-    if (step < 3) {
+    if (step < 4) {
       setStep(step + 1);
     } else {
       onComplete();
@@ -19,6 +20,8 @@ const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete }) => {
 
   const renderStep = () => {
     switch (step) {
+      case 0:
+        return <SplashScreen onComplete={handleNext} />;
       case 1:
         return (
           <>
@@ -140,38 +143,41 @@ const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete }) => {
       <div className="text-center">
         {renderStep()}
 
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
-          className="flex justify-center gap-4"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleNext}
-            className="px-6 py-3 bg-white text-black rounded-lg font-medium hover:bg-white/90 transition-colors"
+        {step > 0 && (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+            className="flex justify-center gap-4"
           >
-            {step === 3 ? 'Get Started' : 'Next'}
-          </motion.button>
-        </motion.div>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleNext}
+              className="px-6 py-3 bg-white text-black rounded-lg font-medium hover:bg-white/90 transition-colors"
+            >
+              {step === 3 ? 'Get Started' : 'Next'}
+            </motion.button>
+          </motion.div>
+        )}
 
-        {/* Progress dots */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="flex justify-center gap-2 mt-8"
-        >
-          {[1, 2, 3].map((dot) => (
-            <div
-              key={dot}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                dot === step ? 'bg-white scale-125' : 'bg-white/50'
-              }`}
-            />
-          ))}
-        </motion.div>
+        {step > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="flex justify-center gap-2 mt-8"
+          >
+            {[1, 2, 3].map((dot) => (
+              <div
+                key={dot}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  dot === step ? 'bg-white scale-125' : 'bg-white/50'
+                }`}
+              />
+            ))}
+          </motion.div>
+        )}
 
         {/* Sparkles */}
         {[...Array(20)].map((_, i) => (
