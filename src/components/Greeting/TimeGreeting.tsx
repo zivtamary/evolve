@@ -24,7 +24,9 @@ const FloatingStar = ({ delay, size, x, y }) => (
     }}
     className="absolute"
   >
-    <Star className={`${size} fill-white/20 text-white/10`} />
+    <Star className={`${size} fill-white/20 text-white/10`} style={{
+      filter: 'drop-shadow(0 0 4px rgba(255, 255, 255, 0.3))'
+    }} />
   </motion.div>
 );
 
@@ -43,7 +45,9 @@ const FloatingCloud = ({ delay, size, x, y }) => (
     }}
     className="absolute"
   >
-    <Cloud className={`${size} fill-white/10 text-white/5`} />
+    <Cloud className={`${size} fill-white/10 text-white/5`} style={{
+      filter: 'drop-shadow(0 0 3px rgba(255, 255, 255, 0.2))'
+    }} />
   </motion.div>
 );
 
@@ -62,7 +66,7 @@ const TimeGreeting = () => {
               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
             >
               <SunDim className="size-12 fill-amber-300 text-amber-200 drop-shadow-lg" style={{
-                filter: 'drop-shadow(0 0 12px rgba(251, 191, 36, 0.4))'
+                filter: 'drop-shadow(0 0 12px rgba(251, 191, 36, 0.4)) drop-shadow(0 0 20px rgba(251, 191, 36, 0.2))'
               }} />
             </motion.div>
             <FloatingCloud delay={0} size="size-6" x={-15} y={-10} />
@@ -81,7 +85,7 @@ const TimeGreeting = () => {
               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
             >
               <Sun className="size-12 fill-yellow-400 text-yellow-400 drop-shadow-lg" style={{
-                filter: 'drop-shadow(0 0 12px rgba(251, 146, 60, 0.4))'
+                filter: 'drop-shadow(0 0 12px rgba(251, 146, 60, 0.4)) drop-shadow(0 0 20px rgba(251, 146, 60, 0.2))'
               }} />
             </motion.div>
             <FloatingCloud delay={0.5} size="size-5" x={-20} y={-8} />
@@ -94,7 +98,9 @@ const TimeGreeting = () => {
         greeting: "Good evening, Ziv.",
         icon: (
           <div className="relative">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{
+              filter: 'drop-shadow(0 0 10px rgba(167, 139, 250, 0.5)) drop-shadow(0 0 15px rgba(79, 70, 229, 0.3))'
+            }}>
               <defs>
                 <linearGradient id="moonGradientEvening" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="rgba(251, 191, 36, 0.9)" />
@@ -114,7 +120,9 @@ const TimeGreeting = () => {
         greeting: "Good night, Ziv.",
         icon: (
           <div className="relative">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{
+              filter: 'drop-shadow(0 0 10px rgba(99, 102, 241, 0.5)) drop-shadow(0 0 15px rgba(67, 56, 202, 0.3))'
+            }}>
               <defs>
                 <linearGradient id="moonGradientNight" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="rgba(167, 139, 250, 0.9)" />

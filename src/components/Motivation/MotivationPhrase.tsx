@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Quote } from 'lucide-react';
 
 const motivationalQuotes = [
   { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
@@ -58,15 +57,8 @@ const MotivationPhrase = () => {
       transition={{ duration: 0.5, delay: 0.5 }}
       className="relative group"
     >
-      <div className="absolute -left-4 top-0 text-white/40">
-        <Quote className="w-6 h-6" />
-      </div>
-      <div className="absolute -right-4 bottom-0 text-white/40 transform rotate-180">
-        <Quote className="w-6 h-6" />
-      </div>
-      
       <motion.div
-        className="text-center text-white/90 text-base md:text-lg lg:text-xl font-medium italic max-w-2xl mx-auto px-4 py-2"
+        className="text-center text-white/90 text-base md:text-lg lg:text-xl font-medium italic max-w-2xl mx-auto py-2"
       >
         <p className="mb-2">{quote.text}</p>
         <p className="text-white/60 text-sm md:text-base font-normal not-italic">— {quote.author}</p>
