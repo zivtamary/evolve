@@ -24,12 +24,24 @@ const Index = () => {
   const { widgetVisibility, expandedWidget, widgetPositions } = useSettings();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(() => {
+    const lastSplashTime = localStorage.getItem('lastSplashScreenTime');
+    if (!lastSplashTime) {
+      return true;
+    }
+    const lastTime = new Date(lastSplashTime).getTime();
+    const currentTime = new Date().getTime();
+    const oneDayInMs = 24 * 60 * 60 * 1000;
+    return currentTime - lastTime > oneDayInMs;
+  });
   const [showMainContent, setShowMainContent] = useState(true);
   const [backgroundType, setBackgroundType] = useState<'image' | 'gradient' | 'solid'>('image');
   const [backgroundStyle, setBackgroundStyle] = useState('');
   const [isBackgroundOptionsOpen, setIsBackgroundOptionsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [showSparkles, setShowSparkles] = useState(true);
+  const [hasShownSparkles, setHasShownSparkles] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   
   const toggleTheme = () => {
     if (theme === 'light') setTheme('dark');
@@ -108,6 +120,7 @@ const Index = () => {
 
   const handleWelcomeComplete = () => {
     setShowWelcome(false);
+    localStorage.setItem('lastSplashScreenTime', new Date().toISOString());
   };
 
   // Get widgets in their correct positions
@@ -146,6 +159,18 @@ const Index = () => {
     setBackgroundStyle('');
     setIsBackgroundOptionsOpen(false);
   };
+
+  // Add effect to hide sparkles after 5 seconds
+  useEffect(() => {
+    if (currentSlide === 0 && showSparkles && !hasShownSparkles) {
+      const timer = setTimeout(() => {
+        setShowSparkles(false);
+        setHasShownSparkles(true);
+      }, 5000); // 5 seconds
+      
+      return () => clearTimeout(timer);
+    }
+  }, [currentSlide, showSparkles, hasShownSparkles]);
 
   return (
     <>
@@ -207,22 +232,57 @@ const Index = () => {
                   >
                     {/* First slide - Clock, Weather, Search */}
                     <div className="h-full w-full flex flex-col items-center justify-center px-6 shrink-0">
-                      <div className="absolute top-32 left-1/2 -translate-x-1/2 w-full">
-                        <div className="container mx-auto flex flex-col items-center">
-                          <Clock className="animate-fade-in" />
-                        </div>
+                      <div className="absolute top-12 xs:top-16 sm:top-24 md:top-32 left-1/2 -translate-x-1/2 w-full">
+                        <motion.div 
+                          className="container mx-auto flex flex-col items-center px-4"
+                          initial={{ opacity: 0, y: -20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.8, delay: 1.8 }}
+                        >
+                          <Clock />
+                        </motion.div>
                       </div>
                       
                       <div className="flex flex-col items-center justify-center flex-1">
-                        <div className="mb-12">
+                        <motion.div 
+                          className="mb-12"
+                          initial={{ opacity: 0, y: -20 }}
+                          animate={{ 
+                            opacity: isSearchFocused ? 0.6 : 1,
+                            y: isSearchFocused ? 40 : 0,
+                            scale: isSearchFocused ? 0.9 : 1
+                          }}
+                          transition={{ 
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 30
+                          }}
+                        >
                           <TimeGreeting />
-                        </div>
-                        <div className="w-full max-w-xs mb-8 animate-slide-up opacity-0 animate-delay-200" style={{ animationFillMode: 'forwards' }}>
+                        </motion.div>
+                        <motion.div 
+                          className="w-full max-w-xs mb-8"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ 
+                            opacity: isSearchFocused ? 0.6 : 1,
+                            y: isSearchFocused ? 60 : 0,
+                            scale: isSearchFocused ? 0.95 : 1
+                          }}
+                          transition={{ 
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 30
+                          }}
+                        >
                           <Weather />
-                        </div>
-                        <div className="animate-slide-up opacity-0 animate-delay-300" style={{ animationFillMode: 'forwards' }}>
-                          <SearchBar />
-                        </div>
+                        </motion.div>
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.8, delay: 2.0 }}
+                        >
+                          <SearchBar onFocusChange={setIsSearchFocused} />
+                        </motion.div>
                       </div>
                     </div>
                     
@@ -256,9 +316,59 @@ const Index = () => {
                 
                 {/* Motivation Phrase - Only visible on first slide */}
                 {currentSlide === 0 && (
-                  <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-full">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: -20 }}
+                    transition={{ duration: 0.8, delay: 2.6 }}
+                    className="absolute bottom-8 left-0 right-0"
+                  >
                     <MotivationPhrase />
-                  </div>
+                  </motion.div>
+                )}
+                
+                {/* Sparkles Animation - Only visible on first slide and for 5 seconds */}
+                {currentSlide === 0 && (
+                  <AnimatePresence>
+                    {showSparkles && (
+                      <motion.div 
+                        className="absolute inset-0 overflow-hidden pointer-events-none"
+                        initial={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 1.5 }}
+                      >
+                        {Array.from({ length: 40 }).map((_, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ 
+                              scale: 0,
+                              opacity: 0,
+                              x: Math.random() * window.innerWidth,
+                              y: Math.random() * window.innerHeight
+                            }}
+                            animate={{ 
+                              scale: [0, 1, 0],
+                              opacity: [0, 0.8, 0],
+                              x: Math.random() * window.innerWidth,
+                              y: Math.random() * window.innerHeight
+                            }}
+                            transition={{
+                              duration: 2 + Math.random() * 2,
+                              delay: i * 0.05,
+                              repeat: Infinity,
+                              repeatDelay: Math.random() * 1
+                            }}
+                            className={`absolute rounded-full ${
+                              i % 3 === 0 
+                                ? "w-2 h-2 bg-white" 
+                                : i % 3 === 1 
+                                  ? "w-1.5 h-1.5 bg-white/80" 
+                                  : "w-1 h-1 bg-white/60"
+                            }`}
+                          />
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 )}
                 
                 {/* Navigation dots */}
