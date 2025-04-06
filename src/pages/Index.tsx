@@ -198,7 +198,7 @@ const Index = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 3, ease: "easeInOut" }}
           >
             <BackgroundImage>
               <motion.div 
@@ -211,7 +211,7 @@ const Index = () => {
                 }`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: backgroundLoaded ? 1 : 0 }}
-                transition={{ duration: 1, ease: "easeInOut" }}
+                transition={{ duration: 1, ease: "easeInOut", delay: 1.5 }}
               >
                 {/* Background type toggle */}
                 <BackgroundTypeToggle
