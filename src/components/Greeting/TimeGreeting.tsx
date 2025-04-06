@@ -51,6 +51,31 @@ const FloatingCloud = ({ delay, size, x, y }) => (
   </motion.div>
 );
 
+const FloatingZ = ({ delay, x, y, size }) => (
+  <motion.div
+    initial={{ opacity: 0, y: y }}
+    animate={{ 
+      opacity: [0, 1, 0],
+      y: [y, y - 10, y]
+    }}
+    transition={{
+      duration: 2,
+      delay,
+      repeat: Infinity,
+      ease: "easeInOut"
+    }}
+    className="absolute text-white/70 font-bold"
+    style={{
+      fontSize: size,
+      left: x,
+      top: y,
+      filter: 'drop-shadow(0 0 3px rgba(255, 255, 255, 0.3))'
+    }}
+  >
+    z
+  </motion.div>
+);
+
 const TimeGreeting = () => {
   const getGreetingAndIcon = () => {
     const hour = new Date().getHours();
@@ -132,10 +157,9 @@ const TimeGreeting = () => {
               </defs>
               <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" fill="url(#moonGradientNight)" />
             </svg>
-            <FloatingStar delay={0} size="size-3" x={-20} y={-15} />
-            <FloatingStar delay={0.5} size="size-2" x={20} y={-10} />
-            <FloatingStar delay={1} size="size-3" x={15} y={15} />
-            <FloatingStar delay={1.5} size="size-2" x={-15} y={10} />
+            <FloatingZ delay={0} x="25px" y="-15px" size="0.8rem" />
+            <FloatingZ delay={0.3} x="32px" y="-12px" size="1rem" />
+            <FloatingZ delay={0.6} x="40px" y="-8px" size="1.2rem" />
           </div>
         )
       };
