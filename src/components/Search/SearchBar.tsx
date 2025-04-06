@@ -2,6 +2,24 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Add a custom hook to detect if we're on mobile
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768); // 768px is a common breakpoint for mobile
+    };
+    
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
+
+  return isMobile;
+};
+
 interface SearchBarProps {
   className?: string;
   onFocusChange?: (focused: boolean) => void;
@@ -26,6 +44,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '', onFocusChange }) 
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
   
   useEffect(() => {
     onFocusChange?.(isFocused);
@@ -135,12 +154,12 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '', onFocusChange }) 
           initial={false}
           animate={{ 
             position: 'fixed',
-            top: isFocused ? '20vh' : '63vh',
+            top: isFocused ? '20vh' : (isMobile ? '70vh' : '63vh'),
             left: '50%',
             x: '-50%',
             y: '-50%',
             width: isFocused ? '95vw' : '90vw',
-            maxWidth: isFocused ? '800px' : '400px',
+            maxWidth: isFocused ? '800px' : '300px',
             zIndex: isFocused ? 50 : 1
           }}
           transition={{ 

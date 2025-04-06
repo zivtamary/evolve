@@ -85,7 +85,13 @@ const Index = () => {
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
+      // If Ctrl key is pressed, don't change slides (allows for zooming)
+      if (e.ctrlKey) return;
+      
       if (isScrolling) return;
+      
+      // If search bar is focused, don't change slides
+      if (isSearchFocused) return;
       
       // Check if the scroll event originated from a widget
       const target = e.target as HTMLElement;
@@ -111,7 +117,7 @@ const Index = () => {
 
     window.addEventListener('wheel', handleWheel, { passive: true });
     return () => window.removeEventListener('wheel', handleWheel);
-  }, [currentSlide, isScrolling, expandedWidget]);
+  }, [currentSlide, isScrolling, expandedWidget, isSearchFocused]);
 
   // Remove the scroll event listener since we're using transform now
   useEffect(() => {
