@@ -94,9 +94,18 @@ const TimeGreeting = () => {
         greeting: "Good evening, Ziv.",
         icon: (
           <div className="relative">
-            <Moon className="size-12 fill-slate-200/90 text-slate-300/30 drop-shadow-lg" style={{
-              filter: 'drop-shadow(0 0 12px rgba(148, 163, 184, 0.4))'
-            }} />
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="moonGradientEvening" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="rgba(251, 191, 36, 0.9)" />
+                  <stop offset="50%" stopColor="rgba(167, 139, 250, 0.8)" />
+                  <stop offset="100%" stopColor="rgba(79, 70, 229, 0.7)" />
+                </linearGradient>
+              </defs>
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" fill="url(#moonGradientEvening)" />
+            </svg>
+            <FloatingStar delay={0} size="size-3" x={-20} y={-15} />
+            <FloatingStar delay={0.5} size="size-2" x={20} y={-10} />
           </div>
         )
       };
@@ -105,9 +114,16 @@ const TimeGreeting = () => {
         greeting: "Good night, Ziv.",
         icon: (
           <div className="relative">
-            <Moon className="size-12 fill-slate-100/90 text-slate-200/30 drop-shadow-lg" style={{
-              filter: 'drop-shadow(0 0 12px rgba(148, 163, 184, 0.4))'
-            }} />
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="moonGradientNight" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="rgba(167, 139, 250, 0.9)" />
+                  <stop offset="50%" stopColor="rgba(99, 102, 241, 0.8)" />
+                  <stop offset="100%" stopColor="rgba(67, 56, 202, 0.7)" />
+                </linearGradient>
+              </defs>
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" fill="url(#moonGradientNight)" />
+            </svg>
             <FloatingStar delay={0} size="size-3" x={-20} y={-15} />
             <FloatingStar delay={0.5} size="size-2" x={20} y={-10} />
             <FloatingStar delay={1} size="size-3" x={15} y={15} />

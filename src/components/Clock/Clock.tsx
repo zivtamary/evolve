@@ -311,7 +311,7 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
       <p
         className={cn(
           clockStyle.font,
-          clockStyle.color.replace("400", "300"),
+          clockStyle.color,
           "mt-3 sm:mt-4 text-lg sm:text-2xl font-light tracking-wide opacity-70"
         )}
         style={{

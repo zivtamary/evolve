@@ -35,12 +35,12 @@ const Index = () => {
     return currentTime - lastTime > oneDayInMs;
   });
   const [showMainContent, setShowMainContent] = useState(true);
+  const [backgroundLoaded, setBackgroundLoaded] = useState(false);
+  const [contentLoaded, setContentLoaded] = useState(false);
   const [backgroundType, setBackgroundType] = useState<'image' | 'gradient' | 'solid'>('image');
   const [backgroundStyle, setBackgroundStyle] = useState('');
   const [isBackgroundOptionsOpen, setIsBackgroundOptionsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [showSparkles, setShowSparkles] = useState(true);
-  const [hasShownSparkles, setHasShownSparkles] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   
   const toggleTheme = () => {
@@ -160,17 +160,24 @@ const Index = () => {
     setIsBackgroundOptionsOpen(false);
   };
 
-  // Add effect to hide sparkles after 5 seconds
+  // Add effect to handle sequential loading
   useEffect(() => {
-    if (currentSlide === 0 && showSparkles && !hasShownSparkles) {
-      const timer = setTimeout(() => {
-        setShowSparkles(false);
-        setHasShownSparkles(true);
-      }, 5000); // 5 seconds
+    if (showMainContent) {
+      // First set background to loaded
+      const backgroundTimer = setTimeout(() => {
+        setBackgroundLoaded(true);
+        
+        // Then after background is visible, start fading in the content
+        const contentTimer = setTimeout(() => {
+          setContentLoaded(true);
+        }, 1500); // Delay for content after background
+        
+        return () => clearTimeout(contentTimer);
+      }, 100);
       
-      return () => clearTimeout(timer);
+      return () => clearTimeout(backgroundTimer);
     }
-  }, [currentSlide, showSparkles, hasShownSparkles]);
+  }, [showMainContent]);
 
   return (
     <>
@@ -188,13 +195,18 @@ const Index = () => {
             transition={{ duration: 0.5 }}
           >
             <BackgroundImage>
-              <div className={`min-h-screen relative overflow-hidden ${
-                backgroundType !== 'image' && backgroundStyle ? (
-                  backgroundType === 'gradient' 
-                    ? `bg-gradient-to-br ${backgroundStyle}` 
-                    : backgroundStyle
-                ) : ''
-              }`}>
+              <motion.div 
+                className={`min-h-screen relative overflow-hidden ${
+                  backgroundType !== 'image' && backgroundStyle ? (
+                    backgroundType === 'gradient' 
+                      ? `bg-gradient-to-br ${backgroundStyle}` 
+                      : backgroundStyle
+                  ) : ''
+                }`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: backgroundLoaded ? 1 : 0 }}
+                transition={{ duration: 1, ease: "easeInOut" }}
+              >
                 {/* Background type toggle */}
                 <BackgroundTypeToggle
                   currentType={backgroundType}
@@ -225,7 +237,12 @@ const Index = () => {
                 <SettingsSidebar />
                 
                 {/* Slides container */}
-                <div className="fixed inset-0">
+                <motion.div 
+                  className="fixed inset-0"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: contentLoaded ? 1 : 0 }}
+                  transition={{ duration: 1, ease: "easeInOut" }}
+                >
                   <div 
                     className="h-full w-full flex transition-transform duration-500 ease-in-out"
                     style={{ transform: `translateX(-${currentSlide * 100}%)` }}
@@ -276,13 +293,7 @@ const Index = () => {
                         >
                           <Weather />
                         </motion.div>
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.8, delay: 2.0 }}
-                        >
                           <SearchBar onFocusChange={setIsSearchFocused} />
-                        </motion.div>
                       </div>
                     </div>
                     
@@ -312,7 +323,7 @@ const Index = () => {
                       </section>
                     </div>
                   </div>
-                </div>
+                </motion.div>
                 
                 {/* Motivation Phrase - Only visible on first slide */}
                 {currentSlide === 0 && (
@@ -324,51 +335,6 @@ const Index = () => {
                   >
                     <MotivationPhrase />
                   </motion.div>
-                )}
-                
-                {/* Sparkles Animation - Only visible on first slide and for 5 seconds */}
-                {currentSlide === 0 && (
-                  <AnimatePresence>
-                    {showSparkles && (
-                      <motion.div 
-                        className="absolute inset-0 overflow-hidden pointer-events-none"
-                        initial={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 1.5 }}
-                      >
-                        {Array.from({ length: 40 }).map((_, i) => (
-                          <motion.div
-                            key={i}
-                            initial={{ 
-                              scale: 0,
-                              opacity: 0,
-                              x: Math.random() * window.innerWidth,
-                              y: Math.random() * window.innerHeight
-                            }}
-                            animate={{ 
-                              scale: [0, 1, 0],
-                              opacity: [0, 0.8, 0],
-                              x: Math.random() * window.innerWidth,
-                              y: Math.random() * window.innerHeight
-                            }}
-                            transition={{
-                              duration: 2 + Math.random() * 2,
-                              delay: i * 0.05,
-                              repeat: Infinity,
-                              repeatDelay: Math.random() * 1
-                            }}
-                            className={`absolute rounded-full ${
-                              i % 3 === 0 
-                                ? "w-2 h-2 bg-white" 
-                                : i % 3 === 1 
-                                  ? "w-1.5 h-1.5 bg-white/80" 
-                                  : "w-1 h-1 bg-white/60"
-                            }`}
-                          />
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
                 )}
                 
                 {/* Navigation dots */}
@@ -394,7 +360,7 @@ const Index = () => {
                     title="Productivity Tools"
                   />
                 </div>
-              </div>
+              </motion.div>
             </BackgroundImage>
           </motion.div>
         )}
