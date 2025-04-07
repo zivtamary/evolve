@@ -63,7 +63,7 @@ const AppRoutes = () => {
       />
       
       {/* Particles Animation - Always visible from the start */}
-      <ParticlesAnimation isVisible={false} />
+      <ParticlesAnimation isVisible={true} />
       
       {/* Content fade-in */}
       <motion.div
