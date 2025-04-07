@@ -25,11 +25,12 @@ const Index = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
   const [showWelcome, setShowWelcome] = useState(() => {
-    const lastSplashTime = localStorage.getItem('lastSplashScreenTime');
+    const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+    const lastSplashTime = evolveData.lastSplashScreenTime;
     if (!lastSplashTime) {
       return true;
     }
-    const lastTime = new Date(lastSplashTime).getTime();
+    const lastTime = new Date(lastSplashTime.value).getTime();
     const currentTime = new Date().getTime();
     const oneDayInMs = 24 * 60 * 60 * 1000;
     return currentTime - lastTime > oneDayInMs;
@@ -126,7 +127,12 @@ const Index = () => {
 
   const handleWelcomeComplete = () => {
     setShowWelcome(false);
-    localStorage.setItem('lastSplashScreenTime', new Date().toISOString());
+    const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+    evolveData.lastSplashScreenTime = {
+      value: new Date().toISOString(),
+      timestamp: Date.now()
+    };
+    localStorage.setItem('evolve_data', JSON.stringify(evolveData));
   };
 
   const handleWelcomeStartFadeOut = () => {

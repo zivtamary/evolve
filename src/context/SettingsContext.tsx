@@ -344,7 +344,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         });
       } else {
         // Save to localStorage if not authenticated
-        localStorage.setItem('widget_visibility', JSON.stringify(newVisibility));
+        const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+        evolveData.widget_visibility = newVisibility;
+        localStorage.setItem('evolve_data', JSON.stringify(evolveData));
         setUserProfile({
           id: 'local',
           widget_visibility: newVisibility,
@@ -365,18 +367,18 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   // Load local widget visibility on mount
   useEffect(() => {
     if (!isAuthenticated) {
-      const localVisibility = localStorage.getItem('widget_visibility');
+      const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+      const localVisibility = evolveData.widget_visibility;
       if (localVisibility) {
         try {
-          const parsedVisibility = JSON.parse(localVisibility);
           setUserProfile({
             id: 'local',
-            widget_visibility: parsedVisibility,
+            widget_visibility: localVisibility,
             cloud_sync_enabled: false,
             last_synced: null
           } as Profile);
         } catch (error) {
-          console.error('Error parsing local widget visibility:', error);
+          console.error('Error parsing widget visibility from localStorage:', error);
         }
       }
     }
@@ -569,7 +571,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const syncNotes = async (userId: string) => {
     try {
       console.log('Fetching local notes...');
-      const localNotesStr = localStorage.getItem('notes');
+      const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+      const localNotesStr = evolveData.notes;
       const localNotesData = localNotesStr ? JSON.parse(localNotesStr) : null;
       
       // Handle both old format (array) and new format (StoredData)
@@ -620,7 +623,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const syncTodos = async (userId: string) => {
     try {
       console.log('Fetching local todos...');
-      const localTodosStr = localStorage.getItem('todos');
+      const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+      const localTodosStr = evolveData.todos;
       const localTodosData = localTodosStr ? JSON.parse(localTodosStr) : null;
       
       // Handle both old format (array) and new format (StoredData)
@@ -693,7 +697,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         value: finalTodos,
         timestamp: Date.now()
       };
-      localStorage.setItem('todos', JSON.stringify(storedData));
+      evolveData.todos = JSON.stringify(storedData);
+      localStorage.setItem('evolve_data', JSON.stringify(evolveData));
       
       // Sync merged data back to cloud
       const todosToSync = finalTodos.map(todo => {
@@ -728,7 +733,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const syncEvents = async (userId: string) => {
     try {
       console.log('Fetching local events...');
-      const localEventsStr = localStorage.getItem('dashboard-events');
+      const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+      const localEventsStr = evolveData['dashboard-events'];
       const localEventsData = localEventsStr ? JSON.parse(localEventsStr) : null;
       
       // Handle both old format (array) and new format (StoredData)
@@ -782,7 +788,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const syncPomodoroSettings = async (userId: string) => {
     try {
       console.log('Fetching local pomodoro settings...');
-      const localSettingsStr = localStorage.getItem('pomodoro-settings');
+      const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+      const localSettingsStr = evolveData['pomodoro-settings'];
       const localSettingsData = localSettingsStr ? JSON.parse(localSettingsStr) : null;
       
       // Handle both old format (object) and new format (StoredData)
@@ -800,7 +807,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
           longBreakDuration: 15,
           sessions: 0
         };
-        localStorage.setItem('pomodoro-settings', JSON.stringify(defaultSettings));
+        evolveData['pomodoro-settings'] = JSON.stringify(defaultSettings);
+        localStorage.setItem('evolve_data', JSON.stringify(evolveData));
         return;
       }
       

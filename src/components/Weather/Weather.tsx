@@ -47,7 +47,12 @@ const Weather: React.FC = () => {
       }
 
       setWeather(data);
-      localStorage.setItem('weather-last-update', new Date().getTime().toString());
+      const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+      evolveData['weather-last-update'] = {
+        value: new Date().getTime().toString(),
+        timestamp: Date.now()
+      };
+      localStorage.setItem('evolve_data', JSON.stringify(evolveData));
     } catch (err) {
       console.error('Error fetching weather:', err);
       setError(err instanceof Error ? err.message : 'Failed to load weather data');
@@ -83,8 +88,9 @@ const Weather: React.FC = () => {
     if (!location) return;
 
     const currentTime = new Date().getTime();
-    const lastUpdate = localStorage.getItem('weather-last-update');
-    const lastUpdateTime = lastUpdate ? parseInt(lastUpdate) : 0;
+    const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+    const lastUpdate = evolveData['weather-last-update'];
+    const lastUpdateTime = lastUpdate ? parseInt(lastUpdate.value) : 0;
     const timeSinceLastUpdate = currentTime - lastUpdateTime;
     const thirtyMinutes = 30 * 60 * 1000;
 

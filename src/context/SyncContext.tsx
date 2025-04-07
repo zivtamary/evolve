@@ -116,7 +116,8 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      const localData = JSON.parse(localStorage.getItem(`_${dataType}`) || '[]') as LocalData[];
+      const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+      const localData = JSON.parse(evolveData[`_${dataType}`] || '[]') as LocalData[];
       const { data: cloudData, error } = await supabase
         .from(dataType)
         .select('*')
@@ -164,7 +165,8 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (cloudNewer.length > 0) {
-        localStorage.setItem(`_${dataType}`, JSON.stringify(cloudNewer));
+        evolveData[`_${dataType}`] = JSON.stringify(cloudNewer);
+        localStorage.setItem('evolve_data', JSON.stringify(evolveData));
       }
 
       setLastSynced(new Date());

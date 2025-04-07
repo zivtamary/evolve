@@ -24,30 +24,33 @@ const MotivationPhrase = () => {
 
   useEffect(() => {
     // Get today's date as a string (YYYY-MM-DD)
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date();
     
     // Check if we already have a quote for today in localStorage
-    const storedQuoteData = localStorage.getItem('dailyQuote');
+    const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+    const storedQuoteData = evolveData.dailyQuote;
     
     if (storedQuoteData) {
       const { date, quoteIndex } = JSON.parse(storedQuoteData);
       
       // If the stored quote is from today, use it
-      if (date === today) {
+      if (date === today.toISOString().split('T')[0]) {
         setQuote(motivationalQuotes[quoteIndex]);
         return;
       }
     }
     
-    // If we don't have a quote for today, generate a new one
+    // Otherwise, get a new random quote
     const randomIndex = Math.floor(Math.random() * motivationalQuotes.length);
     setQuote(motivationalQuotes[randomIndex]);
     
     // Store the new quote and today's date in localStorage
-    localStorage.setItem('dailyQuote', JSON.stringify({
-      date: today,
-      quoteIndex: randomIndex
-    }));
+    evolveData.dailyQuote = JSON.stringify({
+      quote: motivationalQuotes[randomIndex].text,
+      author: motivationalQuotes[randomIndex].author,
+      date: today.toISOString()
+    });
+    localStorage.setItem('evolve_data', JSON.stringify(evolveData));
   }, []);
 
   return (
