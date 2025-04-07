@@ -34,7 +34,7 @@ const Index = () => {
     const oneDayInMs = 24 * 60 * 60 * 1000;
     return currentTime - lastTime > oneDayInMs;
   });
-  const [showMainContent, setShowMainContent] = useState(true);
+  const [showMainContent, setShowMainContent] = useState(!showWelcome);
   const [backgroundLoaded, setBackgroundLoaded] = useState(false);
   const [contentLoaded, setContentLoaded] = useState(false);
   const [backgroundType, setBackgroundType] = useState<'image' | 'gradient' | 'solid'>('image');
@@ -129,6 +129,11 @@ const Index = () => {
     localStorage.setItem('lastSplashScreenTime', new Date().toISOString());
   };
 
+  const handleWelcomeStartFadeOut = () => {
+    // Start rendering the main content when the welcome message starts fading out
+    setShowMainContent(true);
+  };
+
   // Get widgets in their correct positions
   const getOrderedWidgets = () => {
     const widgets = [
@@ -189,7 +194,10 @@ const Index = () => {
     <>
       <AnimatePresence>
         {showWelcome && (
-          <WelcomeIntro onComplete={handleWelcomeComplete} />
+          <WelcomeIntro 
+            onComplete={handleWelcomeComplete} 
+            onStartFadeOut={handleWelcomeStartFadeOut}
+          />
         )}
       </AnimatePresence>
       

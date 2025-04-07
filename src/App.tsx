@@ -63,7 +63,7 @@ const AppRoutes = () => {
       />
       
       {/* Particles Animation - Always visible from the start */}
-      <ParticlesAnimation isVisible={true} />
+      <ParticlesAnimation isVisible={false} />
       
       {/* Content fade-in */}
       <motion.div
@@ -77,11 +77,6 @@ const AppRoutes = () => {
             <Route path="/auth" element={<Auth />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/settings" element={
-              <ProtectedRoute>
-                <Settings />
-              </ProtectedRoute>
-            } />
             {/* Redirect all unmatched routes to home page */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

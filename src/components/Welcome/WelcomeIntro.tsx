@@ -4,14 +4,15 @@ import SplashScreen from './SplashScreen';
 
 interface WelcomeIntroProps {
   onComplete: () => void;
+  onStartFadeOut?: () => void;
 }
 
-const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete }) => {
+const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete, onStartFadeOut }) => {
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');
 
   const handleNext = () => {
-    if (step < 4) {
+    if (step < 3) {
       setStep(step + 1);
     } else {
       onComplete();
@@ -21,17 +22,17 @@ const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete }) => {
   const renderStep = () => {
     switch (step) {
       case 0:
-        return <SplashScreen onComplete={handleNext} />;
+        return <SplashScreen onComplete={handleNext} onStartFadeOut={onStartFadeOut} />;
       case 1:
         return (
-          <>
+          <div className='flex flex-col items-center justify-center'>
             <motion.h1
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5 }}
               className="text-4xl md:text-6xl font-bold text-white mb-4"
             >
-              Welcome to Your Startpage
+              Welcome 👋
             </motion.h1>
             
             <motion.p
@@ -40,9 +41,9 @@ const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete }) => {
               transition={{ delay: 0.3, duration: 0.5 }}
               className="text-xl text-white/80 mb-8"
             >
-              Your personal productivity hub
+        Your personal productivity dashboard awaits!
             </motion.p>
-          </>
+          </div>
         );
       case 2:
         return (
@@ -88,7 +89,7 @@ const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete }) => {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.5 }}
-              className="max-w-2xl mx-auto space-y-4 text-white/80"
+              className="max-w-2xl mx-auto space-y-4 text-white/80 my-4"
             >
               <p className="text-xl">
                 This is your personal productivity dashboard. Here's what you can do:

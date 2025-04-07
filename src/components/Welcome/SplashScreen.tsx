@@ -1,17 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { SparklesIcon } from 'lucide-react';
 
 interface SplashScreenProps {
   onComplete: () => void;
+  onStartFadeOut?: () => void;
 }
 
-const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
+const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, onStartFadeOut }) => {
   const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
     // Total animation duration is about 3 seconds
     const timer = setTimeout(() => {
       setIsExiting(true);
+      // Call onStartFadeOut when the welcome message starts fading out
+      if (onStartFadeOut) {
+        onStartFadeOut();
+      }
       // Delay the actual completion to allow exit animation to play
       setTimeout(() => {
         onComplete();
@@ -19,7 +25,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [onComplete]);
+  }, [onComplete, onStartFadeOut]);
 
   return (
     <AnimatePresence>
@@ -88,13 +94,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
                 transition={{ duration: 1, delay: 0.5 }}
                 className="mb-8"
               >
-                <svg 
-                  viewBox="0 0 24 24" 
-                  className="w-16 h-16 text-white"
-                  fill="currentColor"
-                >
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
+                <SparklesIcon className="w-16 h-16 text-white" />
               </motion.div>
 
               {/* App name */}
