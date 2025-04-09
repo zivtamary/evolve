@@ -26,6 +26,10 @@
   "permissions": [
     "storage"
   ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "host_permissions": ["https://www.google.com/"],
   "author": "Ziv Tamary",
   "homepage_url": "https://evolve-app.com"
 }

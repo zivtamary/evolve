@@ -28,6 +28,7 @@ const Weather: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
+  const [tempUnit, setTempUnit] = useLocalStorage<'C' | 'F'>('temp-unit', 'C');
   
   const fetchWeather = useCallback(async (lat: number, lon: number) => {
     try {
@@ -106,10 +107,31 @@ const Weather: React.FC = () => {
     }
   }, [location, fetchWeather]);
   
+  const toggleTempUnit = useCallback(() => {
+    setTempUnit(prev => prev === 'C' ? 'F' : 'C');
+  }, [setTempUnit]);
+
+  const convertTemp = useCallback((temp: number, unit: 'C' | 'F') => {
+    if (unit === 'F') {
+      return Math.round((temp * 9/5) + 32);
+    }
+    return temp;
+  }, []);
+
   if (loading) {
     return (
-      <div className="glass dark:glass-dark animate-pulse rounded-xl p-4 text-white">
-        <div className="h-10 w-24 bg-white/20 rounded"></div>
+      <div className="glass dark:glass-dark rounded-xl p-4 text-white">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-16 bg-white/10 dark:bg-white/5 rounded animate-pulse-slow"></div>
+              <div className="h-6 w-6 bg-white/10 dark:bg-white/5 rounded animate-pulse-slow"></div>
+            </div>
+            <div className="h-4 w-24 bg-white/10 dark:bg-white/5 rounded mt-1 animate-pulse-slow"></div>
+            <div className="h-3 w-20 bg-white/10 dark:bg-white/5 rounded mt-1 animate-pulse-slow"></div>
+          </div>
+          <div className="h-6 w-6 bg-white/10 dark:bg-white/5 rounded-full animate-pulse-slow"></div>
+        </div>
       </div>
     );
   }
@@ -163,7 +185,13 @@ const Weather: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold">{weather.temperature}°C</span>
+            <button 
+              onClick={toggleTempUnit}
+              className="text-2xl font-bold hover:text-white/80 transition-colors"
+              title={`Click to toggle between °C and °F`}
+            >
+              {weather ? `${convertTemp(weather.temperature, tempUnit)}°${tempUnit}` : ''}
+            </button>
             <div className="text-white/80">
               {getWeatherIcon(weather.icon)}
             </div>

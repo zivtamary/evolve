@@ -42,9 +42,12 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '', onFocusChange }) 
   const [searchEngine, setSearchEngine] = useLocalStorage<string>('search-engine', 'google');
   const [isFocused, setIsFocused] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [googleSuggestions, setGoogleSuggestions] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
+  const searchTimeoutRef = useRef<number | null>(null);
   
   useEffect(() => {
     onFocusChange?.(isFocused);
@@ -111,17 +114,54 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '', onFocusChange }) 
     }
   };
 
+  const fetchGoogleSuggestions = async (query: string) => {
+    if (!query.trim()) {
+      setGoogleSuggestions([]);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await fetch(`https://www.google.com/complete/search?client=chrome&q=${encodeURIComponent(query)}`);
+      const data = await response.json();
+      
+      // Google's API returns an array where the first element is the query and the second is an array of suggestions
+      if (data && Array.isArray(data) && data.length > 1 && Array.isArray(data[1])) {
+        setGoogleSuggestions(data[1]);
+      } else {
+        setGoogleSuggestions([]);
+      }
+    } catch (error) {
+      console.error('Error fetching Google suggestions:', error);
+      setGoogleSuggestions([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInputValue(value);
     
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      window.clearTimeout(searchTimeoutRef.current);
+    }
+    
     if (value.trim()) {
+      // Filter local suggestions
       const filtered = SUGGESTIONS.filter(suggestion => 
         suggestion.toLowerCase().includes(value.toLowerCase())
       );
       setSuggestions(filtered);
+      
+      // Fetch Google suggestions with debounce
+      searchTimeoutRef.current = window.setTimeout(() => {
+        fetchGoogleSuggestions(value);
+      }, 300);
     } else {
       setSuggestions([]);
+      setGoogleSuggestions([]);
     }
   };
 
@@ -131,6 +171,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '', onFocusChange }) 
       inputRef.current.value = suggestion;
     }
     setSuggestions([]);
+    setGoogleSuggestions([]);
   };
   
   return (
@@ -212,7 +253,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '', onFocusChange }) 
             </motion.div>
             
             <AnimatePresence>
-              {isFocused && suggestions.length > 0 && (
+              {isFocused && (suggestions.length > 0 || googleSuggestions.length > 0) && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -220,9 +261,15 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '', onFocusChange }) 
                   transition={{ duration: 0.2 }}
                   className="absolute top-full left-0 right-0 mt-2 glass dark:glass-dark rounded-xl overflow-hidden"
                 >
+                  {suggestions.length > 0 && (
+                    <div className="px-3 py-2 text-xs font-medium text-white/60 uppercase tracking-wider">
+                      Suggestions
+                    </div>
+                  )}
+                  
                   {suggestions.map((suggestion, index) => (
                     <motion.button
-                      key={suggestion}
+                      key={`suggestion-${suggestion}`}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
@@ -235,6 +282,38 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '', onFocusChange }) 
                       {suggestion}
                     </motion.button>
                   ))}
+                  
+                  {googleSuggestions.length > 0 && (
+                    <div className="px-3 py-2 text-xs font-medium text-white/60 uppercase tracking-wider border-t border-white/10">
+                      By Google
+                    </div>
+                  )}
+                  
+                  {googleSuggestions.map((suggestion, index) => (
+                    <motion.button
+                      key={`google-${suggestion}`}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: (suggestions.length + index) * 0.05 }}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className="w-full px-4 py-3 text-left text-white/90 hover:bg-white/10 transition-colors flex items-center gap-2"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/50">
+                        <path d="m21 21-4.3-4.3" />
+                      </svg>
+                      {suggestion}
+                    </motion.button>
+                  ))}
+                  
+                  {isLoading && (
+                    <div className="px-4 py-3 text-white/60 text-sm flex items-center gap-2">
+                      <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Loading suggestions...
+                    </div>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
