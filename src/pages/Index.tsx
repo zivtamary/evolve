@@ -4,6 +4,7 @@ import { useSettings } from '../context/SettingsContext';
 import BackgroundImage from '../components/Background/BackgroundImage';
 import BackgroundTypeToggle from '../components/Background/BackgroundTypeToggle';
 import BackgroundColors from '../components/Background/BackgroundColors';
+import ThemeBackgroundDrawer from '../components/Settings/ThemeBackgroundDrawer';
 import Clock from '../components/Clock/Clock';
 import Weather from '../components/Weather/Weather';
 import SearchBar from '../components/Search/SearchBar';
@@ -200,10 +201,11 @@ const Index = () => {
     setBackgroundType(type);
   };
   
-  const handleReturnToImage = () => {
-    setBackgroundType('image');
-    setBackgroundStyle('');
-    setIsBackgroundOptionsOpen(false);
+  const handleShuffleImage = () => {
+    // This function will be called when the user clicks the "Shuffle" button
+    // You can implement your image shuffling logic here
+    console.log("Shuffling background image");
+    // For example, you might want to trigger a new image load from your BackgroundImage component
   };
 
   // Add effect to handle sequential loading
@@ -256,31 +258,16 @@ const Index = () => {
                 animate={{ opacity: backgroundLoaded ? 1 : 0 }}
                 transition={{ duration: 1, ease: "easeInOut", delay: 1.5 }}
               >
-                {/* Background type toggle */}
-                <BackgroundTypeToggle
-                  currentType={backgroundType}
-                  onTypeChange={handleBackgroundTypeChange}
+                {/* Theme and Background Settings Drawer */}
+                <ThemeBackgroundDrawer
+                  theme={theme}
+                  onThemeChange={setTheme}
+                  backgroundType={backgroundType}
+                  onBackgroundTypeChange={handleBackgroundTypeChange}
+                  backgroundStyle={backgroundStyle}
+                  onBackgroundStyleChange={setBackgroundStyle}
+                  onShuffleImage={handleShuffleImage}
                 />
-                
-                {/* Background color picker */}
-                {backgroundType !== 'image' && (
-                  <BackgroundColors
-                    type={backgroundType}
-                    onSelect={setBackgroundStyle}
-                    onReturnToImage={handleReturnToImage}
-                    isOpen={isBackgroundOptionsOpen}
-                    onClose={() => setIsBackgroundOptionsOpen(false)}
-                  />
-                )}
-                
-                {/* Theme toggle button */}
-                <button
-                  onClick={toggleTheme}
-                  className="absolute top-4 right-4 bg-black/20 dark:bg-transparent text-white p-2 rounded-full backdrop-blur-md hover:bg-black/30 transition-colors z-10"
-                  title={`Current theme: ${theme}`}
-                >
-                  {getThemeIcon()}
-                </button>
                 
                 {/* Settings sidebar */}
                 <SettingsSidebar />
