@@ -28,10 +28,12 @@ import {
   CreditCard,
   Info,
   Download,
-  Sidebar
+  Sidebar,
+  MessageSquare
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import SubscriptionModal from './SubscriptionModal';
+import FeedbackDialog from './FeedbackDialog';
 import Logo from '../Logo/Logo';
 
 interface SettingsButtonProps {
@@ -69,6 +71,7 @@ const SettingsSidebar = () => {
   
   const navigate = useNavigate();
   const [showSubscriptionModal, setShowSubscriptionModal] = React.useState(false);
+  const [showFeedbackDialog, setShowFeedbackDialog] = React.useState(false);
   const [userEmail, setUserEmail] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -234,6 +237,25 @@ const SettingsSidebar = () => {
                         <span className="leading-tight">Cloud sync is currently disabled. Enable it to keep your data backed up and synchronized across devices.</span>
                       </div>
                     )}
+
+                    <Button 
+                      className="w-full mt-4"
+                      variant="outline"
+                      onClick={handleAuthClick}
+                      disabled={isSyncing}
+                    >
+                      {isAuthenticated ? (
+                        <>
+                          <LogOut className="h-4 w-4 mr-2" />
+                          Sign Out
+                        </>
+                      ) : (
+                        <>
+                          <LogIn className="h-4 w-4 mr-2" />
+                          Sign In
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -280,29 +302,15 @@ const SettingsSidebar = () => {
             </div>
             
             <div className="p-6 border-t border-black/10 dark:border-white/10">
-              {isAuthenticated ? (
-                <Button 
-                  className="w-full mb-6"
-                  variant="outline"
-                  onClick={handleAuthClick}
-                  disabled={isSyncing}
-                >
-                  <LogOut className="h-4 w-4" />
-                  Sign Out
-                </Button>
-              ) : (
-                <Button 
-                  className="w-full mb-6"
-                  variant="outline"
-                  onClick={handleAuthClick}
-                  disabled={isSyncing}
-                >
-                  <LogIn className="h-4 w-4" />
-                  Sign In
-                </Button>
-              )}
-
               <div className="flex flex-col items-center gap-4">
+                <Button
+                  variant="outline"
+                  className="w-full mb-4"
+                  onClick={() => setShowFeedbackDialog(true)}
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Leave Feedback
+                </Button>
                 <Logo className="h-8 w-8 flex justify-center items-center" />
                 <div className="flex items-center gap-2 text-sm text-black/50 dark:text-white/50">
                   <Info className="h-4 w-4" />
@@ -322,6 +330,11 @@ const SettingsSidebar = () => {
       <SubscriptionModal 
         open={showSubscriptionModal}
         onOpenChange={setShowSubscriptionModal}
+      />
+      
+      <FeedbackDialog
+        open={showFeedbackDialog}
+        onOpenChange={setShowFeedbackDialog}
       />
     </>
   );
