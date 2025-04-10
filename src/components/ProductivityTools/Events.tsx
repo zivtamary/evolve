@@ -100,7 +100,7 @@ const Events = () => {
   
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleString();
+    return date.toLocaleDateString();
   };
   
   const getEventCategory = (date: string) => {
@@ -480,7 +480,8 @@ const Events = () => {
                     {events.map((event) => (
                       <div 
                         key={event.id} 
-                        className="p-3 rounded-md bg-black/20 hover:bg-black/30 border border-white/10 transition-colors group"
+                        className="p-3 rounded-md bg-black/20 hover:bg-black/30 border border-white/10 transition-colors group cursor-pointer"
+                        onClick={() => handleEditEvent(event)}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -490,10 +491,12 @@ const Events = () => {
                                 <CalendarIcon className="h-3.5 w-3.5" />
                                 <span>{formatDate(event.date)}</span>
                               </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-3.5 w-3.5" />
-                                <span>{event.time}</span>
-                              </div>
+                              {event.time && (
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-3.5 w-3.5" />
+                                  <span>{event.time}</span>
+                                </div>
+                              )}
                             </div>
                             {event.description && (
                               <div className="text-sm text-white/70 mt-2">
@@ -501,27 +504,16 @@ const Events = () => {
                               </div>
                             )}
                           </div>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger className="opacity-0 group-hover:opacity-100 p-1 hover:bg-white/10 rounded-md transition-all">
-                              <MoreVertical className="h-4 w-4 text-white/70" />
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="bg-black/95 border border-white/10">
-                              <DropdownMenuItem 
-                                onClick={() => handleEditEvent(event)}
-                                className="flex items-center gap-2 text-white hover:bg-white/10 cursor-pointer"
-                              >
-                                <Edit2 className="h-4 w-4" />
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                onClick={() => handleDeleteEvent(event.id)}
-                                className="flex items-center gap-2 text-red-400 hover:text-red-300 hover:bg-white/10 cursor-pointer"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteEvent(event.id);
+                            }}
+                            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-white/10 rounded-md transition-all text-white/50 hover:text-white"
+                            title="Delete event"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
                         </div>
                       </div>
                     ))}

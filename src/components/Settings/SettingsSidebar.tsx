@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSettings } from '../../context/SettingsContext';
 import { supabase } from '../../integrations/supabase/client';
 import { Database } from '../../integrations/supabase/types';
+import { formatDistanceToNow, isToday, isYesterday, format } from 'date-fns';
 import { 
   Sheet, 
   SheetContent, 
@@ -68,6 +69,17 @@ const SettingsSidebar = () => {
   
   const navigate = useNavigate();
   const [showSubscriptionModal, setShowSubscriptionModal] = React.useState(false);
+  const [userEmail, setUserEmail] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const getUserEmail = async () => {
+      if (isAuthenticated) {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUserEmail(user?.email || null);
+      }
+    };
+    getUserEmail();
+  }, [isAuthenticated]);
 
   const isPremium = subscription?.status === 'active';
 
@@ -88,7 +100,16 @@ const SettingsSidebar = () => {
     if (!userProfile?.last_synced) return 'Never';
     
     const date = new Date(userProfile.last_synced);
-    return date.toLocaleString();
+    
+    if (isToday(date)) {
+      return `Today at ${format(date, 'h:mm a')}`;
+    }
+    
+    if (isYesterday(date)) {
+      return `Yesterday at ${format(date, 'h:mm a')}`;
+    }
+    
+    return formatDistanceToNow(date, { addSuffix: true });
   };
 
   return (
@@ -166,7 +187,7 @@ const SettingsSidebar = () => {
                     {isAuthenticated ? (
                       <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
                         <Lock className="h-4 w-4" />
-                        <span>Logged in</span>
+                        <span>Logged in as {userEmail}</span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
@@ -177,7 +198,12 @@ const SettingsSidebar = () => {
                   </div>
                   
                   <div className="text-sm text-black/70 dark:text-white/70">
-                    Last synced: <span className="text-black/50 dark:text-white/50">{formatLastSynced()}</span>
+                    <div className="flex items-center gap-2">
+                      <span>Last synced:</span>
+                      <span className={`${!userProfile?.last_synced ? 'text-amber-600 dark:text-amber-400' : 'text-black/50 dark:text-white/50'}`}>
+                        {formatLastSynced()}
+                      </span>
+                    </div>
                   </div>
                   
                   <div className="flex flex-col space-y-4">
@@ -199,6 +225,13 @@ const SettingsSidebar = () => {
                       <div className="flex items-center justify-center text-sm text-black/50 dark:text-white/50">
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                         <span>Syncing data...</span>
+                      </div>
+                    )}
+
+                    {isAuthenticated && isPremium && !userProfile?.cloud_sync_enabled && (
+                      <div className="flex items-start gap-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-500/10 p-2 rounded">
+                        <Cloud className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                        <span className="leading-tight">Cloud sync is currently disabled. Enable it to keep your data backed up and synchronized across devices.</span>
                       </div>
                     )}
                   </div>
