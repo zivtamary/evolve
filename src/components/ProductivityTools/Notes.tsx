@@ -283,6 +283,20 @@ const Notes: React.FC = () => {
 
   useClickOutside(notesRef, handleClickOutside);
 
+  // Handle Escape key press to close expanded widget
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isExpanded) {
+        setExpandedWidget(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isExpanded, setExpandedWidget]);
+
   return (
     <motion.div
       ref={notesRef}

@@ -22,6 +22,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useSettings } from '../../context/SettingsContext';
 import { supabase } from '@/integrations/supabase/client';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import { useClickOutside } from '../../hooks/use-click-outside';
 
 interface Event {
   id: string;
@@ -49,7 +52,7 @@ const MAX_DESCRIPTION_LENGTH = 500;
 
 const Events = () => {
   const { theme } = useTheme();
-  const { syncEventsOnBlur, isAuthenticated, userProfile } = useSettings();
+  const { syncEventsOnBlur, isAuthenticated, userProfile, setExpandedWidget, expandedWidget, widgetPositions } = useSettings();
   const [events, setEvents] = useLocalStorage<Event[]>('events', []);
   const [activeTab, setActiveTab] = useState("all");
   const [dialogState, setDialogState] = useState<'closed' | 'create' | 'edit'>('closed');
@@ -62,6 +65,8 @@ const Events = () => {
   });
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const eventsRef = useRef<HTMLDivElement>(null);
+  const isExpanded = expandedWidget === 'events';
   
   // Filter events based on active tab
   const getFilteredEvents = () => {
@@ -324,24 +329,125 @@ const Events = () => {
     return () => clearInterval(intervalId);
   }, [isAuthenticated, userProfile?.cloud_sync_enabled, userProfile?.id]);
 
+  const toggleExpand = () => {
+    setExpandedWidget(isExpanded ? null : 'events');
+  };
+
+  const handleClickOutside = () => {
+    if (isExpanded) {
+      setExpandedWidget(null);
+    }
+  };
+
+  useClickOutside(eventsRef, handleClickOutside);
+
+  // Calculate transform origin based on position
+  const getTransformOrigin = () => {
+    switch (widgetPositions.events) {
+      case 1: // Top left
+        return 'top left';
+      case 2: // Top right
+        return 'top right';
+      case 3: // Bottom left
+        return 'bottom left';
+      case 4: // Bottom right
+        return 'bottom right';
+      default:
+        return 'center';
+    }
+  };
+
+  // Handle Escape key press to close expanded widget
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isExpanded) {
+        setExpandedWidget(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isExpanded, setExpandedWidget]);
+
   return (
-    <div className="glass dark:glass-dark rounded-xl text-white overflow-hidden h-[400px] flex flex-col relative">
-      <div className="flex items-center justify-between p-4 border-b border-white/10">
-        <h2 className="text-xl font-semibold flex items-center gap-2">
+    <motion.div
+      ref={eventsRef}
+      layout
+      initial={false}
+      animate={{
+        height: isExpanded ? '800px' : '400px',
+        zIndex: isExpanded ? 50 : 0,
+      }}
+      transition={{
+        type: "spring",
+        stiffness: 200,
+        damping: 25,
+        duration: 0.4,
+        bounce: 0,
+        mass: 1
+      }}
+      className={cn(
+        "glass dark:glass-dark rounded-xl text-white overflow-hidden flex flex-col relative",
+        isExpanded ? "mx-auto" : "w-full"
+      )}
+      style={{
+        width: isExpanded ? '800px' : '100%',
+        minWidth: isExpanded ? '800px' : 'auto',
+        maxWidth: isExpanded ? '800px' : '100%',
+        boxShadow: isExpanded ? '0 0 0 100vw rgba(0, 0, 0, 0.5)' : 'none',
+        transformOrigin: getTransformOrigin()
+      }}
+    >
+      <motion.div 
+        layout="position"
+        className="flex items-center justify-between p-4 border-b border-white/10"
+        transition={{ 
+          duration: 0.2,
+          layout: {
+            type: "spring",
+            stiffness: 200,
+            damping: 25,
+            duration: 0.4,
+            bounce: 0,
+            mass: 1
+          }
+        }}
+      >
+        <h2 
+          onClick={toggleExpand}
+          className="text-xl font-semibold flex items-center gap-2 cursor-pointer hover:text-white/80 transition-colors"
+        >
           <CalendarDays className="h-5 w-5" />
           <span>Events</span>
         </h2>
-        <button
-          onClick={() => setDialogState('create')}
-          className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10"
-          title="New event"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 12h14" />
-            <path d="M12 5v14" />
-          </svg>
-        </button>
-      </div>
+        <div className="flex items-center gap-2">
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                onClick={toggleExpand}
+                className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10"
+              >
+                <X className="h-5 w-5" />
+              </motion.button>
+            )}
+          </AnimatePresence>
+          <button
+            onClick={() => setDialogState('create')}
+            className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10"
+            title="New event"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14" />
+              <path d="M12 5v14" />
+            </svg>
+          </button>
+        </div>
+      </motion.div>
 
       <Dialog open={dialogState !== 'closed'} onOpenChange={(open) => !open && resetForm()}>
         <DialogContent className="glass dark:glass-dark border-white/10 backdrop-blur-md shadow-xl">
@@ -471,7 +577,21 @@ const Events = () => {
         </DialogContent>
       </Dialog>
 
-      <div className="p-4 flex-1 overflow-hidden">
+      <motion.div 
+        layout="position" 
+        className="p-4 flex-1 overflow-hidden"
+        transition={{ 
+          duration: 0.2,
+          layout: {
+            type: "spring",
+            stiffness: 200,
+            damping: 25,
+            duration: 0.4,
+            bounce: 0,
+            mass: 1
+          }
+        }}
+      >
         <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
           <TabsList className="grid grid-cols-3 mb-4 bg-black/20">
             <TabsTrigger 
@@ -550,8 +670,8 @@ const Events = () => {
             )}
           </TabsContent>
         </Tabs>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

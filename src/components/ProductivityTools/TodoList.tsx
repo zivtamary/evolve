@@ -80,6 +80,20 @@ const TodoList: React.FC = () => {
     setCharCount(newTodo.length);
   }, [newTodo]);
 
+  // Handle Escape key press to close expanded widget
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isExpanded) {
+        setExpandedWidget(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isExpanded, setExpandedWidget]);
+
   const addTodo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTodo.trim()) return;
