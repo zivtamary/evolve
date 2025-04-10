@@ -455,13 +455,13 @@ const Events = () => {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all duration-200"
+                  className="flex items-center gap-2 px-4 py-2 text-sm bg-white/20 hover:bg-white/30 rounded text-white transition-colors"
                 >
                   {dialogState === 'edit' ? 'Save Changes' : 'Create Event'}
                 </button>
