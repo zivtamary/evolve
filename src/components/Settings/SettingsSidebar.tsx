@@ -42,16 +42,14 @@ interface SettingsButtonProps {
 
 export const SettingsButton: React.FC<SettingsButtonProps> = ({ onClick }) => {
   return (
-    <Button
-      variant="ghost"
-      size="icon"
+    <button
       onClick={onClick}
-      className="absolute top-4 right-4 p-2 rounded-full backdrop-blur-md transition-all z-10
+      className="p-2 size-8 absolute top-4 right-3  rounded-full backdrop-blur-md transition-all z-10
           shadow-sm hover:shadow-md dark:hover:bg-black/30 dark:active:bg-black/40 active:bg-black/40 text-white/90 hover:text-white border-white/10 hover:border-white/20 bottom-4  text-white hover:bg-black/30"
       title="Settings"
     >
       <Sidebar className="size-4" />
-    </Button>
+    </button>
   );
 };
 
