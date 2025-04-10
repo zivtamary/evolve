@@ -703,10 +703,12 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       // Sync merged data back to cloud
       const todosToSync = finalTodos.map(todo => {
         const now = new Date().toISOString();
+        // Ensure the title doesn't exceed 100 characters
+        const title = todo.text.substring(0, 100);
         return {
           id: todo.id,
           user_id: userId,
-          title: todo.text,
+          title: title,
           completed: todo.completed || false,
           created_at: now,
           updated_at: now

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useSettings } from '../context/SettingsContext';
 import BackgroundImage from '../components/Background/BackgroundImage';
@@ -7,7 +7,6 @@ import BackgroundColors from '../components/Background/BackgroundColors';
 import Clock from '../components/Clock/Clock';
 import Weather from '../components/Weather/Weather';
 import SearchBar from '../components/Search/SearchBar';
-import Favorites from '../components/Favorites/Favorites';
 import Notes from '../components/ProductivityTools/Notes';
 import TodoList from '../components/ProductivityTools/TodoList';
 import Pomodoro from '../components/ProductivityTools/Pomodoro';

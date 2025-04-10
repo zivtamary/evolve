@@ -2,10 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useSettings } from '../../context/SettingsContext';
 import { supabase } from '@/integrations/supabase/client';
-import { StickyNote, X } from 'lucide-react';
+import { StickyNote, X, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useClickOutside } from '../../hooks/use-click-outside';
+
+// Maximum character limit for note content
+const MAX_CONTENT_LENGTH = 5000;
 
 interface CloudNote {
   id: string;
@@ -35,6 +38,7 @@ const Notes: React.FC = () => {
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [noteTitle, setNoteTitle] = useState<string>('');
   const [noteContent, setNoteContent] = useState<string>('');
+  const [showCharLimitWarning, setShowCharLimitWarning] = useState<boolean>(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const notesRef = useRef<HTMLDivElement>(null);
   const isExpanded = expandedWidget === 'notes';
@@ -56,7 +60,7 @@ const Notes: React.FC = () => {
         const localNotes = (cloudNotes as CloudNote[]).map(note => ({
           id: note.id,
           title: note.title || 'Untitled Note',
-          content: note.content,
+          content: truncateContent(note.content), // Ensure content is within limit
           createdAt: new Date(note.created_at).getTime(),
           updatedAt: new Date(note.updated_at).getTime()
         }));
@@ -82,6 +86,21 @@ const Notes: React.FC = () => {
     return () => clearInterval(intervalId);
   }, [isAuthenticated, userProfile?.cloud_sync_enabled, userProfile?.id]);
   
+  // Validate notes from localStorage on initial load
+  useEffect(() => {
+    if (notes.length > 0) {
+      const validatedNotes = notes.map(note => ({
+        ...note,
+        content: truncateContent(note.content)
+      }));
+      
+      // Only update if changes were made
+      if (JSON.stringify(validatedNotes) !== JSON.stringify(notes)) {
+        setNotes(validatedNotes);
+      }
+    }
+  }, []);
+  
   // Set active note to the most recent note when component mounts
   useEffect(() => {
     if (notes.length > 0 && !activeNoteId) {
@@ -98,6 +117,12 @@ const Notes: React.FC = () => {
       textareaRef.current.focus();
     }
   }, [activeNoteId]);
+  
+  // Helper function to truncate content to max length
+  const truncateContent = (content: string): string => {
+    if (content.length <= MAX_CONTENT_LENGTH) return content;
+    return content.substring(0, MAX_CONTENT_LENGTH);
+  };
   
   const createNewNote = () => {
     const newNote: Note = {
@@ -175,16 +200,36 @@ const Notes: React.FC = () => {
 
   const handleContentChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const content = e.target.value;
-    setNoteContent(content);
     
-    if (activeNoteId) {
-      const updatedNotes = notes.map(note => 
-        note.id === activeNoteId 
-          ? { ...note, content, updatedAt: Date.now() } 
-          : note
-      );
+    // Check if content exceeds the limit
+    if (content.length > MAX_CONTENT_LENGTH) {
+      setShowCharLimitWarning(true);
+      // Truncate the content to the maximum length
+      const truncatedContent = content.substring(0, MAX_CONTENT_LENGTH);
+      setNoteContent(truncatedContent);
       
-      setNotes(updatedNotes);
+      if (activeNoteId) {
+        const updatedNotes = notes.map(note => 
+          note.id === activeNoteId 
+            ? { ...note, content: truncatedContent, updatedAt: Date.now() } 
+            : note
+        );
+        
+        setNotes(updatedNotes);
+      }
+    } else {
+      setShowCharLimitWarning(false);
+      setNoteContent(content);
+      
+      if (activeNoteId) {
+        const updatedNotes = notes.map(note => 
+          note.id === activeNoteId 
+            ? { ...note, content, updatedAt: Date.now() } 
+            : note
+        );
+        
+        setNotes(updatedNotes);
+      }
     }
   };
 
@@ -420,26 +465,46 @@ const Notes: React.FC = () => {
                 className="w-full bg-transparent outline-none text-xl font-semibold text-white placeholder:text-white/60"
                 placeholder="Note title..."
               />
-              <motion.textarea
-                layout="position"
-                ref={textareaRef}
-                value={noteContent}
-                onChange={handleContentChange}
-                onBlur={handleBlur}
-                className="w-full flex-1 bg-transparent outline-none resize-none text-base text-white placeholder:text-white/60"
-                placeholder="Start typing..."
-                transition={{ 
-                  duration: 0.2,
-                  layout: {
-                    type: "spring",
-                    stiffness: 200,
-                    damping: 25,
-                    duration: 0.4,
-                    bounce: 0,
-                    mass: 1
-                  }
-                }}
-              />
+              <div className="flex flex-col flex-1">
+                <motion.textarea
+                  layout="position"
+                  ref={textareaRef}
+                  value={noteContent}
+                  onChange={handleContentChange}
+                  onBlur={handleBlur}
+                  className="w-full flex-1 bg-transparent outline-none resize-none text-base text-white placeholder:text-white/60"
+                  placeholder="Start typing..."
+                  transition={{ 
+                    duration: 0.2,
+                    layout: {
+                      type: "spring",
+                      stiffness: 200,
+                      damping: 25,
+                      duration: 0.4,
+                      bounce: 0,
+                      mass: 1
+                    }
+                  }}
+                />
+                <div className="flex justify-between items-center mt-2 text-xs text-white/50">
+                  <AnimatePresence>
+                    {showCharLimitWarning && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="flex items-center gap-1 text-amber-400"
+                      >
+                        <AlertCircle className="h-3 w-3" />
+                        <span>Character limit reached ({MAX_CONTENT_LENGTH})</span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  <div>
+                    {noteContent.length}/{MAX_CONTENT_LENGTH}
+                  </div>
+                </div>
+              </div>
             </motion.div>
           ) : (
             <motion.div

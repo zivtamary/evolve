@@ -44,6 +44,9 @@ interface StoredEvents {
   timestamp: number;
 }
 
+const MAX_TITLE_LENGTH = 100;
+const MAX_DESCRIPTION_LENGTH = 500;
+
 const Events = () => {
   const { theme } = useTheme();
   const { syncEventsOnBlur, isAuthenticated, userProfile } = useSettings();
@@ -347,18 +350,26 @@ const Events = () => {
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={dialogState === 'edit' ? handleSaveEdit : addEvent} className="space-y-4 mt-4">
-            <div>
+            <div className="mb-4">
               <label className="block text-sm mb-1">Title</label>
               <input
                 ref={inputRef}
                 type="text"
                 value={newEvent.title}
-                onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value.length <= MAX_TITLE_LENGTH) {
+                    setNewEvent({ ...newEvent, title: value });
+                  }
+                }}
                 onBlur={handleEventBlur}
                 className="w-full bg-black/10 dark:bg-black/20 px-4 py-2 rounded outline-none border border-black/10 dark:border-white/10 focus:border-black/30 dark:focus:border-white/30"
                 placeholder="Event title"
                 required
               />
+              <div className="text-xs text-black/50 dark:text-white/50 mt-1 text-right">
+                {newEvent.title.length}/{MAX_TITLE_LENGTH}
+              </div>
             </div>
             <div>
               <label className="block text-sm mb-1">Date</label>
@@ -401,12 +412,20 @@ const Events = () => {
               <label className="block text-sm mb-1">Description</label>
               <textarea
                 value={newEvent.description}
-                onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value.length <= MAX_DESCRIPTION_LENGTH) {
+                    setNewEvent({ ...newEvent, description: value });
+                  }
+                }}
                 onBlur={handleEventBlur}
                 className="w-full bg-black/10 dark:bg-black/20 px-4 py-2 rounded outline-none border border-black/10 dark:border-white/10 focus:border-black/30 dark:focus:border-white/30"
                 placeholder="Event description"
                 rows={3}
               />
+              <div className="text-xs text-black/50 dark:text-white/50 mt-1 text-right">
+                {newEvent.description?.length || 0}/{MAX_DESCRIPTION_LENGTH}
+              </div>
             </div>
             <DialogFooter>
               <div className="flex justify-end space-x-2 pt-2">

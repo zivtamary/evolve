@@ -8,6 +8,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useClickOutside } from '../../hooks/use-click-outside';
 
+// Maximum character limit for todo items
+const TODO_CHAR_LIMIT = 100;
+
 interface TodoItem {
   id: string;
   text: string;
@@ -24,6 +27,7 @@ const TodoList: React.FC = () => {
   const { syncTodosOnBlur, isAuthenticated, userProfile, setExpandedWidget, expandedWidget, widgetPositions } = useSettings();
   const [todos, setTodos] = useLocalStorage<TodoItem[]>('todos', []);
   const [newTodo, setNewTodo] = useState('');
+  const [charCount, setCharCount] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const todoListRef = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
@@ -71,13 +75,21 @@ const TodoList: React.FC = () => {
     return () => clearInterval(intervalId);
   }, [isAuthenticated, userProfile?.cloud_sync_enabled, userProfile?.id]);
 
+  // Update character count when newTodo changes
+  useEffect(() => {
+    setCharCount(newTodo.length);
+  }, [newTodo]);
+
   const addTodo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTodo.trim()) return;
 
+    // Ensure the todo text doesn't exceed the character limit
+    const todoText = newTodo.trim().substring(0, TODO_CHAR_LIMIT);
+
     const todo: TodoItem = {
       id: crypto.randomUUID(),
-      text: newTodo.trim(),
+      text: todoText,
       completed: false,
       createdAt: Date.now()
     };
@@ -275,21 +287,29 @@ const TodoList: React.FC = () => {
           }
         }}
       >
-        <div className="flex">
-          <input
-            ref={inputRef}
-            type="text"
-            value={newTodo}
-            onChange={(e) => setNewTodo(e.target.value)}
-            placeholder="What needs to be done?"
-            className="flex-grow bg-black/20 px-4 py-2 rounded-l outline-none placeholder:text-white/50"
-          />
-          <button
-            type="submit"
-            className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-r text-white transition-colors"
-          >
-            Add
-          </button>
+        <div className="flex flex-col">
+          <div className="flex">
+            <input
+              ref={inputRef}
+              type="text"
+              value={newTodo}
+              onChange={(e) => setNewTodo(e.target.value)}
+              placeholder="What needs to be done?"
+              className="flex-grow bg-black/20 px-4 py-2 rounded-l outline-none placeholder:text-white/50"
+              maxLength={TODO_CHAR_LIMIT}
+            />
+            <button
+              type="submit"
+              className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-r text-white transition-colors"
+            >
+              Add
+            </button>
+          </div>
+          <div className="flex justify-end mt-1">
+            <span className={`text-xs ${charCount >= TODO_CHAR_LIMIT ? 'text-red-400' : 'text-white/50'}`}>
+              {charCount}/{TODO_CHAR_LIMIT} characters
+            </span>
+          </div>
         </div>
       </motion.form>
       
