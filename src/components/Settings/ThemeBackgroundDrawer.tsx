@@ -3,7 +3,6 @@ import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Settings2, Sun, Moon, Monitor, Image, Palette, Waves, Shuffle } from 'lucide-react';
 import { cn } from "@/lib/utils";
-import { motion } from 'framer-motion';
 
 // Theme options
 const THEME_OPTIONS = [
@@ -68,10 +67,14 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
         <Button
           variant="ghost"
           size="icon"
-          className="absolute top-4 right-4 bg-black/20 dark:bg-transparent text-white p-2 rounded-full backdrop-blur-md hover:bg-black/30 transition-colors z-10"
+          className="top-16 right-4 transition-all z-10
+             dark:hover:bg-black/30 dark:active:bg-black/40 active:bg-black/40
+            text-white/90 hover:text-white
+            border-white/10 hover:border-white/20
+            shadow-sm hover:shadow-md absolute bottom-4 rounded-full  text-white backdrop-blur-md hover:bg-black/30"
           title="Theme & Background Settings"
         >
-          <Settings2 className="h-5 w-5" />
+          <Palette className="size-4" />
         </Button>
       </DrawerTrigger>
       <DrawerContent className="bg-transparent backdrop-blur-xl border-t border-white/5">
@@ -84,8 +87,8 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
           <div className="mb-8">
             <h4 className="text-sm font-medium text-white/70 mb-3">Theme</h4>
             <div className="flex gap-3">
-              {THEME_OPTIONS.map((option, index) => (
-                <motion.button
+              {THEME_OPTIONS.map((option) => (
+                <button
                   key={option.value}
                   onClick={() => onThemeChange(option.value)}
                   className={cn(
@@ -94,13 +97,10 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                       ? "bg-zinc-700 text-white"
                       : "bg-zinc-800/50 text-white/70 hover:bg-zinc-700/50"
                   )}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
                 >
                   {option.icon}
                   <span className="mt-2 text-xs">{option.name}</span>
-                </motion.button>
+                </button>
               ))}
             </div>
           </div>
@@ -111,23 +111,41 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
           <div className="mb-8">
             <h4 className="text-sm font-medium text-white/70 mb-3">Background Type</h4>
             <div className="flex gap-3">
-              {BACKGROUND_TYPE_OPTIONS.map((option, index) => (
-                <motion.button
+              {BACKGROUND_TYPE_OPTIONS.map((option) => (
+                <button
                   key={option.value}
                   onClick={() => onBackgroundTypeChange(option.value as 'image' | 'gradient' | 'solid')}
                   className={cn(
-                    "flex-1 flex flex-col items-center justify-center p-3 rounded-lg transition-all",
+                    "group flex-1 flex flex-col items-center justify-center p-3 rounded-lg transition-all relative overflow-hidden",
                     backgroundType === option.value
                       ? "bg-zinc-700 text-white"
                       : "bg-zinc-800/50 text-white/70 hover:bg-zinc-700/50"
                   )}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
                 >
-                  {option.icon}
-                  <span className="mt-2 text-xs">{option.name}</span>
-                </motion.button>
+                  {/* Preview background for gradient button */}
+                  {option.value === 'gradient' && (
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600" />
+                  )}
+                  
+                  {/* Preview background for image button */}
+                  {option.value === 'image' && (
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(https://source.unsplash.com/random/800x600?nature)' }} />
+                      <div className="absolute inset-0 bg-black/30" />
+                    </div>
+                  )}
+                  
+                  {/* Preview background for solid button */}
+                  {option.value === 'solid' && (
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-indigo-700" />
+                  )}
+                  
+                  {/* Content with z-index to appear above the preview */}
+                  <div className="relative z-10 flex flex-col items-center">
+                    {option.icon}
+                    <span className="mt-2 text-xs">{option.name}</span>
+                  </div>
+                </button>
               ))}
             </div>
           </div>
@@ -145,31 +163,32 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
             <div className="overflow-x-auto -mx-6 px-6">
               <div className="flex gap-3 min-w-96 pb-4">
                 {backgroundType === 'image' ? (
-                  IMAGE_OPTIONS.map((option, index) => (
-                    <motion.button
-                      key={option.value}
+                  <>
+                    <button
+                      key="shuffle"
                       onClick={onShuffleImage}
                       className={cn(
                         "group relative size-10 mt-1 rounded-full transition-all flex-shrink-0",
-                        "bg-zinc-800/50 text-white/70 hover:bg-zinc-700/50",
-                        "flex items-center justify-center"
+                        "bg-white/10 dark:bg-white/10 hover:bg-white/20 dark:hover:bg-white/20",
+                        "text-white/90 hover:text-white",
+                        "border border-white/10 hover:border-white/20",
+                        "shadow-sm hover:shadow-md",
+                        "flex items-center justify-center",
+                        "ring-2 ring-white"
                       )}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.05 }}
                     >
-                      {option.icon}
+                      <Shuffle className="h-4 w-4" />
                       <div
                         className={cn(
                           "absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity",
                           "bg-gradient-to-b from-white/10 to-transparent"
                         )}
                       />
-                    </motion.button>
-                  ))
+                    </button>
+                  </>
                 ) : backgroundType === 'gradient' ? (
-                  GRADIENT_OPTIONS.map((option, index) => (
-                    <motion.button
+                  GRADIENT_OPTIONS.map((option) => (
+                    <button
                       key={option.value}
                       onClick={() => onBackgroundStyleChange(option.value)}
                       className={cn(
@@ -179,9 +198,6 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                           ? "ring-2 ring-white"
                           : "ring-1 ring-white/20 hover:ring-white/40"
                       )}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.05 }}
                     >
                       <div
                         className={cn(
@@ -189,11 +205,11 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                           "bg-gradient-to-b from-white/10 to-transparent"
                         )}
                       />
-                    </motion.button>
+                    </button>
                   ))
                 ) : (
-                  SOLID_COLOR_OPTIONS.map((option, index) => (
-                    <motion.button
+                  SOLID_COLOR_OPTIONS.map((option) => (
+                    <button
                       key={option.value}
                       onClick={() => onBackgroundStyleChange(option.value)}
                       className={cn(
@@ -203,9 +219,6 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                           ? "ring-2 ring-white"
                           : "ring-1 ring-white/20 hover:ring-white/40"
                       )}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.05 }}
                     >
                       <div
                         className={cn(
@@ -213,7 +226,7 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                           "bg-gradient-to-b from-white/10 to-transparent"
                         )}
                       />
-                    </motion.button>
+                    </button>
                   ))
                 )}
               </div>
