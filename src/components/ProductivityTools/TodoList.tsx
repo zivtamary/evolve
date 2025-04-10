@@ -266,19 +266,6 @@ const TodoList: React.FC = () => {
           <span>Todo List</span>
         </h2>
         <div className="flex items-center gap-2">
-          <AnimatePresence>
-            {isExpanded && (
-              <motion.button
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                onClick={toggleExpand}
-                className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10"
-              >
-                <X className="h-5 w-5" />
-              </motion.button>
-            )}
-          </AnimatePresence>
           <div className="text-xs text-white/70">
             {activeTodosCount} items left
           </div>

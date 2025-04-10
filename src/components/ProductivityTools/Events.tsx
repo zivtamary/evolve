@@ -334,7 +334,8 @@ const Events = () => {
   };
 
   const handleClickOutside = () => {
-    if (isExpanded) {
+    // Don't collapse if dialog is open
+    if (isExpanded && dialogState === 'closed') {
       setExpandedWidget(null);
     }
   };
@@ -423,19 +424,6 @@ const Events = () => {
           <span>Events</span>
         </h2>
         <div className="flex items-center gap-2">
-          <AnimatePresence>
-            {isExpanded && (
-              <motion.button
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                onClick={toggleExpand}
-                className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10"
-              >
-                <X className="h-5 w-5" />
-              </motion.button>
-            )}
-          </AnimatePresence>
           <button
             onClick={() => setDialogState('create')}
             className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10"
