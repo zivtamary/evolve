@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { CalendarDays, Calendar as CalendarIcon, Clock, X, MoreVertical, Edit2, Trash2 } from 'lucide-react';
+import { CalendarDays, Calendar as CalendarIcon, Clock, X, MoreVertical, Edit2, Trash2, Smile } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useTheme } from '@/context/ThemeContext';
 import { Calendar } from '@/components/ui/calendar';
@@ -33,6 +33,7 @@ interface Event {
   time: string;
   description: string;
   createdAt: number;
+  icon?: string;
 }
 
 interface NewEvent {
@@ -40,6 +41,7 @@ interface NewEvent {
   date: string;
   time: string;
   description: string;
+  icon?: string;
 }
 
 interface StoredEvents {
@@ -63,6 +65,7 @@ const Events = () => {
     time: '',
     description: ''
   });
+  const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const eventsRef = useRef<HTMLDivElement>(null);
@@ -121,17 +124,53 @@ const Events = () => {
     
     const nextWeek = new Date(today);
     nextWeek.setDate(nextWeek.getDate() + 7);
-    
-    if (eventDate.getTime() === today.getTime()) {
-      return "Today";
-    } else if (eventDate.getTime() === tomorrow.getTime()) {
-      return "Tomorrow";
-    } else if (eventDate > today && eventDate <= nextWeek) {
-      return "This Week";
-    } else if (eventDate > nextWeek) {
-      return "Later";
+
+    if (activeTab === "month") {
+      if (eventDate.getTime() === today.getTime()) {
+        return "Today";
+      } else if (eventDate.getTime() === tomorrow.getTime()) {
+        return "Tomorrow";
+      } else if (eventDate < today) {
+        return "Past Due";
+      }
+
+      // Calculate the difference in weeks
+      const weekDiff = Math.floor((eventDate.getTime() - today.getTime()) / (7 * 24 * 60 * 60 * 1000));
+      
+      if (weekDiff === 0) {
+        return "This Week";
+      } else if (weekDiff === 1) {
+        return "Next Week";
+      } else {
+        return `In ${weekDiff} Weeks`;
+      }
+    } else if (activeTab === "week") {
+      // For week view, group by day name
+      const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const dayName = dayNames[eventDate.getDay()];
+      
+      if (eventDate.getTime() === today.getTime()) {
+        return "Today";
+      } else if (eventDate.getTime() === tomorrow.getTime()) {
+        return "Tomorrow";
+      } else if (eventDate < today) {
+        return "Past Due";
+      } else {
+        return dayName;
+      }
     } else {
-      return "Past";
+      // For "all" view
+      if (eventDate.getTime() === today.getTime()) {
+        return "Today";
+      } else if (eventDate.getTime() === tomorrow.getTime()) {
+        return "Tomorrow";
+      } else if (eventDate > today && eventDate <= nextWeek) {
+        return "This Week";
+      } else if (eventDate > nextWeek) {
+        return "Later";
+      } else {
+        return "Past Due";
+      }
     }
   };
 
@@ -153,7 +192,8 @@ const Events = () => {
       title: event.title,
       date: event.date,
       time: event.time,
-      description: event.description
+      description: event.description,
+      icon: event.icon
     });
     setDialogState('edit');
   };
@@ -189,7 +229,8 @@ const Events = () => {
       date: newEvent.date,
       time: newEvent.time || '',
       description: newEvent.description.trim(),
-      createdAt: Date.now()
+      createdAt: Date.now(),
+      ...(newEvent.icon && { icon: newEvent.icon })
     };
 
     setEvents([...events, event]);
@@ -197,7 +238,7 @@ const Events = () => {
       title: '', 
       date: new Date().toISOString().split('T')[0],
       time: '', 
-      description: '' 
+      description: ''
     });
 
     try {
@@ -212,6 +253,7 @@ const Events = () => {
             date: event.date,
             time: event.time,
             description: event.description,
+            icon: event.icon,
             created_at: new Date(event.createdAt).toISOString()
           }]);
 
@@ -254,7 +296,8 @@ const Events = () => {
       title: newEvent.title.trim(),
       date: newEvent.date,
       time: newEvent.time || '',
-      description: newEvent.description.trim()
+      description: newEvent.description.trim(),
+      icon: newEvent.icon
     };
 
     const updatedEvents = events.map(event => 
@@ -272,7 +315,8 @@ const Events = () => {
             title: updatedEvent.title,
             date: updatedEvent.date,
             time: updatedEvent.time,
-            description: updatedEvent.description
+            description: updatedEvent.description,
+            icon: updatedEvent.icon
           })
           .eq('id', updatedEvent.id)
           .eq('user_id', userProfile.id);
@@ -305,6 +349,7 @@ const Events = () => {
           date: event.date,
           time: event.time,
           description: event.description,
+          icon: 'icon' in event && typeof event.icon === 'string' ? event.icon : '😊',
           createdAt: new Date(event.created_at).getTime()
         }));
         setEvents(localEvents);
@@ -372,6 +417,29 @@ const Events = () => {
     };
   }, [isExpanded, setExpandedWidget]);
 
+  // Emoji picker component
+  const EmojiPicker = () => {
+    const commonEmojis = ['😊', '🎉', '🎂', '🎁', '📅', '⏰', '📝', '📌', '🔔', '⭐', '❤️', '👍', '🎯', '🏆', '📚', '💼', '🏠', '✈️', '🎵', '🎮'];
+    
+    return (
+      <div className="grid grid-cols-5 gap-2 p-2 bg-black/20 dark:bg-black/40 rounded-lg border border-white/10">
+        {commonEmojis.map((emoji, index) => (
+          <button
+            key={index}
+            type="button"
+            className="w-8 h-8 flex items-center justify-center text-lg hover:bg-white/10 rounded transition-colors"
+            onClick={() => {
+              setNewEvent({ ...newEvent, icon: emoji });
+              setIsEmojiPickerOpen(false);
+            }}
+          >
+            {emoji}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <motion.div
       ref={eventsRef}
@@ -395,8 +463,6 @@ const Events = () => {
       )}
       style={{
         width: isExpanded ? '800px' : '100%',
-        minWidth: isExpanded ? '800px' : 'auto',
-        maxWidth: isExpanded ? '800px' : '100%',
         boxShadow: isExpanded ? '0 0 0 100vw rgba(0, 0, 0, 0.5)' : 'none',
         transformOrigin: getTransformOrigin()
       }}
@@ -448,21 +514,51 @@ const Events = () => {
           <form onSubmit={dialogState === 'edit' ? handleSaveEdit : addEvent} className="space-y-5 mt-4">
             <div className="mb-4">
               <label className="block text-sm mb-1.5 text-white/80 font-medium">Title</label>
-              <input
-                ref={inputRef}
-                type="text"
-                value={newEvent.title}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value.length <= MAX_TITLE_LENGTH) {
-                    setNewEvent({ ...newEvent, title: value });
-                  }
-                }}
-                onBlur={handleEventBlur}
-                className="w-full bg-black/10 dark:bg-black/20 px-4 py-2.5 rounded-lg outline-none border border-white/10 focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all duration-200 text-white placeholder-white/40"
-                placeholder="Event title"
-                required
-              />
+              <div className="relative">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={newEvent.title}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value.length <= MAX_TITLE_LENGTH) {
+                      setNewEvent({ ...newEvent, title: value });
+                    }
+                  }}
+                  onBlur={handleEventBlur}
+                  className="w-full bg-black/10 dark:bg-black/20 px-4 py-2.5 rounded-lg outline-none border border-white/10 focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all duration-200 text-white placeholder-white/40 pl-12"
+                  placeholder="Event title"
+                  required
+                />
+                {newEvent.icon ? (
+                  <button
+                    type="button"
+                    onClick={() => setNewEvent({ ...newEvent, icon: undefined })}
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center justify-center w-6 h-6 text-white transition-colors rounded group"
+                    title="Remove emoji"
+                  >
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/40 rounded transition-opacity">
+                      <X className="h-3 w-3 text-white/90" />
+                    </div>
+                    <span className="text-lg">{newEvent.icon}</span>
+                  </button>
+                ) : (
+                  <Popover open={isEmojiPickerOpen} onOpenChange={setIsEmojiPickerOpen}>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center justify-center w-6 h-6 text-white/50 hover:text-white/70 transition-colors"
+                        title="Add emoji"
+                      >
+                        <Smile className="h-5 w-5" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 glass dark:glass-dark border-white/10" align="start">
+                      <EmojiPicker />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              </div>
               <div className="text-xs text-white/50 mt-1.5 text-right">
                 {newEvent.title.length}/{MAX_TITLE_LENGTH}
               </div>
@@ -615,32 +711,42 @@ const Events = () => {
                         onClick={() => handleEditEvent(event)}
                       >
                         <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="font-medium text-white">{event.title}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-white flex items-center gap-2">
+                              {event.icon && (
+                                <span className="text-xl shrink-0 text-white">
+                                  {event.icon}
+                                </span>
+                              )}
+                              <span className="truncate">{event.title}</span>
+                            </div>
                             <div className="flex items-center justify-between text-sm text-white/70 mt-1">
-                              <div className="flex items-center gap-1">
-                                <CalendarIcon className="h-3.5 w-3.5" />
-                                <span>{formatDate(event.date)}</span>
+                              <div className="flex items-center gap-1 min-w-0">
+                                <CalendarIcon className="h-3.5 w-3.5 shrink-0" />
+                                <span className="truncate">{formatDate(event.date)}</span>
                               </div>
                               {event.time && (
-                                <div className="flex items-center gap-1">
-                                  <Clock className="h-3.5 w-3.5" />
-                                  <span>{event.time}</span>
+                                <div className="flex items-center gap-1 ml-2">
+                                  <Clock className="h-3.5 w-3.5 shrink-0" />
+                                  <span className="truncate">{event.time}</span>
                                 </div>
                               )}
                             </div>
                             {event.description && (
-                              <div className="text-sm text-white/70 mt-2">
+                              <div className={cn(
+                                "text-sm text-white/70 mt-2 break-words",
+                                !isExpanded && "line-clamp-2"
+                              )}>
                                 {event.description}
                               </div>
                             )}
                           </div>
-                          <button 
+                          <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleDeleteEvent(event.id);
                             }}
-                            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-white/10 rounded-md transition-all text-white/50 hover:text-white"
+                            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-white/10 rounded-md transition-all text-white/50 hover:text-white shrink-0 ml-2"
                             title="Delete event"
                           >
                             <X className="h-4 w-4" />
