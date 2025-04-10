@@ -61,6 +61,7 @@ const Events = () => {
     description: ''
   });
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   
   // Filter events based on active tab
   const getFilteredEvents = () => {
@@ -343,15 +344,16 @@ const Events = () => {
       </div>
 
       <Dialog open={dialogState !== 'closed'} onOpenChange={(open) => !open && resetForm()}>
-        <DialogContent className="border-white/10">
-          <DialogHeader>
-            <DialogTitle>
+        <DialogContent className="glass dark:glass-dark border-white/10 backdrop-blur-md shadow-xl">
+          <DialogHeader className="border-b border-white/10 pb-3">
+            <DialogTitle className="text-white text-xl font-semibold flex items-center gap-2">
+              <CalendarDays className="h-5 w-5" />
               {dialogState === 'edit' ? 'Edit Event' : 'Create New Event'}
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={dialogState === 'edit' ? handleSaveEdit : addEvent} className="space-y-4 mt-4">
+          <form onSubmit={dialogState === 'edit' ? handleSaveEdit : addEvent} className="space-y-5 mt-4">
             <div className="mb-4">
-              <label className="block text-sm mb-1">Title</label>
+              <label className="block text-sm mb-1.5 text-white/80 font-medium">Title</label>
               <input
                 ref={inputRef}
                 type="text"
@@ -363,53 +365,74 @@ const Events = () => {
                   }
                 }}
                 onBlur={handleEventBlur}
-                className="w-full bg-black/10 dark:bg-black/20 px-4 py-2 rounded outline-none border border-black/10 dark:border-white/10 focus:border-black/30 dark:focus:border-white/30"
+                className="w-full bg-black/10 dark:bg-black/20 px-4 py-2.5 rounded-lg outline-none border border-white/10 focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all duration-200 text-white placeholder-white/40"
                 placeholder="Event title"
                 required
               />
-              <div className="text-xs text-black/50 dark:text-white/50 mt-1 text-right">
+              <div className="text-xs text-white/50 mt-1.5 text-right">
                 {newEvent.title.length}/{MAX_TITLE_LENGTH}
               </div>
             </div>
             <div>
-              <label className="block text-sm mb-1">Date</label>
-              <Popover>
+              <label className="block text-sm mb-1.5 text-white/80 font-medium">Date</label>
+              <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className="w-full bg-black/10 dark:bg-black/20 px-4 py-2 rounded outline-none border border-black/10 dark:border-white/10 focus:border-black/30 dark:focus:border-white/30 flex items-center justify-between"
+                    onClick={() => setIsDatePickerOpen(true)}
+                    className="w-full bg-black/10 dark:bg-black/20 px-4 py-2.5 rounded-lg outline-none border border-white/10 focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all duration-200 flex items-center justify-between text-white"
                   >
                     {newEvent.date ? format(new Date(newEvent.date), 'PPP') : 'Pick a date'}
                     <CalendarIcon className="h-4 w-4 opacity-70" />
                   </button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-auto p-0 glass dark:glass-dark border-white/10" align="start">
                   <Calendar
                     mode="single"
                     selected={newEvent.date ? new Date(newEvent.date) : undefined}
                     onSelect={(date) => {
                       if (date) {
-                        setNewEvent({ ...newEvent, date: date.toISOString().split('T')[0] });
+                        const adjustedDate = new Date(date);
+                        adjustedDate.setMinutes(adjustedDate.getMinutes() - adjustedDate.getTimezoneOffset());
+                        setNewEvent({ ...newEvent, date: adjustedDate.toISOString().split('T')[0] });
+                        setIsDatePickerOpen(false);
                       }
                     }}
                     initialFocus
-                    className="rounded-md border bg-background dark:bg-black/95 dark:border-white/10"
+                    className="rounded-md border bg-background/80 dark:bg-black/80 backdrop-blur-md border-white/10 text-foreground dark:text-white"
+                    classNames={{
+                      caption: "flex justify-center pt-1 relative items-center",
+                      caption_label: "text-sm font-medium text-foreground dark:text-white",
+                      nav: "space-x-1 flex items-center",
+                      nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 text-foreground dark:text-white",
+                      nav_button_previous: "absolute left-1",
+                      nav_button_next: "absolute right-1",
+                      head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+                      cell: "h-9 w-9 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
+                      day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 text-foreground dark:text-white hover:bg-foreground/10 rounded-md transition-colors",
+                      day_selected: "bg-foreground/20 text-foreground dark:text-white hover:bg-foreground/30 rounded-md",
+                      day_today: "bg-foreground/10 text-foreground dark:text-white rounded-md",
+                      day_outside: "text-muted-foreground opacity-50",
+                      day_disabled: "text-muted-foreground opacity-50",
+                      day_range_middle: "aria-selected:bg-foreground/20 aria-selected:text-foreground",
+                      day_hidden: "invisible"
+                    }}
                   />
                 </PopoverContent>
               </Popover>
             </div>
             <div>
-              <label className="block text-sm mb-1">Time (optional)</label>
+              <label className="block text-sm mb-1.5 text-white/80 font-medium">Time (optional)</label>
               <input
                 type="time"
                 value={newEvent.time}
                 onChange={(e) => setNewEvent({ ...newEvent, time: e.target.value })}
                 onBlur={handleEventBlur}
-                className="w-full bg-black/10 dark:bg-black/20 px-4 py-2 rounded outline-none border border-black/10 dark:border-white/10 focus:border-black/30 dark:focus:border-white/30"
+                className="w-full bg-black/10 dark:bg-black/20 px-4 py-2.5 rounded-lg outline-none border border-white/10 focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all duration-200 text-white [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-70 [&::-webkit-calendar-picker-indicator]:hover:opacity-100 [&::-webkit-calendar-picker-indicator]:w-4 [&::-webkit-calendar-picker-indicator]:h-4"
               />
             </div>
             <div>
-              <label className="block text-sm mb-1">Description</label>
+              <label className="block text-sm mb-1.5 text-white/80 font-medium">Description</label>
               <textarea
                 value={newEvent.description}
                 onChange={(e) => {
@@ -419,26 +442,26 @@ const Events = () => {
                   }
                 }}
                 onBlur={handleEventBlur}
-                className="w-full bg-black/10 dark:bg-black/20 px-4 py-2 rounded outline-none border border-black/10 dark:border-white/10 focus:border-black/30 dark:focus:border-white/30"
+                className="w-full bg-black/10 dark:bg-black/20 px-4 py-2.5 rounded-lg outline-none border border-white/10 focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all duration-200 text-white placeholder-white/40"
                 placeholder="Event description"
                 rows={3}
               />
-              <div className="text-xs text-black/50 dark:text-white/50 mt-1 text-right">
+              <div className="text-xs text-white/50 mt-1.5 text-right">
                 {newEvent.description?.length || 0}/{MAX_DESCRIPTION_LENGTH}
               </div>
             </div>
-            <DialogFooter>
-              <div className="flex justify-end space-x-2 pt-2">
+            <DialogFooter className="border-t border-white/10 pt-4 mt-2">
+              <div className="flex justify-end space-x-3">
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-4 py-2 text-sm opacity-70 hover:opacity-100 hover:bg-black/10 dark:hover:bg-white/10 rounded transition-colors"
+                  className="px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm bg-black/20 dark:bg-white/20 hover:bg-black/30 dark:hover:bg-white/30 rounded transition-colors"
+                  className="px-4 py-2 text-sm bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all duration-200"
                 >
                   {dialogState === 'edit' ? 'Save Changes' : 'Create Event'}
                 </button>
