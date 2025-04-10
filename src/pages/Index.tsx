@@ -23,6 +23,7 @@ const Index = () => {
   const { widgetVisibility, expandedWidget, widgetPositions } = useSettings();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
+  const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | null>(null);
   const [showWelcome, setShowWelcome] = useState(() => {
     const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
     const lastSplashTime = evolveData.lastSplashScreenTime;
@@ -88,36 +89,65 @@ const Index = () => {
       // If Ctrl key is pressed, don't change slides (allows for zooming)
       if (e.ctrlKey) return;
       
-      if (isScrolling) return;
-      
       // If search bar is focused, don't change slides
       if (isSearchFocused) return;
       
-      // Check if the scroll event originated from a widget
+      // Check if the scroll event originated from a widget or any scrollable content
       const target = e.target as HTMLElement;
-      const isWidgetScroll = target.closest('.widget') || 
-                            target.closest('.overflow-y-auto') || 
-                            target.closest('.overflow-auto');
       
-      // If scrolling within a widget or if a widget is expanded, don't change slides
-      if (isWidgetScroll || expandedWidget) return;
+      // Check if we're scrolling within the Notes component
+      const isNotesComponent = target.closest('.notes-component') || 
+                             target.closest('.note-list') ||
+                             target.closest('.note-content') ||
+                             target.closest('textarea') ||
+                             target.closest('[role="textbox"]');
       
+      // Check for other scrollable content
+      const isScrollableContent = target.closest('.widget') || 
+                                target.closest('.overflow-y-auto') || 
+                                target.closest('.overflow-auto') ||
+                                target.closest('.scrollable-content') || 
+                                target.closest('.overflow-y-scroll') || 
+                                target.closest('.overflow-x-scroll');
+      
+      // If scrolling within notes, scrollable content, or if a widget is expanded, don't change slides
+      if (isNotesComponent || isScrollableContent || expandedWidget) return;
+      
+      // Clear any existing timeout
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      
+      // Set scrolling state
       setIsScrolling(true);
-      setTimeout(() => setIsScrolling(false), 1000); // Debounce scroll events
       
       // Use deltaX for horizontal scrolling, fallback to deltaY
       const delta = e.deltaX || e.deltaY;
       
+      // Only change slides if we're not at the boundaries
       if (delta > 0 && currentSlide < 1) {
-        setCurrentSlide(prev => prev + 1);
+        setCurrentSlide(prev => Math.min(prev + 1, 1));
       } else if (delta < 0 && currentSlide > 0) {
-        setCurrentSlide(prev => prev - 1);
+        setCurrentSlide(prev => Math.max(prev - 1, 0));
       }
+      
+      // Set a new timeout
+      const timeout = setTimeout(() => {
+        setIsScrolling(false);
+        setScrollTimeout(null);
+      }, 500); // Reduced debounce time to 500ms for better responsiveness
+      
+      setScrollTimeout(timeout);
     };
 
     window.addEventListener('wheel', handleWheel, { passive: true });
-    return () => window.removeEventListener('wheel', handleWheel);
-  }, [currentSlide, isScrolling, expandedWidget, isSearchFocused]);
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+    };
+  }, [currentSlide, isScrolling, expandedWidget, isSearchFocused, scrollTimeout]);
 
   // Remove the scroll event listener since we're using transform now
   useEffect(() => {

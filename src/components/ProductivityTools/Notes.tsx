@@ -301,7 +301,7 @@ const Notes: React.FC = () => {
         mass: 1
       }}
       className={cn(
-        "glass dark:glass-dark rounded-xl text-white overflow-hidden flex flex-col relative",
+        "glass dark:glass-dark rounded-xl text-white overflow-hidden flex flex-col relative notes-component",
         isExpanded ? "mx-auto" : "w-full"
       )}
       style={{
@@ -375,7 +375,7 @@ const Notes: React.FC = () => {
       >
         <motion.div 
           layout="position"
-          className="w-1/3 border-r border-white/10 overflow-y-auto"
+          className="w-1/3 border-r border-white/10 overflow-y-auto note-list"
           transition={{ 
             duration: 0.2,
             layout: {
@@ -439,7 +439,7 @@ const Notes: React.FC = () => {
         
         <motion.div 
           layout="position" 
-          className="flex-1 p-4"
+          className="flex-1 p-4 note-content"
           transition={{ 
             duration: 0.2,
             layout: {
