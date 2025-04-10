@@ -462,7 +462,7 @@ const Events = () => {
         isExpanded ? "mx-auto" : "w-full"
       )}
       style={{
-        width: isExpanded ? '800px' : '100%',
+        width: isExpanded ? '855px' : '100%',
         boxShadow: isExpanded ? '0 0 0 100vw rgba(0, 0, 0, 0.5)' : 'none',
         transformOrigin: getTransformOrigin()
       }}
