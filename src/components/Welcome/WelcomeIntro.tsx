@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SplashScreen from './SplashScreen';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 interface WelcomeIntroProps {
   onComplete: () => void;
@@ -10,9 +11,20 @@ interface WelcomeIntroProps {
 const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete, onStartFadeOut }) => {
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');
+  const [displayName, setDisplayName] = useLocalStorage('display_name', '');
+  const [nameError, setNameError] = useState('');
 
   const handleNext = () => {
     if (step < 3) {
+      if (step === 2 && (!name || name.trim() === '')) {
+        setNameError('Please enter your name');
+        return;
+      }
+      
+      if (step === 2) {
+        setDisplayName(name.trim());
+      }
+      
       setStep(step + 1);
     } else {
       onComplete();
@@ -41,7 +53,7 @@ const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete, onStartFadeOut 
               transition={{ delay: 0.3, duration: 0.5 }}
               className="text-xl text-white/80 mb-8"
             >
-        Your personal productivity dashboard awaits!
+              Your personal productivity dashboard awaits!
             </motion.p>
           </div>
         );
@@ -66,10 +78,22 @@ const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete, onStartFadeOut 
               <input
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  setNameError('');
+                }}
                 placeholder="Enter your name"
-                className="px-4 py-2 rounded-lg bg-white/10 text-white placeholder-white/50 border border-white/20 focus:outline-none focus:border-white/50 w-64 text-center text-xl"
+                className={`px-4 py-2 rounded-lg bg-white/10 text-white placeholder-white/50 border ${nameError ? 'border-red-500' : 'border-white/20'} focus:outline-none focus:border-white/50 w-64 text-center text-xl`}
               />
+              {nameError && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-red-500 mt-2 text-sm"
+                >
+                  {nameError}
+                </motion.p>
+              )}
             </motion.div>
           </>
         );
@@ -82,7 +106,7 @@ const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete, onStartFadeOut 
               transition={{ duration: 0.5 }}
               className="text-3xl md:text-5xl font-bold text-white mb-4"
             >
-              Welcome{name ? `, ${name}` : ''}!
+              Welcome, {displayName}!
             </motion.h2>
             
             <motion.div

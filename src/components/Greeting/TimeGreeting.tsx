@@ -5,6 +5,7 @@ import { motion, useAnimation } from 'framer-motion';
 import type { HTMLAttributes } from 'react';
 import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 import { cn } from '@/lib/utils';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 
 const FloatingStar = ({ delay, size, x, y }) => (
@@ -77,12 +78,14 @@ const FloatingZ = ({ delay, x, y, size }) => (
 );
 
 const TimeGreeting = () => {
+  const [displayName] = useLocalStorage('display_name', '');
+  
   const getGreetingAndIcon = () => {
     const hour = new Date().getHours();
     
     if (hour >= 5 && hour < 12) {
       return {
-        greeting: "Good morning, Ziv.",
+        greeting: `Good morning${displayName ? `, ${displayName}` : ''}.`,
         icon: (
           <div className="relative">
             <motion.div
@@ -101,7 +104,7 @@ const TimeGreeting = () => {
       };
     } else if (hour >= 12 && hour < 17) {
       return {
-        greeting: "Good afternoon, Ziv.",
+        greeting: `Good afternoon${displayName ? `, ${displayName}` : ''}.`,
         icon: (
           <div className="relative">
             <motion.div
@@ -120,7 +123,7 @@ const TimeGreeting = () => {
       };
     } else if (hour >= 17 && hour < 22) {
       return {
-        greeting: "Good evening, Ziv.",
+        greeting: `Good evening${displayName ? `, ${displayName}` : ''}.`,
         icon: (
           <div className="relative">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{
@@ -142,7 +145,7 @@ const TimeGreeting = () => {
       };
     } else {
       return {
-        greeting: "Good night, Ziv.",
+        greeting: `Good night${displayName ? `, ${displayName}` : ''}.`,
         icon: (
           <div className="relative">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{

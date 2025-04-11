@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SparklesIcon } from 'lucide-react';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -9,6 +10,7 @@ interface SplashScreenProps {
 
 const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, onStartFadeOut }) => {
   const [isExiting, setIsExiting] = useState(false);
+  const [displayName] = useLocalStorage('display_name', '');
 
   useEffect(() => {
     // Total animation duration is about 3 seconds
@@ -116,7 +118,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, onStartFadeOut 
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5, delay: 1.2 }}
                 >
-                    Welcome back, Ziv.
+                  {displayName ? `Welcome back, ${displayName}.` : 'Welcome to Evolve'}
                 </motion.h1>
                 <motion.p
                   className="text-white/60 text-lg"
