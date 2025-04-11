@@ -25,6 +25,7 @@ const FONT_OPTIONS = [
 ];
 
 const COLOR_OPTIONS = [
+  { name: "Black", value: "text-black", bg: "bg-black" },
   { name: "White", value: "text-white", bg: "bg-white" },
   { name: "Yellow", value: "text-yellow-400", bg: "bg-yellow-400" },
   { name: "Green", value: "text-green-400", bg: "bg-green-400" },
