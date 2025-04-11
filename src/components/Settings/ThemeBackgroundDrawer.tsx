@@ -38,31 +38,31 @@ const IMAGE_OPTIONS = [
 // Background color options
 const GRADIENT_OPTIONS = [
   {
-    name: "Indigo Purple Pink",
-    value: "from-indigo-600 via-purple-600 to-pink-600",
-  },
-  { name: "Blue Cyan Teal", value: "from-blue-600 via-cyan-600 to-teal-600" },
-  {
-    name: "Amber Orange Red",
-    value: "from-amber-600 via-orange-600 to-red-600",
+    name: "Black and Gray",
+    value: "from-black/50 via-gray-900/50 to-gray-900/50",
   },
   {
     name: "Emerald Teal Cyan",
-    value: "from-emerald-600 via-teal-600 to-cyan-600",
+    value: "from-emerald-700/60 via-teal-700/60 to-cyan-700/60",
   },
   {
     name: "Violet Purple Fuchsia",
-    value: "from-violet-600 via-purple-600 to-fuchsia-600",
+    value: "from-violet-600/60 via-purple-600/60 to-fuchsia-600/60",
   },
   { name: "Slate Gray Zinc", value: "from-slate-700 via-gray-700 to-zinc-700" },
+  {
+    name: "Blue Cyan Teal",
+    value: "from-blue-700/60 via-cyan-700/60 to-teal-700/60",
+  },
 ];
 
 const SOLID_COLOR_OPTIONS = [
-  { name: "Indigo", value: "bg-indigo-700" },
-  { name: "Blue", value: "bg-blue-700" },
-  { name: "Amber", value: "bg-amber-700" },
-  { name: "Emerald", value: "bg-emerald-700" },
-  { name: "Violet", value: "bg-violet-700" },
+  { name: "Black", value: "bg-black/50" },
+  { name: "Indigo", value: "bg-indigo-700/50" },
+  { name: "Blue", value: "bg-blue-200/60" },
+  { name: "Amber", value: "bg-amber-100/40" },
+  { name: "Emerald", value: "bg-emerald-700/50" },
+  { name: "Violet", value: "bg-violet-700/50" },
   { name: "Slate", value: "bg-slate-800" },
 ];
 
@@ -87,8 +87,13 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
 }) => {
   // Use local storage hooks for each setting
   const [storedTheme, setStoredTheme] = useLocalStorage("theme", theme);
-  const [storedBackgroundType, setStoredBackgroundType] = useLocalStorage<"image" | "gradient" | "solid">("backgroundType", backgroundType);
-  const [storedBackgroundStyle, setStoredBackgroundStyle] = useLocalStorage("backgroundStyle", backgroundStyle);
+  const [storedBackgroundType, setStoredBackgroundType] = useLocalStorage<
+    "image" | "gradient" | "solid"
+  >("backgroundType", backgroundType);
+  const [storedBackgroundStyle, setStoredBackgroundStyle] = useLocalStorage(
+    "backgroundStyle",
+    backgroundStyle
+  );
 
   // Sync stored values with props when component mounts
   useEffect(() => {
@@ -111,7 +116,9 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
   };
 
   // Handle background type change with local storage
-  const handleBackgroundTypeChange = (newType: "image" | "gradient" | "solid") => {
+  const handleBackgroundTypeChange = (
+    newType: "image" | "gradient" | "solid"
+  ) => {
     setStoredBackgroundType(newType);
     onBackgroundTypeChange(newType);
   };
