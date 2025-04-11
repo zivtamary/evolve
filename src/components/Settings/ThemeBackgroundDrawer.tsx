@@ -10,6 +10,8 @@ import {
   Palette,
   Waves,
   Shuffle,
+  SettingsIcon,
+  PaletteIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -124,14 +126,14 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
     <Drawer>
       <DrawerTrigger asChild>
         <button
-          className="p-2 top-16 right-3 transition-all z-10 flex items-center justify-center
+          className="p-2 top-14 right-3 transition-all z-10 flex items-center justify-center
              dark:hover:bg-black/30 dark:active:bg-black/40 active:bg-black/40
             text-white/90 hover:text-white
             border-white/10 hover:border-white/20
             shadow-sm hover:shadow-md absolute rounded-full  text-white backdrop-blur-md hover:bg-black/30"
           title="Theme & Background Settings"
         >
-          <Palette className="h-4 w-4" />
+          <PaletteIcon className="h-4 w-4" />
         </button>
       </DrawerTrigger>
       <DrawerContent className="bg-transparent backdrop-blur-xl border-t border-white/5">
