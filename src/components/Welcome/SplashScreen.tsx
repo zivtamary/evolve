@@ -13,6 +13,9 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, onStartFadeOut 
   const [displayName] = useLocalStorage('display_name', '');
 
   useEffect(() => {
+    // Add class to body to prevent interaction
+    document.body.classList.add('splash-screen-active');
+    
     // Total animation duration is about 3 seconds
     const timer = setTimeout(() => {
       setIsExiting(true);
@@ -26,7 +29,11 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, onStartFadeOut 
       }, 1000);
     }, 3000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      // Remove class from body when component unmounts
+      document.body.classList.remove('splash-screen-active');
+    };
   }, [onComplete, onStartFadeOut]);
 
   return (

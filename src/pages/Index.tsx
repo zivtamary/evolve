@@ -87,6 +87,11 @@ const Index = () => {
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
+      // If splash screen or welcome intro is showing, disable scrolling
+      if (document.body.classList.contains('splash-screen-active') || showWelcome) {
+        return;
+      }
+      
       // If Ctrl key is pressed, don't change slides (allows for zooming)
       if (e.ctrlKey) return;
       
@@ -148,7 +153,7 @@ const Index = () => {
         clearTimeout(scrollTimeout);
       }
     };
-  }, [currentSlide, isScrolling, expandedWidget, isSearchFocused, scrollTimeout]);
+  }, [currentSlide, isScrolling, expandedWidget, isSearchFocused, scrollTimeout, showWelcome]);
 
   // Remove the scroll event listener since we're using transform now
   useEffect(() => {

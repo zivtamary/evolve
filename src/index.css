@@ -220,3 +220,22 @@
   background-size: 200% 200%;
   animation: gradient-x 3s ease infinite;
 }
+
+/* Splash screen styles */
+body.splash-screen-active {
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  scroll-behavior: none;
+}
+
+body.splash-screen-active * {
+  pointer-events: none;
+}
+
+/* Allow interaction with the splash screen itself */
+body.splash-screen-active .splash-screen-active {
+  pointer-events: auto;
+}

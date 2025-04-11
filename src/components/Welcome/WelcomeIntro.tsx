@@ -14,6 +14,14 @@ const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete, onStartFadeOut 
   const [displayName, setDisplayName] = useLocalStorage('display_name', '');
   const [nameError, setNameError] = useState('');
 
+  // Add class to body when component mounts and remove when it unmounts
+  useEffect(() => {
+    document.body.classList.add('splash-screen-active');
+    return () => {
+      document.body.classList.remove('splash-screen-active');
+    };
+  }, []);
+
   const handleNext = () => {
     if (step < 3) {
       if (step === 2 && (!name || name.trim() === '')) {
