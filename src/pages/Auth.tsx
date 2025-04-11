@@ -10,10 +10,11 @@ import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useSettings } from '@/context/SettingsContext';
 import BackgroundImage from '@/components/Background/BackgroundImage';
-import { ArrowLeft, ArrowRight, CheckCircle, Cloud, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Cloud, Sparkles, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { FcGoogle } from 'react-icons/fc';
 import { motion, AnimatePresence } from 'framer-motion';
+import ParticlesAnimation from '@/components/Background/ParticlesAnimation';
 
 const slideAnimation = {
   initial: { opacity: 0, x: 20 },
@@ -30,6 +31,8 @@ const Auth = () => {
   const [view, setView] = useState<'signin' | 'signup' | 'reset_password' | 'success'>('signin');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showParticles, setShowParticles] = useState(true);
   const isSigningIn = useRef(false);
   const navigate = useNavigate();
   const { isAuthenticated } = useSettings();
@@ -39,6 +42,14 @@ const Auth = () => {
       navigate('/');
     }
   }, [isAuthenticated, navigate]);
+
+  // Hide particles after initial animation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowParticles(false);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, []);
   
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,6 +129,7 @@ const Auth = () => {
         toast({
           title: "Welcome back",
           description: "You have been signed in successfully",
+          action: <Sparkles className="size-5" />
         });
         
         navigate('/');
@@ -196,34 +208,43 @@ const Auth = () => {
   };
   
   const renderHeader = () => {
-    if (view === 'reset_password') {
-      return (
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setView('signin')}
-              className="h-8 w-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <CardTitle>Authentication</CardTitle>
-          </div>
-          <CardDescription>
-            Sign in or create an account to sync your data across devices
-          </CardDescription>
-        </div>
-      );
-    }
-
-    return (
+    const headerContent = view === 'reset_password' ? (
       <>
-        <CardTitle>Authentication</CardTitle>
-        <CardDescription>
-          Sign in or create an account to sync your data across devices
+        <CardTitle className="text-xl font-semibold">Reset Password</CardTitle>
+        <CardDescription className="text-sm text-gray-500 dark:text-gray-400">
+          Enter your email to receive a password reset link
         </CardDescription>
       </>
+    ) : view === 'signup' ? (
+      <>
+        <CardTitle className="text-xl font-semibold">Create Account</CardTitle>
+        <CardDescription className="text-sm text-gray-500 dark:text-gray-400">
+          Join us to unlock premium features and sync across devices
+        </CardDescription>
+      </>
+    ) : (
+      <>
+        <CardTitle className="text-xl font-semibold">Welcome Back</CardTitle>
+        <CardDescription className="text-sm text-gray-500 dark:text-gray-400">
+          Sign in to continue to your dashboard
+        </CardDescription>
+      </>
+    );
+
+    return (
+      <div className="relative">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate('/')}
+          className="absolute -left-3 top-0 h-8 w-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <div className="pl-7">
+          {headerContent}
+        </div>
+      </div>
     );
   };
 
@@ -232,7 +253,13 @@ const Auth = () => {
       return (
         <motion.div {...slideAnimation} className="space-y-6">
           <div className="flex flex-col items-center justify-center py-8 space-y-4 text-center">
-            <CheckCircle className="h-16 w-16 text-green-500" />
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", duration: 0.6, bounce: 0.4 }}
+            >
+              <CheckCircle className="h-16 w-16 text-green-500" />
+            </motion.div>
             <h2 className="text-2xl font-bold">Account Created!</h2>
             <p className="text-muted-foreground">
               Please check your email to confirm your account before logging in.
@@ -250,15 +277,19 @@ const Auth = () => {
         <motion.div {...slideAnimation}>
           <form onSubmit={handleResetPassword} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="reset-email">Email</Label>
-              <Input 
-                id="reset-email" 
-                type="email" 
-                placeholder="your@email.com" 
-                value={resetEmail}
-                onChange={(e) => setResetEmail(e.target.value)}
-                required
-              />
+              <Label htmlFor="reset-email" className="dark:text-gray-200">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                <Input 
+                  id="reset-email" 
+                  type="email" 
+                  placeholder="your@email.com" 
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  required
+                  className="pl-10 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700 dark:placeholder-gray-400"
+                />
+              </div>
             </div>
             
             <Button 
@@ -276,9 +307,9 @@ const Auth = () => {
     return (
       <motion.div {...slideAnimation}>
         <Tabs defaultValue={view} onValueChange={(value) => setView(value as 'signin' | 'signup')}>
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Create Account</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mt-4 mb-6 dark:bg-gray-800">
+            <TabsTrigger value="signin" className="dark:data-[state=active]:bg-gray-700 dark:text-gray-100">Sign In</TabsTrigger>
+            <TabsTrigger value="signup" className="dark:data-[state=active]:bg-gray-700 dark:text-gray-100">Create Account</TabsTrigger>
           </TabsList>
           
           <AnimatePresence mode="wait">
@@ -292,40 +323,61 @@ const Auth = () => {
                 <form onSubmit={handleSignIn}>
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signin-email">Email</Label>
-                      <Input 
-                        id="signin-email" 
-                        type="email" 
-                        placeholder="your@email.com" 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
+                      <Label htmlFor="signin-email" className="dark:text-gray-200">Email</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                        <Input 
+                          id="signin-email" 
+                          type="email" 
+                          placeholder="your@email.com" 
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                          className="pl-10 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700 dark:placeholder-gray-400"
+                        />
+                      </div>
                     </div>
                     
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="signin-password">Password</Label>
+                        <Label htmlFor="signin-password" className="dark:text-gray-200">Password</Label>
                         <Button 
                           variant="link" 
-                          className="p-0 h-auto text-xs" 
+                          className="p-0 h-auto text-xs dark:text-gray-300 dark:hover:text-gray-100" 
                           onClick={() => setView('reset_password')}
                         >
                           Forgot password?
                         </Button>
                       </div>
-                      <Input 
-                        id="signin-password" 
-                        type="password" 
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                      />
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                        <Input 
+                          id="signin-password" 
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                          className="pl-10 pr-10 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4 text-gray-500" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-gray-500" />
+                          )}
+                        </Button>
+                      </div>
                     </div>
                     
                     <Button 
                       type="submit" 
-                      className="w-full" 
+                      className="w-full transition-colors" 
                       disabled={loading}
                     >
                       {loading ? "Signing in..." : "Sign In"}
@@ -333,10 +385,10 @@ const Auth = () => {
 
                     <div className="relative">
                       <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t" />
+                        <span className="w-full border-t dark:border-gray-700" />
                       </div>
                       <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-background px-2 text-muted-foreground">
+                        <span className="bg-background px-2 text-muted-foreground dark:bg-gray-900/60 dark:text-gray-400">
                           Or continue with
                         </span>
                       </div>
@@ -345,7 +397,7 @@ const Auth = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full"
+                      className="w-full dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100 dark:border-gray-700"
                       onClick={handleGoogleSignIn}
                       disabled={loading || isPending}
                     >
@@ -367,27 +419,48 @@ const Auth = () => {
                 <form onSubmit={handleSignUp}>
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signup-email">Email</Label>
-                      <Input 
-                        id="signup-email" 
-                        type="email" 
-                        placeholder="your@email.com" 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
+                      <Label htmlFor="signup-email" className="dark:text-gray-200">Email</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                        <Input 
+                          id="signup-email" 
+                          type="email" 
+                          placeholder="your@email.com" 
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                          className="pl-10 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700 dark:placeholder-gray-400"
+                        />
+                      </div>
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="signup-password">Password</Label>
-                      <Input 
-                        id="signup-password" 
-                        type="password" 
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                      />
-                      <p className="text-xs text-muted-foreground">
+                      <Label htmlFor="signup-password" className="dark:text-gray-200">Password</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                        <Input 
+                          id="signup-password" 
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                          className="pl-10 pr-10 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4 text-gray-500" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-gray-500" />
+                          )}
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground dark:text-gray-400">
                         Password must be at least 6 characters
                       </p>
                     </div>
@@ -397,14 +470,15 @@ const Auth = () => {
                         id="terms" 
                         checked={agreedToTerms}
                         onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
+                        className="dark:border-gray-600"
                       />
-                      <Label htmlFor="terms" className="text-xs leading-tight">
+                      <Label htmlFor="terms" className="text-xs leading-tight dark:text-gray-300">
                         I agree to the{" "}
-                        <Link to="/terms-of-service" className="text-primary hover:underline" target="_blank">
+                        <Link to="/terms-of-service" className="text-primary hover:underline dark:text-primary/90" target="_blank">
                           Terms of Service
                         </Link>{" "}
                         and{" "}
-                        <Link to="/privacy-policy" className="text-primary hover:underline" target="_blank">
+                        <Link to="/privacy-policy" className="text-primary hover:underline dark:text-primary/90" target="_blank">
                           Privacy Policy
                         </Link>
                       </Label>
@@ -412,7 +486,7 @@ const Auth = () => {
                     
                     <Button 
                       type="submit" 
-                      className="w-full" 
+                      className="w-full transition-colors" 
                       disabled={loading || !agreedToTerms}
                     >
                       {loading ? "Creating account..." : "Create Account"}
@@ -430,7 +504,7 @@ const Auth = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.3 }}
-          className="space-y-4"
+          className="space-y-4 dark:text-gray-100"
         >
           <h3 className="text-lg font-medium flex items-center">
             <Sparkles className="h-5 w-5 mr-2 text-yellow-500" />
@@ -442,7 +516,7 @@ const Auth = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
-              className="flex items-start"
+              className="flex items-start dark:text-gray-300"
             >
               <Cloud className="h-5 w-5 mr-2 text-primary flex-shrink-0 mt-0.5" />
               <span className="text-sm">Cloud sync across all your devices</span>
@@ -451,7 +525,7 @@ const Auth = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
-              className="flex items-start"
+              className="flex items-start dark:text-gray-300"
             >
               <CheckCircle className="h-5 w-5 mr-2 text-primary flex-shrink-0 mt-0.5" />
               <span className="text-sm">Secure backup of all your notes, todos and events</span>
@@ -460,7 +534,7 @@ const Auth = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 }}
-              className="flex items-start"
+              className="flex items-start dark:text-gray-300"
             >
               <ArrowRight className="h-5 w-5 mr-2 text-primary flex-shrink-0 mt-0.5" />
               <span className="text-sm">Access your productivity dashboard from anywhere</span>
@@ -473,27 +547,18 @@ const Auth = () => {
 
   return (
     <BackgroundImage>
+      <ParticlesAnimation isVisible={showParticles} />
       <div className="flex justify-center items-center min-h-screen p-4">
-        <Card className="w-full max-w-md overflow-hidden">
-          <CardHeader>
+        <Card className="w-full max-w-md overflow-hidden border-0 dark:bg-gray-900/60 dark:backdrop-blur-md">
+          <CardHeader className="dark:text-gray-100">
             {renderHeader()}
           </CardHeader>
           
-          <CardContent>
+          <CardContent className="dark:text-gray-200">
             <AnimatePresence mode="wait" initial={false}>
               {renderAuthContent()}
             </AnimatePresence>
           </CardContent>
-          
-          <CardFooter>
-            <Button 
-              variant="outline" 
-              className="w-full" 
-              onClick={() => navigate('/')}
-            >
-              Back to Dashboard
-            </Button>
-          </CardFooter>
         </Card>
       </div>
     </BackgroundImage>
