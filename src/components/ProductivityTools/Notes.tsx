@@ -43,6 +43,10 @@ const Notes: React.FC = () => {
   const notesRef = useRef<HTMLDivElement>(null);
   const isExpanded = expandedWidget === 'notes';
   
+  // Add state to track initial values when focusing
+  const [initialTitle, setInitialTitle] = useState<string>('');
+  const [initialContent, setInitialContent] = useState<string>('');
+  
   // Function to fetch notes from cloud
   const fetchCloudNotes = async () => {
     if (!isAuthenticated || !userProfile?.cloud_sync_enabled) return;
@@ -57,15 +61,124 @@ const Notes: React.FC = () => {
       if (error) throw error;
       
       if (cloudNotes) {
-        const localNotes = (cloudNotes as CloudNote[]).map(note => ({
+        // Convert cloud notes to local format
+        const cloudNotesFormatted = (cloudNotes as CloudNote[]).map(note => ({
           id: note.id,
           title: note.title || 'Untitled Note',
           content: truncateContent(note.content), // Ensure content is within limit
           createdAt: new Date(note.created_at).getTime(),
           updatedAt: new Date(note.updated_at).getTime()
         }));
-        setNotes(localNotes);
-        console.log('Local notes updated with cloud data');
+        
+        console.log('Cloud notes fetched:', cloudNotesFormatted.length);
+        console.log('Local notes:', notes.length);
+        
+        // Create a map of local notes for easy lookup
+        const localNotesMap = new Map<string, Note>();
+        notes.forEach(note => {
+          localNotesMap.set(note.id, note);
+        });
+        
+        // Create a map of cloud notes for easy lookup
+        const cloudNotesMap = new Map<string, Note>();
+        cloudNotesFormatted.forEach(note => {
+          cloudNotesMap.set(note.id, note);
+        });
+        
+        // Create sets of IDs for comparison
+        const localNoteIds = new Set(notes.map(note => note.id));
+        const cloudNoteIds = new Set(cloudNotesFormatted.map(note => note.id));
+        
+        // Find notes to delete (in cloud but not in local)
+        const notesToDelete = Array.from(cloudNoteIds).filter(id => !localNoteIds.has(id));
+        
+        // Find notes to add (in local but not in cloud)
+        const notesToAdd = Array.from(localNoteIds).filter(id => !cloudNoteIds.has(id));
+        
+        // Find notes that exist in both local and cloud
+        const commonNoteIds = Array.from(localNoteIds).filter(id => cloudNoteIds.has(id));
+        
+        // Merge notes, keeping the most recent version
+        const mergedNotes: Note[] = [];
+        
+        // Add notes that only exist locally
+        notesToAdd.forEach(id => {
+          const localNote = localNotesMap.get(id);
+          if (localNote) {
+            mergedNotes.push(localNote);
+          }
+        });
+        
+        // Add notes that only exist in cloud
+        notesToDelete.forEach(id => {
+          const cloudNote = cloudNotesMap.get(id);
+          if (cloudNote) {
+            mergedNotes.push(cloudNote);
+          }
+        });
+        
+        // Compare and merge common notes
+        commonNoteIds.forEach(id => {
+          const localNote = localNotesMap.get(id);
+          const cloudNote = cloudNotesMap.get(id);
+          
+          if (localNote && cloudNote) {
+            // Keep the note with the newer updatedAt timestamp
+            if (localNote.updatedAt >= cloudNote.updatedAt) {
+              mergedNotes.push(localNote);
+            } else {
+              mergedNotes.push(cloudNote);
+            }
+          }
+        });
+        
+        // Sort notes by updatedAt (most recent first)
+        const sortedNotes = mergedNotes.sort((a, b) => b.updatedAt - a.updatedAt);
+        
+        // Update local state with merged notes
+        setNotes(sortedNotes);
+        
+        // Update database with any changes
+        const notesToSync = sortedNotes.map(note => {
+          const cloudNote = cloudNotesMap.get(note.id);
+          
+          // If note doesn't exist in cloud or local version is newer, sync to cloud
+          if (!cloudNote || note.updatedAt > new Date(cloudNote.updatedAt).getTime()) {
+            return {
+              id: note.id,
+              user_id: userProfile.id,
+              title: note.title,
+              content: note.content,
+              created_at: new Date(note.createdAt).toISOString(),
+              updated_at: new Date(note.updatedAt).toISOString()
+            };
+          }
+          return null;
+        }).filter(Boolean) as CloudNote[];
+        
+        if (notesToSync.length > 0) {
+          console.log('Syncing', notesToSync.length, 'notes to cloud...');
+          const { error: syncError } = await supabase
+            .from('notes')
+            .upsert(notesToSync);
+            
+          if (syncError) throw syncError;
+          console.log('Notes synced to cloud successfully');
+        }
+        
+        // Delete notes from cloud that don't exist locally
+        if (notesToDelete.length > 0) {
+          console.log('Deleting', notesToDelete.length, 'notes from cloud...');
+          const { error: deleteError } = await supabase
+            .from('notes')
+            .delete()
+            .in('id', notesToDelete);
+            
+          if (deleteError) throw deleteError;
+          console.log('Notes deleted from cloud successfully');
+        }
+        
+        console.log('Notes sync completed successfully');
       }
     } catch (error) {
       console.error('Error fetching notes from cloud:', error);
@@ -124,7 +237,7 @@ const Notes: React.FC = () => {
     return content.substring(0, MAX_CONTENT_LENGTH);
   };
   
-  const createNewNote = () => {
+  const createNewNote = async () => {
     const newNote: Note = {
       id: crypto.randomUUID(),
       title: 'Untitled Note',
@@ -139,6 +252,28 @@ const Notes: React.FC = () => {
     
     if (textareaRef.current) {
       textareaRef.current.focus();
+    }
+    
+    // Immediately create the note in the database if authenticated and sync is enabled
+    if (isAuthenticated && userProfile?.cloud_sync_enabled) {
+      try {
+        console.log('Creating new note in database:', newNote.id);
+        const { error } = await supabase
+          .from('notes')
+          .insert({
+            id: newNote.id,
+            user_id: userProfile.id,
+            title: newNote.title,
+            content: newNote.content,
+            created_at: new Date(newNote.createdAt).toISOString(),
+            updated_at: new Date(newNote.updatedAt).toISOString()
+          });
+          
+        if (error) throw error;
+        console.log('Note created in database successfully');
+      } catch (error) {
+        console.error('Error creating note in database:', error);
+      }
     }
   };
   
@@ -165,7 +300,23 @@ const Notes: React.FC = () => {
 
     try {
       console.log('Note deleted, attempting to sync...');
-      await syncNotesOnBlur();
+      
+      // Directly delete from database if authenticated and sync is enabled
+      if (isAuthenticated && userProfile?.cloud_sync_enabled) {
+        console.log('Deleting note from database:', id);
+        const { error } = await supabase
+          .from('notes')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', userProfile.id);
+          
+        if (error) throw error;
+        console.log('Note deleted from database successfully');
+      } else {
+        // If not authenticated or sync disabled, just sync normally
+        await syncNotesOnBlur();
+      }
+      
       console.log('Notes sync completed');
     } catch (error) {
       console.error('Error syncing notes:', error);
@@ -195,6 +346,62 @@ const Notes: React.FC = () => {
       );
       
       setNotes(updatedNotes);
+    }
+  };
+
+  const handleTitleFocus = () => {
+    // Store the initial title value when focusing
+    setInitialTitle(noteTitle);
+  };
+  
+  const handleContentFocus = () => {
+    // Store the initial content value when focusing
+    setInitialContent(noteContent);
+  };
+
+  // Add a new function to handle title blur
+  const handleTitleBlur = async () => {
+    try {
+      console.log('Note title blur event triggered');
+      console.log('Initial title:', initialTitle);
+      console.log('Current title:', noteTitle);
+      
+      // If we have an active note and are authenticated with sync enabled, update it directly
+      if (activeNoteId && isAuthenticated && userProfile?.cloud_sync_enabled) {
+        const activeNote = notes.find(note => note.id === activeNoteId);
+        if (activeNote) {
+          // Check if the title has actually changed
+          if (initialTitle !== noteTitle) {
+            console.log('Title changed, updating note title in database:', activeNoteId);
+            const { error } = await supabase
+              .from('notes')
+              .update({
+                title: noteTitle,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', activeNoteId)
+              .eq('user_id', userProfile.id);
+              
+            if (error) throw error;
+            console.log('Note title updated in database successfully');
+            
+            // Update last_synced timestamp in profile
+            await updateLastSynced();
+          } else {
+            console.log('No title changes detected, skipping database update');
+          }
+        }
+      } else {
+        // If not authenticated or sync disabled, just sync normally
+        await syncNotesOnBlur();
+      }
+      
+      // Clear the initial title value
+      setInitialTitle('');
+      
+      console.log('Notes sync completed');
+    } catch (error) {
+      console.error('Error syncing notes:', error);
     }
   };
 
@@ -236,10 +443,63 @@ const Notes: React.FC = () => {
   const handleBlur = async () => {
     try {
       console.log('Note blur event triggered');
-      await syncNotesOnBlur();
+      console.log('Initial content:', initialContent);
+      console.log('Current content:', noteContent);
+      
+      // If we have an active note and are authenticated with sync enabled, update it directly
+      if (activeNoteId && isAuthenticated && userProfile?.cloud_sync_enabled) {
+        const activeNote = notes.find(note => note.id === activeNoteId);
+        if (activeNote) {
+          // Check if the content has actually changed
+          if (initialContent !== noteContent) {
+            console.log('Content changed, updating note in database:', activeNoteId);
+            const { error } = await supabase
+              .from('notes')
+              .update({
+                content: noteContent,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', activeNoteId)
+              .eq('user_id', userProfile.id);
+              
+            if (error) throw error;
+            console.log('Note content updated in database successfully');
+            
+            // Update last_synced timestamp in profile
+            await updateLastSynced();
+          } else {
+            console.log('No content changes detected, skipping database update');
+          }
+        }
+      } else {
+        // If not authenticated or sync disabled, just sync normally
+        await syncNotesOnBlur();
+      }
+      
+      // Clear the initial content value
+      setInitialContent('');
+      
       console.log('Notes sync completed');
     } catch (error) {
       console.error('Error syncing notes:', error);
+    }
+  };
+  
+  // Add a helper function to update the last_synced timestamp
+  const updateLastSynced = async () => {
+    if (!isAuthenticated || !userProfile?.id) return;
+    
+    try {
+      console.log('Updating last_synced timestamp in profile');
+      const { error } = await supabase
+        .from('profiles')
+        .update({ last_synced: new Date().toISOString() })
+        .eq('id', userProfile.id);
+        
+      if (error) throw error;
+      console.log('Last synced timestamp updated successfully');
+    } catch (error) {
+      console.error('Error updating last_synced timestamp:', error);
     }
   };
   
@@ -460,6 +720,8 @@ const Notes: React.FC = () => {
                 type="text"
                 value={noteTitle}
                 onChange={handleTitleChange}
+                onFocus={handleTitleFocus}
+                onBlur={handleTitleBlur}
                 className="w-full bg-transparent outline-none text-xl font-semibold text-white placeholder:text-white/60"
                 placeholder="Note title..."
               />
@@ -469,6 +731,7 @@ const Notes: React.FC = () => {
                   ref={textareaRef}
                   value={noteContent}
                   onChange={handleContentChange}
+                  onFocus={handleContentFocus}
                   onBlur={handleBlur}
                   className="w-full flex-1 bg-transparent outline-none resize-none text-base text-white placeholder:text-white/60"
                   placeholder="Start typing..."

@@ -19,6 +19,7 @@ interface Note {
   user_id?: string;
   created_at?: string;
   updated_at?: string;
+  updatedAt: number;
 }
 
 interface CloudNote {
@@ -37,7 +38,8 @@ interface Todo {
   user_id?: string;
   created_at?: string;
   updated_at?: string;
-  createdAt?: number;
+  createdAt: number;
+  updatedAt: number;
 }
 
 interface StoredData<T> {
@@ -62,6 +64,7 @@ interface Event {
   user_id?: string;
   created_at?: string;
   updated_at?: string;
+  updatedAt: number;
 }
 
 interface CloudEvent {
@@ -146,53 +149,37 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const checkSession = async () => {
-      // If we're already checking the session, don't start another check
-      if (isCheckingSessionRef.current) {
-        console.log('[SettingsContext] Session check already in progress, skipping');
-        return;
-      }
+      if (isCheckingSessionRef.current) return;
+      isCheckingSessionRef.current = true;
 
       try {
-        isCheckingSessionRef.current = true;
-        console.log('[SettingsContext] Starting session check...');
-        
-        // 1. Get session and user
-        console.log('[SettingsContext] Getting session...');
+        // 1. Check if there's a session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        console.log('[SettingsContext] Session check result:', { session: !!session, error: sessionError });
-        
-        console.log('[SettingsContext] Getting user...');
+        console.log('[SettingsContext] Session check result:', { hasSession: !!session, error: sessionError });
+
+        if (sessionError) {
+          console.error('[SettingsContext] Session error:', sessionError);
+          throw sessionError;
+        }
+
+        // 2. Get user from session
         const { data: { user }, error: userError } = await supabase.auth.getUser();
-        console.log('[SettingsContext] User check result:', { user: !!user, error: userError });
-        
-        if (sessionError || userError) {
-          console.error('[SettingsContext] Session or user error:', sessionError || userError);
+        console.log('[SettingsContext] User check result:', { hasUser: !!user, error: userError });
+
+        if (userError) {
+          console.error('[SettingsContext] User error:', userError);
+          throw userError;
+        }
+
+        if (!user) {
+          console.log('[SettingsContext] No user found, setting isAuthenticated to false');
           setIsAuthenticated(false);
           setUserProfile(null);
           setSubscription(null);
-          setIsLoading(false);
           return;
         }
-        
-        console.log('[SettingsContext] Session state:', {
-          exists: !!session,
-          user: user?.id,
-          expiresAt: session?.expires_at
-        });
 
-        // Set initial state based on session and user
-        const hasValidSession = !!session && !!user;
-        console.log('[SettingsContext] Setting auth state:', hasValidSession);
-        setIsAuthenticated(hasValidSession);
-        
-        // If no valid session, clear state and return early
-        if (!hasValidSession) {
-          console.log('[SettingsContext] No valid session, clearing state');
-          setUserProfile(null);
-          setSubscription(null);
-          setIsLoading(false);
-          return;
-        }
+        setIsAuthenticated(true);
 
         try {
           // 3. Fetch profile
@@ -244,41 +231,54 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
             .from('subscriptions')
             .select('*')
             .eq('user_id', user.id)
-            .maybeSingle();
+            .single();
           console.log('[SettingsContext] Subscription fetch result:', { data: !!subscriptionData, error: subscriptionError });
 
-          if (subscriptionError) {
-            console.error('[SettingsContext] Error fetching subscription:', subscriptionError);
-            // Don't throw error, just log it
-          } else {
-            console.log('[SettingsContext] Subscription state:', subscriptionData);
-            setSubscription(subscriptionData);
+          if (subscriptionError && subscriptionError.code !== 'PGRST116') {
+            console.error('[SettingsContext] Subscription error:', subscriptionError);
+            throw subscriptionError;
           }
+          setSubscription(subscriptionData);
+
+          // 5. Fetch notes, todos, and events
+          console.log('[SettingsContext] Fetching notes, todos, and events');
+          await Promise.all([
+            syncNotes(user.id),
+            syncTodos(user.id),
+            syncEvents(user.id)
+          ]);
+
+          // 6. Update last_synced timestamp after all data is fetched
+          console.log('[SettingsContext] Updating last_synced timestamp');
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ last_synced: new Date().toISOString() })
+            .eq('id', user.id);
+            
+          if (updateError) {
+            console.error('[SettingsContext] Error updating last_synced:', updateError);
+            throw updateError;
+          }
+          
+          // Update local profile state with new last_synced
+          setUserProfile(prev => prev ? {
+            ...prev,
+            last_synced: new Date().toISOString()
+          } : null);
+          
+          console.log('[SettingsContext] Last synced timestamp updated successfully');
         } catch (error) {
           console.error('[SettingsContext] Error in data fetching:', error);
-          // Don't reset auth state on profile/subscription errors
-          toast({
-            title: "Error",
-            description: "Error loading user data",
-            variant: "destructive"
-          });
-        } finally {
-          console.log('[SettingsContext] Setting isLoading to false');
-          setIsLoading(false);
+          // Don't throw here, we want to keep the user logged in even if data fetching fails
         }
       } catch (error) {
-        console.error('[SettingsContext] Error in session check:', error);
+        console.error('[SettingsContext] Error in checkSession:', error);
         setIsAuthenticated(false);
         setUserProfile(null);
         setSubscription(null);
-        setIsLoading(false);
-        toast({
-          title: "Session Error",
-          description: "Please try logging in again",
-          variant: "destructive"
-        });
       } finally {
         isCheckingSessionRef.current = false;
+        setIsLoading(false);
       }
     };
 
@@ -585,22 +585,40 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       console.log('Local notes found:', localNotes.length);
       
       console.log('Fetching cloud notes...');
-    const { data: cloudNotes, error } = await supabase
-      .from('notes')
-      .select('*')
-      .eq('user_id', userId);
+      const { data: cloudNotes, error } = await supabase
+        .from('notes')
+        .select('*')
+        .eq('user_id', userId);
     
-    if (error) throw error;
+      if (error) throw error;
     
       console.log('Cloud notes found:', cloudNotes?.length || 0);
       
+      // Create sets of IDs for comparison
+      const localNoteIds = new Set(localNotes.map(note => note.id));
+      const cloudNoteIds = new Set(cloudNotes?.map(note => note.id) || []);
+
+      // Find notes to delete (in cloud but not in local)
+      const notesToDelete = Array.from(cloudNoteIds).filter(id => !localNoteIds.has(id));
+      
+      if (notesToDelete.length > 0) {
+        console.log('Deleting', notesToDelete.length, 'notes from cloud...');
+        const { error: deleteError } = await supabase
+          .from('notes')
+          .delete()
+          .in('id', notesToDelete);
+          
+        if (deleteError) throw deleteError;
+        console.log('Notes deleted successfully');
+      }
+      
       // Merge and sync
       const notesToSync = localNotes.map((note: Note) => ({
-            id: note.id,
-            user_id: userId,
-            content: note.content,
+        id: note.id,
+        user_id: userId,
+        content: note.content,
         created_at: note.created_at || new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date(note.updatedAt).toISOString()
       }));
       
       if (notesToSync.length > 0) {
@@ -674,7 +692,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
             id: todo.id,
             text: todo.title,
             completed: todo.completed,
-            createdAt: new Date(todo.created_at).getTime()
+            createdAt: new Date(todo.created_at).getTime(),
+            updatedAt: new Date(todo.updated_at).getTime()
           });
         });
       }
@@ -682,7 +701,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       // Add local todos, keeping the most recent version if there's a conflict
       localTodos.forEach(todo => {
         const existingTodo = mergedTodos.get(todo.id);
-        if (!existingTodo || (todo.createdAt && todo.createdAt > (existingTodo.createdAt || 0))) {
+        if (!existingTodo || (todo.updatedAt && todo.updatedAt > (existingTodo.updatedAt || 0))) {
           mergedTodos.set(todo.id, todo);
         }
       });
@@ -702,7 +721,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       
       // Sync merged data back to cloud
       const todosToSync = finalTodos.map(todo => {
-        const now = new Date().toISOString();
         // Ensure the title doesn't exceed 100 characters
         const title = todo.text.substring(0, 100);
         return {
@@ -710,8 +728,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
           user_id: userId,
           title: title,
           completed: todo.completed || false,
-          created_at: now,
-          updated_at: now
+          created_at: new Date(todo.createdAt).toISOString(),
+          updated_at: new Date(todo.updatedAt).toISOString()
         };
       });
       
@@ -763,11 +781,11 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
             id: event.id,
             user_id: userId,
             title: event.title,
-        date: event.start.split('T')[0], // Extract date from start time
-        time: event.start.split('T')[1], // Extract time from start time
-        description: event.title, // Use title as description
-        created_at: event.created_at || new Date().toISOString(),
-        updated_at: new Date().toISOString()
+            date: event.start.split('T')[0], // Extract date from start time
+            time: event.start.split('T')[1], // Extract time from start time
+            description: event.title, // Use title as description
+            created_at: event.created_at || new Date().toISOString(),
+            updated_at: new Date(event.updatedAt).toISOString()
       }));
       
       if (eventsToSync.length > 0) {

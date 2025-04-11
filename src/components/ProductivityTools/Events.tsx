@@ -45,8 +45,20 @@ interface Event {
   date: string;
   time: string;
   description: string;
-  createdAt: number;
   icon?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+interface CloudEvent {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  description: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface NewEvent {
@@ -283,6 +295,7 @@ const Events = () => {
       time: newEvent.time || "",
       description: newEvent.description.trim(),
       createdAt: Date.now(),
+      updatedAt: Date.now(),
       ...(newEvent.icon && { icon: newEvent.icon }),
     };
 
@@ -307,6 +320,7 @@ const Events = () => {
             description: event.description,
             icon: event.icon,
             created_at: new Date(event.createdAt).toISOString(),
+            updated_at: new Date(event.updatedAt).toISOString(),
           },
         ]);
 
@@ -350,6 +364,7 @@ const Events = () => {
       date: newEvent.date,
       time: newEvent.time || "",
       description: newEvent.description.trim(),
+      updatedAt: Date.now(),
       icon: newEvent.icon,
     };
 
@@ -370,6 +385,7 @@ const Events = () => {
             time: updatedEvent.time,
             description: updatedEvent.description,
             icon: updatedEvent.icon,
+            updated_at: new Date(updatedEvent.updatedAt).toISOString(),
           })
           .eq("id", updatedEvent.id)
           .eq("user_id", userProfile.id);
@@ -385,34 +401,142 @@ const Events = () => {
   // Function to fetch events from cloud
   const fetchCloudEvents = async () => {
     if (!isAuthenticated || !userProfile?.cloud_sync_enabled) return;
-
+    
     try {
-      console.log("Fetching events from cloud...");
+      console.log('Fetching events from cloud...');
       const { data: cloudEvents, error } = await supabase
-        .from("events")
-        .select("*")
-        .eq("user_id", userProfile.id);
-
+        .from('events')
+        .select('*')
+        .eq('user_id', userProfile.id);
+        
       if (error) throw error;
-
+      
       if (cloudEvents) {
-        const localEvents = cloudEvents.map((event) => ({
+        // Convert cloud events to local format
+        const cloudEventsFormatted = (cloudEvents as CloudEvent[]).map(event => ({
           id: event.id,
           title: event.title,
           date: event.date,
           time: event.time,
           description: event.description,
-          icon:
-            "icon" in event && typeof event.icon === "string"
-              ? event.icon
-              : "",
           createdAt: new Date(event.created_at).getTime(),
+          updatedAt: new Date(event.updated_at).getTime()
         }));
-        setEvents(localEvents);
-        console.log("Local events updated with cloud data");
+        
+        console.log('Cloud events fetched:', cloudEventsFormatted.length);
+        console.log('Local events:', events.length);
+        
+        // Create a map of local events for easy lookup
+        const localEventsMap = new Map<string, Event>();
+        events.forEach(event => {
+          localEventsMap.set(event.id, event);
+        });
+        
+        // Create a map of cloud events for easy lookup
+        const cloudEventsMap = new Map<string, Event>();
+        cloudEventsFormatted.forEach(event => {
+          cloudEventsMap.set(event.id, event);
+        });
+        
+        // Create sets of IDs for comparison
+        const localEventIds = new Set(events.map(event => event.id));
+        const cloudEventIds = new Set(cloudEventsFormatted.map(event => event.id));
+        
+        // Find events to delete (in cloud but not in local)
+        const eventsToDelete = Array.from(cloudEventIds).filter(id => !localEventIds.has(id));
+        
+        // Find events to add (in local but not in cloud)
+        const eventsToAdd = Array.from(localEventIds).filter(id => !cloudEventIds.has(id));
+        
+        // Find events that exist in both local and cloud
+        const commonEventIds = Array.from(localEventIds).filter(id => cloudEventIds.has(id));
+        
+        // Merge events, keeping the most recent version
+        const mergedEvents: Event[] = [];
+        
+        // Add events that only exist locally
+        eventsToAdd.forEach(id => {
+          const localEvent = localEventsMap.get(id);
+          if (localEvent) {
+            mergedEvents.push(localEvent);
+          }
+        });
+        
+        // Add events that only exist in cloud
+        eventsToDelete.forEach(id => {
+          const cloudEvent = cloudEventsMap.get(id);
+          if (cloudEvent) {
+            mergedEvents.push(cloudEvent);
+          }
+        });
+        
+        // Compare and merge common events
+        commonEventIds.forEach(id => {
+          const localEvent = localEventsMap.get(id);
+          const cloudEvent = cloudEventsMap.get(id);
+          
+          if (localEvent && cloudEvent) {
+            // Keep the event with the newer updatedAt timestamp
+            if (localEvent.updatedAt >= cloudEvent.updatedAt) {
+              mergedEvents.push(localEvent);
+            } else {
+              mergedEvents.push(cloudEvent);
+            }
+          }
+        });
+        
+        // Sort events by updatedAt (most recent first)
+        const sortedEvents = mergedEvents.sort((a, b) => b.updatedAt - a.updatedAt);
+        
+        // Update local state with merged events
+        setEvents(sortedEvents);
+        
+        // Update database with any changes
+        const eventsToSync = sortedEvents.map(event => {
+          const cloudEvent = cloudEventsMap.get(event.id);
+          
+          // If event doesn't exist in cloud or local version is newer, sync to cloud
+          if (!cloudEvent || event.updatedAt > new Date(cloudEvent.updatedAt).getTime()) {
+            return {
+              id: event.id,
+              user_id: userProfile.id,
+              title: event.title,
+              date: event.date,
+              time: event.time,
+              description: event.description,
+              created_at: new Date(event.createdAt).toISOString(),
+              updated_at: new Date(event.updatedAt).toISOString()
+            };
+          }
+          return null;
+        }).filter(Boolean) as CloudEvent[];
+        
+        if (eventsToSync.length > 0) {
+          console.log('Syncing', eventsToSync.length, 'events to cloud...');
+          const { error: syncError } = await supabase
+            .from('events')
+            .upsert(eventsToSync);
+            
+          if (syncError) throw syncError;
+          console.log('Events synced to cloud successfully');
+        }
+        
+        // Delete events from cloud that don't exist locally
+        if (eventsToDelete.length > 0) {
+          console.log('Deleting', eventsToDelete.length, 'events from cloud...');
+          const { error: deleteError } = await supabase
+            .from('events')
+            .delete()
+            .in('id', eventsToDelete);
+            
+          if (deleteError) throw deleteError;
+          console.log('Events deleted from cloud successfully');
+        }
+        
+        console.log('Events sync completed successfully');
       }
     } catch (error) {
-      console.error("Error fetching events from cloud:", error);
+      console.error('Error fetching events from cloud:', error);
     }
   };
 

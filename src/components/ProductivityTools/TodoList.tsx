@@ -16,6 +16,16 @@ interface TodoItem {
   text: string;
   completed: boolean;
   createdAt: number;
+  updatedAt: number;
+}
+
+interface CloudTodo {
+  id: string;
+  title: string;
+  completed: boolean;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface StoredTodos {
@@ -47,14 +57,124 @@ const TodoList: React.FC = () => {
       if (error) throw error;
       
       if (cloudTodos) {
-        const localTodos = cloudTodos.map(todo => ({
+        // Convert cloud todos to local format
+        const cloudTodosFormatted = (cloudTodos as CloudTodo[]).map(todo => ({
           id: todo.id,
           text: todo.title,
           completed: todo.completed,
-          createdAt: new Date(todo.created_at).getTime()
+          createdAt: new Date(todo.created_at).getTime(),
+          updatedAt: new Date(todo.updated_at).getTime()
         }));
-        setTodos(localTodos);
-        console.log('Local todos updated with cloud data');
+        
+        console.log('Cloud todos fetched:', cloudTodosFormatted.length);
+        console.log('Local todos:', todos.length);
+        
+        // Create a map of local todos for easy lookup
+        const localTodosMap = new Map<string, TodoItem>();
+        todos.forEach(todo => {
+          localTodosMap.set(todo.id, todo);
+        });
+        
+        // Create a map of cloud todos for easy lookup
+        const cloudTodosMap = new Map<string, TodoItem>();
+        cloudTodosFormatted.forEach(todo => {
+          cloudTodosMap.set(todo.id, todo);
+        });
+        
+        // Create sets of IDs for comparison
+        const localTodoIds = new Set(todos.map(todo => todo.id));
+        const cloudTodoIds = new Set(cloudTodosFormatted.map(todo => todo.id));
+        
+        // Find todos to delete (in cloud but not in local)
+        const todosToDelete = Array.from(cloudTodoIds).filter(id => !localTodoIds.has(id));
+        
+        // Find todos to add (in local but not in cloud)
+        const todosToAdd = Array.from(localTodoIds).filter(id => !cloudTodoIds.has(id));
+        
+        // Find todos that exist in both local and cloud
+        const commonTodoIds = Array.from(localTodoIds).filter(id => cloudTodoIds.has(id));
+        
+        // Merge todos, keeping the most recent version
+        const mergedTodos: TodoItem[] = [];
+        
+        // Add todos that only exist locally
+        todosToAdd.forEach(id => {
+          const localTodo = localTodosMap.get(id);
+          if (localTodo) {
+            mergedTodos.push(localTodo);
+          }
+        });
+        
+        // Add todos that only exist in cloud
+        todosToDelete.forEach(id => {
+          const cloudTodo = cloudTodosMap.get(id);
+          if (cloudTodo) {
+            mergedTodos.push(cloudTodo);
+          }
+        });
+        
+        // Compare and merge common todos
+        commonTodoIds.forEach(id => {
+          const localTodo = localTodosMap.get(id);
+          const cloudTodo = cloudTodosMap.get(id);
+          
+          if (localTodo && cloudTodo) {
+            // Keep the todo with the newer updatedAt timestamp
+            if (localTodo.updatedAt >= cloudTodo.updatedAt) {
+              mergedTodos.push(localTodo);
+            } else {
+              mergedTodos.push(cloudTodo);
+            }
+          }
+        });
+        
+        // Sort todos by updatedAt (most recent first)
+        const sortedTodos = mergedTodos.sort((a, b) => b.updatedAt - a.updatedAt);
+        
+        // Update local state with merged todos
+        setTodos(sortedTodos);
+        
+        // Update database with any changes
+        const todosToSync = sortedTodos.map(todo => {
+          const cloudTodo = cloudTodosMap.get(todo.id);
+          
+          // If todo doesn't exist in cloud or local version is newer, sync to cloud
+          if (!cloudTodo || todo.updatedAt > new Date(cloudTodo.updatedAt).getTime()) {
+            return {
+              id: todo.id,
+              user_id: userProfile.id,
+              title: todo.text,
+              completed: todo.completed,
+              created_at: new Date(todo.createdAt).toISOString(),
+              updated_at: new Date(todo.updatedAt).toISOString()
+            };
+          }
+          return null;
+        }).filter(Boolean) as CloudTodo[];
+        
+        if (todosToSync.length > 0) {
+          console.log('Syncing', todosToSync.length, 'todos to cloud...');
+          const { error: syncError } = await supabase
+            .from('todos')
+            .upsert(todosToSync);
+            
+          if (syncError) throw syncError;
+          console.log('Todos synced to cloud successfully');
+        }
+        
+        // Delete todos from cloud that don't exist locally
+        if (todosToDelete.length > 0) {
+          console.log('Deleting', todosToDelete.length, 'todos from cloud...');
+          const { error: deleteError } = await supabase
+            .from('todos')
+            .delete()
+            .in('id', todosToDelete);
+            
+          if (deleteError) throw deleteError;
+          console.log('Todos deleted from cloud successfully');
+        }
+        
+        console.log('Todos sync completed successfully');
       }
     } catch (error) {
       console.error('Error fetching todos from cloud:', error);
@@ -105,7 +225,8 @@ const TodoList: React.FC = () => {
       id: crypto.randomUUID(),
       text: todoText,
       completed: false,
-      createdAt: Date.now()
+      createdAt: Date.now(),
+      updatedAt: Date.now()
     };
 
     setTodos([...todos, todo]);
@@ -113,7 +234,31 @@ const TodoList: React.FC = () => {
 
     try {
       console.log('Todo added, attempting to sync...');
-      await syncTodosOnBlur();
+      
+      // Directly insert into database if authenticated and sync is enabled
+      if (isAuthenticated && userProfile?.cloud_sync_enabled) {
+        console.log('Inserting todo into database:', todo.id);
+        const { error } = await supabase
+          .from('todos')
+          .insert({
+            id: todo.id,
+            user_id: userProfile.id,
+            title: todo.text,
+            completed: todo.completed,
+            created_at: new Date(todo.createdAt).toISOString(),
+            updated_at: new Date(todo.updatedAt).toISOString()
+          });
+          
+        if (error) throw error;
+        console.log('Todo inserted into database successfully');
+        
+        // Update last_synced timestamp in profile
+        await updateLastSynced();
+      } else {
+        // If not authenticated or sync disabled, just sync normally
+        await syncTodosOnBlur();
+      }
+      
       console.log('Todos sync completed');
     } catch (error) {
       console.error('Error syncing todos:', error);
@@ -122,13 +267,38 @@ const TodoList: React.FC = () => {
   
   const toggleTodo = async (id: string) => {
     const updatedTodos = todos.map(todo =>
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      todo.id === id ? { ...todo, completed: !todo.completed, updatedAt: Date.now() } : todo
     );
     setTodos(updatedTodos);
 
     try {
       console.log('Todo toggled, attempting to sync...');
-      await syncTodosOnBlur();
+      
+      // Directly update in database if authenticated and sync is enabled
+      if (isAuthenticated && userProfile?.cloud_sync_enabled) {
+        const todo = updatedTodos.find(t => t.id === id);
+        if (todo) {
+          console.log('Updating todo in database:', id);
+          const { error } = await supabase
+            .from('todos')
+            .update({
+              completed: todo.completed,
+              updated_at: new Date(todo.updatedAt).toISOString()
+            })
+            .eq('id', id)
+            .eq('user_id', userProfile.id);
+            
+          if (error) throw error;
+          console.log('Todo updated in database successfully');
+          
+          // Update last_synced timestamp in profile
+          await updateLastSynced();
+        }
+      } else {
+        // If not authenticated or sync disabled, just sync normally
+        await syncTodosOnBlur();
+      }
+      
       console.log('Todos sync completed');
     } catch (error) {
       console.error('Error syncing todos:', error);
@@ -163,10 +333,14 @@ const TodoList: React.FC = () => {
             id: todo.id,
             text: todo.title,
             completed: todo.completed,
-            createdAt: new Date(todo.created_at).getTime()
+            createdAt: new Date(todo.created_at).getTime(),
+            updatedAt: new Date(todo.updated_at).getTime()
           }));
           setTodos(localTodos);
           console.log('Local todos updated with cloud data');
+          
+          // Update last_synced timestamp in profile
+          await updateLastSynced();
         }
       } else {
         // If not authenticated or sync disabled, just update local storage
@@ -176,6 +350,24 @@ const TodoList: React.FC = () => {
       }
     } catch (error) {
       console.error('Error deleting todo:', error);
+    }
+  };
+  
+  // Add a helper function to update the last_synced timestamp
+  const updateLastSynced = async () => {
+    if (!isAuthenticated || !userProfile?.id) return;
+    
+    try {
+      console.log('Updating last_synced timestamp in profile');
+      const { error } = await supabase
+        .from('profiles')
+        .update({ last_synced: new Date().toISOString() })
+        .eq('id', userProfile.id);
+        
+      if (error) throw error;
+      console.log('Last synced timestamp updated successfully');
+    } catch (error) {
+      console.error('Error updating last_synced timestamp:', error);
     }
   };
   
