@@ -155,10 +155,14 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '', onFocusChange }) 
       );
       setSuggestions(filtered);
       
-      // Fetch Google suggestions with debounce
-      searchTimeoutRef.current = window.setTimeout(() => {
-        fetchGoogleSuggestions(value);
-      }, 300);
+      // Only fetch Google suggestions if Google is the selected search engine
+      if (searchEngine === 'google') {
+        searchTimeoutRef.current = window.setTimeout(() => {
+          fetchGoogleSuggestions(value);
+        }, 300);
+      } else {
+        setGoogleSuggestions([]);
+      }
     } else {
       setSuggestions([]);
       setGoogleSuggestions([]);
