@@ -405,7 +405,7 @@ const Events = () => {
           icon:
             "icon" in event && typeof event.icon === "string"
               ? event.icon
-              : "😊",
+              : "",
           createdAt: new Date(event.created_at).getTime(),
         }));
         setEvents(localEvents);
