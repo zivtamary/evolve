@@ -1,29 +1,22 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ExternalLink } from 'lucide-react';
 
-const TermsOfService = () => {
-  const location = useLocation();
-  const isDialog = location.state?.isDialog || false;
-  
+interface TermsDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+const TermsDialog: React.FC<TermsDialogProps> = ({ open, onOpenChange }) => {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <Card className="w-full max-w-4xl">
-        <CardHeader>
-          {!isDialog ? (
-            <div className="flex items-center gap-2">
-              <Link to="/auth" className="text-muted-foreground hover:text-foreground transition-colors">
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-              <CardTitle className="text-2xl font-bold">Terms of Service</CardTitle>
-            </div>
-          ) : (
-            <CardTitle className="text-2xl font-bold">Terms of Service</CardTitle>
-          )}
-        </CardHeader>
-        <CardContent className="space-y-4 text-sm">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent closeButtonClassName="text-foreground" className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background text-foregroud">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold">Terms of Service</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 text-sm">
           <h2 className="text-lg font-semibold">1. Acceptance of Terms</h2>
           <p>
             By accessing and using Evolve - Aesthetic Startpage ("the Service"), you accept and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service. These terms constitute a legally binding agreement between you and Evolve.
@@ -53,7 +46,7 @@ const TermsOfService = () => {
           
           <h2 className="text-lg font-semibold">4. Privacy Policy</h2>
           <p>
-            Your use of the Service is also governed by our <Link to="/privacy-policy" className="text-primary hover:underline">Privacy Policy</Link>. Please review it carefully to understand how we collect, use, and protect your information.
+            Your use of the Service is also governed by our Privacy Policy. Please review it carefully to understand how we collect, use, and protect your information.
           </p>
           
           <h2 className="text-lg font-semibold">5. Subscription Services</h2>
@@ -114,24 +107,18 @@ const TermsOfService = () => {
           <p className="text-xs text-muted-foreground mt-4">
             Last Updated: {new Date().toLocaleDateString()}
           </p>
-        </CardContent>
-        <CardFooter>
-          {!isDialog ? (
-            <Button asChild className="w-full">
-              <Link to="/auth?tab=signup">Return to Sign Up</Link>
-            </Button>
-          ) : (
-            <Button asChild variant="outline" className="w-full gap-2">
-              <Link to="/terms-of-service" target="_blank" rel="noopener noreferrer">
-                Open in new page
-                <ExternalLink className="h-4 w-4" />
-              </Link>
-            </Button>
-          )}
-        </CardFooter>
-      </Card>
-    </div>
+        </div>
+        <div className="flex justify-end mt-4">
+          <Button asChild variant="outline" className="gap-2">
+            <Link to="/terms-of-service" target="_blank" rel="noopener noreferrer">
+              Open in new page
+              <ExternalLink className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
-export default TermsOfService;
+export default TermsDialog; 

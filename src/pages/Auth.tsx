@@ -1,45 +1,68 @@
-import React, { useState, useEffect, useTransition, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Checkbox } from '@/components/ui/checkbox';
-import { toast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { useSettings } from '@/context/SettingsContext';
-import BackgroundImage from '@/components/Background/BackgroundImage';
-import { ArrowLeft, ArrowRight, CheckCircle, Cloud, Sparkles, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-import { FcGoogle } from 'react-icons/fc';
-import { motion, AnimatePresence } from 'framer-motion';
-import ParticlesAnimation from '@/components/Background/ParticlesAnimation';
+import React, { useState, useEffect, useTransition, useRef } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useSettings } from "@/context/SettingsContext";
+import BackgroundImage from "@/components/Background/BackgroundImage";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle,
+  Cloud,
+  Sparkles,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { FcGoogle } from "react-icons/fc";
+import { motion, AnimatePresence } from "framer-motion";
+import ParticlesAnimation from "@/components/Background/ParticlesAnimation";
+import TermsDialog from "@/components/Dialogs/TermsDialog";
+import PrivacyDialog from "@/components/Dialogs/PrivacyDialog";
 
 const slideAnimation = {
   initial: { opacity: 0, x: 20 },
   animate: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: -20 },
-  transition: { type: "spring", duration: 0.4, bounce: 0.1 }
+  transition: { type: "spring", duration: 0.4, bounce: 0.1 },
 };
 
 const Auth = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [resetEmail, setResetEmail] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [resetEmail, setResetEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [view, setView] = useState<'signin' | 'signup' | 'reset_password' | 'success'>('signin');
+  const [view, setView] = useState<
+    "signin" | "signup" | "reset_password" | "success"
+  >("signin");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
   const [showParticles, setShowParticles] = useState(true);
+  const [termsDialogOpen, setTermsDialogOpen] = useState(false);
+  const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
   const isSigningIn = useRef(false);
   const navigate = useNavigate();
   const { isAuthenticated } = useSettings();
-  
+
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/');
+      navigate("/");
     }
   }, [isAuthenticated, navigate]);
 
@@ -50,17 +73,17 @@ const Auth = () => {
     }, 5000);
     return () => clearTimeout(timer);
   }, []);
-  
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setLoading(true);
-      
+
       if (!email || !password) {
         toast({
           title: "Error",
           description: "Please fill in all fields",
-          variant: "destructive"
+          variant: "destructive",
         });
         return;
       }
@@ -68,78 +91,85 @@ const Auth = () => {
       if (!agreedToTerms) {
         toast({
           title: "Error",
-          description: "You must agree to the Terms of Service and Privacy Policy",
-          variant: "destructive"
+          description:
+            "You must agree to the Terms of Service and Privacy Policy",
+          variant: "destructive",
         });
         return;
       }
-      
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
       });
-      
+
       if (error) {
         throw error;
       }
-      
+
       if (data.user) {
-        setView('success');
+        setView("success");
         toast({
           title: "Account created",
           description: "Please check your email to confirm your account",
         });
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "An error occurred during sign up";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "An error occurred during sign up";
       toast({
         title: "Sign up failed",
         description: errorMessage,
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
   };
-  
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setLoading(true);
-      
+
       if (!email || !password) {
         toast({
           title: "Error",
           description: "Please fill in all fields",
-          variant: "destructive"
+          variant: "destructive",
         });
         return;
       }
-      
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      
+
       if (error) {
         throw error;
       }
-      
+
       if (data.user && data.session) {
         toast({
           title: "Welcome back",
           description: "You have been signed in successfully",
-          action: <Sparkles className="size-5" />
+          action: <Sparkles className="size-5" />,
         });
-        
-        navigate('/');
+
+        navigate("/");
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "An error occurred during sign in";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "An error occurred during sign in";
       toast({
         title: "Sign in failed",
         description: errorMessage,
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -150,36 +180,39 @@ const Auth = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      
+
       if (!resetEmail) {
         toast({
           title: "Error",
           description: "Please enter your email address",
-          variant: "destructive"
+          variant: "destructive",
         });
         return;
       }
-      
+
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: window.location.origin + '/auth',
+        redirectTo: window.location.origin + "/auth",
       });
-      
+
       if (error) {
         throw error;
       }
-      
+
       toast({
         title: "Password reset email sent",
         description: "Please check your email for the password reset link",
       });
-      
-      setView('signin');
+
+      setView("signin");
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "An error occurred during password reset";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "An error occurred during password reset";
       toast({
         title: "Password reset failed",
         description: errorMessage,
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -188,68 +221,82 @@ const Auth = () => {
 
   const handleGoogleSignIn = () => {
     if (loading) return;
-    
+
     setLoading(true);
-    
-    supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin + '/',
-      },
-    }).catch((error) => {
-      const errorMessage = error instanceof Error ? error.message : "An error occurred during Google sign in";
-      toast({
-        title: "Google sign in failed",
-        description: errorMessage,
-        variant: "destructive"
+
+    supabase.auth
+      .signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin + "/",
+        },
+      })
+      .catch((error) => {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "An error occurred during Google sign in";
+        toast({
+          title: "Google sign in failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        setLoading(false);
       });
-      setLoading(false);
-    });
   };
-  
+
   const renderHeader = () => {
-    const headerContent = view === 'reset_password' ? (
-      <>
-        <CardTitle className="text-xl font-semibold">Reset Password</CardTitle>
-        <CardDescription className="text-sm text-gray-500 dark:text-gray-400">
-          Enter your email to receive a password reset link
-        </CardDescription>
-      </>
-    ) : view === 'signup' ? (
-      <>
-        <CardTitle className="text-xl font-semibold">Create Account</CardTitle>
-        <CardDescription className="text-sm text-gray-500 dark:text-gray-400">
-          Join us to unlock premium features and sync across devices
-        </CardDescription>
-      </>
-    ) : (
-      <>
-        <CardTitle className="text-xl font-semibold">Welcome Back</CardTitle>
-        <CardDescription className="text-sm text-gray-500 dark:text-gray-400">
-          Sign in to continue to your dashboard
-        </CardDescription>
-      </>
-    );
+    const headerContent =
+      view === "reset_password" ? (
+        <>
+          <CardTitle className="text-xl font-semibold">
+            Reset Password
+          </CardTitle>
+          <CardDescription className="text-sm text-gray-500 dark:text-gray-400">
+            Enter your email to receive a password reset link
+          </CardDescription>
+        </>
+      ) : view === "signup" ? (
+        <>
+          <CardTitle className="text-xl font-semibold">
+            Create Account
+          </CardTitle>
+          <CardDescription className="text-sm text-gray-500 dark:text-gray-400">
+            Join us to unlock premium features and sync across devices
+          </CardDescription>
+        </>
+      ) : (
+        <>
+          <CardTitle className="text-xl font-semibold">Welcome Back</CardTitle>
+          <CardDescription className="text-sm text-gray-500 dark:text-gray-400">
+            Sign in to continue to your dashboard
+          </CardDescription>
+        </>
+      );
 
     return (
       <div className="relative">
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate('/')}
+          onClick={() => {
+            if (view === "reset_password") {
+              setView("signin");
+            } else {
+              navigate("/");
+            }
+          }}
           className="absolute -left-3 top-0 h-8 w-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <div className="pl-7">
-          {headerContent}
-        </div>
+        <div className="pl-7">{headerContent}</div>
       </div>
     );
   };
 
   const renderAuthContent = () => {
-    if (view === 'success') {
+    if (view === "success") {
       return (
         <motion.div {...slideAnimation} className="space-y-6">
           <div className="flex flex-col items-center justify-center py-8 space-y-4 text-center">
@@ -264,7 +311,7 @@ const Auth = () => {
             <p className="text-muted-foreground">
               Please check your email to confirm your account before logging in.
             </p>
-            <Button onClick={() => setView('signin')} className="mt-4">
+            <Button onClick={() => setView("signin")} className="mt-4">
               Return to Sign In
             </Button>
           </div>
@@ -272,18 +319,20 @@ const Auth = () => {
       );
     }
 
-    if (view === 'reset_password') {
+    if (view === "reset_password") {
       return (
         <motion.div {...slideAnimation}>
           <form onSubmit={handleResetPassword} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="reset-email" className="dark:text-gray-200">Email</Label>
+              <Label htmlFor="reset-email" className="dark:text-gray-200">
+                Email
+              </Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                <Input 
-                  id="reset-email" 
-                  type="email" 
-                  placeholder="your@email.com" 
+                <Input
+                  id="reset-email"
+                  type="email"
+                  placeholder="your@email.com"
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
                   required
@@ -291,12 +340,8 @@ const Auth = () => {
                 />
               </div>
             </div>
-            
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={loading}
-            >
+
+            <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Sending reset email..." : "Send Reset Link"}
             </Button>
           </form>
@@ -306,12 +351,25 @@ const Auth = () => {
 
     return (
       <motion.div {...slideAnimation}>
-        <Tabs defaultValue={view} onValueChange={(value) => setView(value as 'signin' | 'signup')}>
+        <Tabs
+          defaultValue={view}
+          onValueChange={(value) => setView(value as "signin" | "signup")}
+        >
           <TabsList className="grid w-full grid-cols-2 mt-4 mb-6 dark:bg-gray-800">
-            <TabsTrigger value="signin" className="dark:data-[state=active]:bg-gray-700 dark:text-gray-100">Sign In</TabsTrigger>
-            <TabsTrigger value="signup" className="dark:data-[state=active]:bg-gray-700 dark:text-gray-100">Create Account</TabsTrigger>
+            <TabsTrigger
+              value="signin"
+              className="dark:data-[state=active]:bg-gray-700 dark:text-gray-100"
+            >
+              Sign In
+            </TabsTrigger>
+            <TabsTrigger
+              value="signup"
+              className="dark:data-[state=active]:bg-gray-700 dark:text-gray-100"
+            >
+              Create Account
+            </TabsTrigger>
           </TabsList>
-          
+
           <AnimatePresence mode="wait">
             <TabsContent value="signin" asChild key="signin">
               <motion.div
@@ -323,13 +381,18 @@ const Auth = () => {
                 <form onSubmit={handleSignIn}>
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signin-email" className="dark:text-gray-200">Email</Label>
+                      <Label
+                        htmlFor="signin-email"
+                        className="dark:text-gray-200"
+                      >
+                        Email
+                      </Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                        <Input 
-                          id="signin-email" 
-                          type="email" 
-                          placeholder="your@email.com" 
+                        <Input
+                          id="signin-email"
+                          type="email"
+                          placeholder="your@email.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           required
@@ -337,22 +400,27 @@ const Auth = () => {
                         />
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="signin-password" className="dark:text-gray-200">Password</Label>
-                        <Button 
-                          variant="link" 
-                          className="p-0 h-auto text-xs dark:text-gray-300 dark:hover:text-gray-100" 
-                          onClick={() => setView('reset_password')}
+                        <Label
+                          htmlFor="signin-password"
+                          className="dark:text-gray-200"
+                        >
+                          Password
+                        </Label>
+                        <Button
+                          variant="link"
+                          className="p-0 h-auto text-xs dark:text-gray-300 dark:hover:text-gray-100"
+                          onClick={() => setView("reset_password")}
                         >
                           Forgot password?
                         </Button>
                       </div>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                        <Input 
-                          id="signin-password" 
+                        <Input
+                          id="signin-password"
                           type={showPassword ? "text" : "password"}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
@@ -374,10 +442,10 @@ const Auth = () => {
                         </Button>
                       </div>
                     </div>
-                    
-                    <Button 
-                      type="submit" 
-                      className="w-full transition-colors" 
+
+                    <Button
+                      type="submit"
+                      className="w-full transition-colors"
                       disabled={loading}
                     >
                       {loading ? "Signing in..." : "Sign In"}
@@ -402,13 +470,15 @@ const Auth = () => {
                       disabled={loading || isPending}
                     >
                       <FcGoogle className="mr-2 h-4 w-4" />
-                      {loading || isPending ? "Signing in..." : "Sign in with Google"}
+                      {loading || isPending
+                        ? "Signing in..."
+                        : "Sign in with Google"}
                     </Button>
                   </div>
                 </form>
               </motion.div>
             </TabsContent>
-            
+
             <TabsContent value="signup" asChild key="signup">
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -419,13 +489,18 @@ const Auth = () => {
                 <form onSubmit={handleSignUp}>
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signup-email" className="dark:text-gray-200">Email</Label>
+                      <Label
+                        htmlFor="signup-email"
+                        className="dark:text-gray-200"
+                      >
+                        Email
+                      </Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                        <Input 
-                          id="signup-email" 
-                          type="email" 
-                          placeholder="your@email.com" 
+                        <Input
+                          id="signup-email"
+                          type="email"
+                          placeholder="your@email.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           required
@@ -433,13 +508,18 @@ const Auth = () => {
                         />
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2">
-                      <Label htmlFor="signup-password" className="dark:text-gray-200">Password</Label>
+                      <Label
+                        htmlFor="signup-password"
+                        className="dark:text-gray-200"
+                      >
+                        Password
+                      </Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                        <Input 
-                          id="signup-password" 
+                        <Input
+                          id="signup-password"
                           type={showPassword ? "text" : "password"}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
@@ -466,27 +546,40 @@ const Auth = () => {
                     </div>
 
                     <div className="flex items-start space-x-2 pt-2">
-                      <Checkbox 
-                        id="terms" 
+                      <Checkbox
+                        id="terms"
                         checked={agreedToTerms}
-                        onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
+                        onCheckedChange={(checked) =>
+                          setAgreedToTerms(checked === true)
+                        }
                         className="dark:border-gray-600"
                       />
-                      <Label htmlFor="terms" className="text-xs leading-tight dark:text-gray-300">
+                      <Label
+                        htmlFor="terms"
+                        className="text-xs leading-tight dark:text-gray-300"
+                      >
                         I agree to the{" "}
-                        <Link to="/terms-of-service" className="text-primary hover:underline dark:text-primary/90" target="_blank">
+                        <button
+                          type="button"
+                          onClick={() => setTermsDialogOpen(true)}
+                          className="text-primary hover:underline dark:text-primary/90"
+                        >
                           Terms of Service
-                        </Link>{" "}
+                        </button>{" "}
                         and{" "}
-                        <Link to="/privacy-policy" className="text-primary hover:underline dark:text-primary/90" target="_blank">
+                        <button
+                          type="button"
+                          onClick={() => setPrivacyDialogOpen(true)}
+                          className="text-primary hover:underline dark:text-primary/90"
+                        >
                           Privacy Policy
-                        </Link>
+                        </button>
                       </Label>
                     </div>
-                    
-                    <Button 
-                      type="submit" 
-                      className="w-full transition-colors" 
+
+                    <Button
+                      type="submit"
+                      className="w-full transition-colors"
                       disabled={loading || !agreedToTerms}
                     >
                       {loading ? "Creating account..." : "Create Account"}
@@ -500,7 +593,7 @@ const Auth = () => {
 
         <Separator className="my-6" />
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.3 }}
@@ -510,34 +603,40 @@ const Auth = () => {
             <Sparkles className="h-5 w-5 mr-2 text-yellow-500" />
             Premium Benefits
           </h3>
-          
+
           <ul className="space-y-2">
-            <motion.li 
+            <motion.li
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
               className="flex items-start dark:text-gray-300"
             >
               <Cloud className="h-5 w-5 mr-2 text-primary flex-shrink-0 mt-0.5" />
-              <span className="text-sm">Cloud sync across all your devices</span>
+              <span className="text-sm">
+                Cloud sync across all your devices
+              </span>
             </motion.li>
-            <motion.li 
+            <motion.li
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
               className="flex items-start dark:text-gray-300"
             >
               <CheckCircle className="h-5 w-5 mr-2 text-primary flex-shrink-0 mt-0.5" />
-              <span className="text-sm">Secure backup of all your notes, todos and events</span>
+              <span className="text-sm">
+                Secure backup of all your notes, todos and events
+              </span>
             </motion.li>
-            <motion.li 
+            <motion.li
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 }}
               className="flex items-start dark:text-gray-300"
             >
               <ArrowRight className="h-5 w-5 mr-2 text-primary flex-shrink-0 mt-0.5" />
-              <span className="text-sm">Access your productivity dashboard from anywhere</span>
+              <span className="text-sm">
+                Access your productivity dashboard from anywhere
+              </span>
             </motion.li>
           </ul>
         </motion.div>
@@ -546,22 +645,30 @@ const Auth = () => {
   };
 
   return (
-    <BackgroundImage>
-      <ParticlesAnimation isVisible={showParticles} />
-      <div className="flex justify-center items-center min-h-screen p-4">
-        <Card className="w-full max-w-md overflow-hidden border-0 dark:bg-gray-900/60 dark:backdrop-blur-md">
-          <CardHeader className="dark:text-gray-100">
-            {renderHeader()}
-          </CardHeader>
-          
-          <CardContent className="dark:text-gray-200">
-            <AnimatePresence mode="wait" initial={false}>
-              {renderAuthContent()}
-            </AnimatePresence>
-          </CardContent>
-        </Card>
-      </div>
-    </BackgroundImage>
+    <>
+      <BackgroundImage>
+        <div className="flex justify-center items-center min-h-screen p-4">
+          <Card className="w-full max-w-md overflow-hidden border-0 dark:bg-gray-900/60 dark:backdrop-blur-md">
+            <CardHeader className="dark:text-gray-100">
+              {renderHeader()}
+            </CardHeader>
+
+            <CardContent className="dark:text-gray-200">
+              <AnimatePresence mode="wait" initial={false}>
+                {renderAuthContent()}
+              </AnimatePresence>
+            </CardContent>
+          </Card>
+        </div>
+      </BackgroundImage>
+
+      {/* Terms and Privacy Dialogs */}
+      <TermsDialog open={termsDialogOpen} onOpenChange={setTermsDialogOpen} />
+      <PrivacyDialog
+        open={privacyDialogOpen}
+        onOpenChange={setPrivacyDialogOpen}
+      />
+    </>
   );
 };
 
