@@ -37,9 +37,6 @@ const AppRoutes = () => {
   const [contentLoaded, setContentLoaded] = useState(false);
 
   useEffect(() => {
-    // Add splash-screen-active class to body when app first loads
-    document.body.classList.add('splash-screen-active');
-    
     // First set background to loaded
     const backgroundTimer = setTimeout(() => {
       setBackgroundLoaded(true);
@@ -52,13 +49,9 @@ const AppRoutes = () => {
       return () => clearTimeout(contentTimer);
     }, 50); // Reduced from 100ms to 50ms for faster initial load
 
-    return () => {
-      clearTimeout(backgroundTimer);
-      // Remove splash-screen-active class when component unmounts
-      document.body.classList.remove('splash-screen-active');
-    };
+    return () => clearTimeout(backgroundTimer);
   }, []);
-
+console.log(window.location)
   return (
     <div className="relative">
       {/* Background fade-in */}

@@ -39,12 +39,12 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
   const [time, setTime] = useState<Date>(new Date());
   const [clockType, setClockType] = useLocalStorage<ClockType>(
     "clock-type",
-    "digital-12h"
+    "digital-24h"
   );
   const [clockStyle, setClockStyle] = useLocalStorage<ClockStyle>(
     "clock-style",
     {
-      font: FONT_OPTIONS[0].value,
+      font: FONT_OPTIONS[1].value,
       color: COLOR_OPTIONS[0].value,
     }
   );

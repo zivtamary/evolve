@@ -201,12 +201,28 @@ const Events = () => {
         return "Today";
       } else if (eventDate.getTime() === tomorrow.getTime()) {
         return "Tomorrow";
-      } else if (eventDate > today && eventDate <= nextWeek) {
-        return "This Week";
-      } else if (eventDate > nextWeek) {
-        return "Later";
-      } else {
+      } else if (eventDate < today) {
         return "Past Due";
+      }
+
+      // Calculate the difference in weeks
+      const weekDiff = Math.floor(
+        (eventDate.getTime() - today.getTime()) / (7 * 24 * 60 * 60 * 1000)
+      );
+
+      if (weekDiff === 0) {
+        return "This Week";
+      } else if (weekDiff === 1) {
+        return "Next Week";
+      } else if (weekDiff <= 4) {
+        return "Later this month";
+      } else {
+        // For events beyond this month, show the month and year
+        const monthNames = [
+          "January", "February", "March", "April", "May", "June",
+          "July", "August", "September", "October", "November", "December"
+        ];
+        return `${monthNames[eventDate.getMonth()]} ${eventDate.getFullYear()}`;
       }
     }
   };
