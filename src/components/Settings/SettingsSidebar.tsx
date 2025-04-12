@@ -151,16 +151,16 @@ const SettingsSidebar = () => {
         <SheetContent className="glass dark:glass-dark border-l border-white/0 dark:border-white/5 dark:bg-transparent backdrop-blur-xl p-0">
           <div className="h-full flex flex-col">
             <SheetHeader className="p-6 border-b border-black/10 dark:border-white/10">
-              <SheetTitle className="flex items-center gap-2 text-black dark:text-white">
-                <Settings className="h-5 w-5" />
+              <SheetTitle className="flex items-center gap-2 text-black dark:text-white text-base">
+                <Settings className="h-4 w-4" />
                 <span>Settings</span>
               </SheetTitle>
             </SheetHeader>
 
             <div className="flex-1 overflow-y-auto">
               <div className="p-6 border-b border-black/10 dark:border-white/10">
-                <h3 className="mb-4 text-lg font-medium text-black dark:text-white flex items-center gap-2">
-                  <Layout className="h-5 w-5" />
+                <h3 className="mb-4 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                  <Layout className="h-4 w-4" />
                   <span>Widget Visibility</span>
                 </h3>
                 <div className="space-y-0">
@@ -214,8 +214,8 @@ const SettingsSidebar = () => {
               </div>
 
               <div className="p-6 border-black/10 dark:border-white/10">
-                <h3 className="mb-3 text-lg font-medium text-black dark:text-white flex items-center gap-2">
-                  <User className="h-5 w-5" />
+                <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                  <User className="h-4 w-4" />
                   <span>User Profile</span>
                 </h3>
 
@@ -236,8 +236,13 @@ const SettingsSidebar = () => {
                         <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
                           <span>Account Type</span>
                         </div>
-                        <span className={`text-sm ${isPremium ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"}`}>
-                          {isPremium ? "Premium" : "Free"}
+                        <span className={`text-sm ${isPremium ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"} flex items-center gap-1`}>
+                          {isPremium ? "Premium" : (
+                            <>
+                              <Lock className="h-3 w-3" />
+                              Free
+                            </>
+                          )}
                         </span>
                       </div>
                       
@@ -273,8 +278,8 @@ const SettingsSidebar = () => {
               </div>
 
               <div className="p-6 border-t">
-                <h3 className="mb-3 text-lg font-medium text-black dark:text-white flex items-center gap-2">
-                  <Cloud className="h-5 w-5" />
+                <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                  <Cloud className="h-4 w-4" />
                   <span>Data Synchronization</span>
                 </h3>
 
@@ -311,24 +316,6 @@ const SettingsSidebar = () => {
                         {formatLastSynced()}
                       </span>
                     </div>
-                    <Separator className="bg-black/10 dark:bg-white/10" />
-
-                    <div className="flex items-center justify-between py-2">
-                      <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
-                        <span>Account Status</span>
-                      </div>
-                      {isAuthenticated ? (
-                        <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                          <Lock className="h-4 w-4 mr-1" />
-                          <span className="text-sm">{userEmail}</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
-                          <Lock className="h-4 w-4" />
-                          <span className="text-sm">Not signed in</span>
-                        </div>
-                      )}
-                    </div>
                   </div>
 
                   {isSyncing && (
@@ -353,15 +340,15 @@ const SettingsSidebar = () => {
               {isAuthenticated &&
                 (!isPremium || userProfile?.polar_customer_id) && (
                   <div className="p-6 border-t border-black/10 dark:border-white/10">
-                    <h3 className="mb-4 text-lg font-medium text-black dark:text-white flex items-center gap-2">
-                      <CreditCard className="h-5 w-5" />
+                    <h3 className="mb-4 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                      <CreditCard className="h-4 w-4" />
                       <span>Billing</span>
                     </h3>
 
                     <div className="space-y-4">
                       {isAuthenticated && !isPremium && (
                         <Button
-                          className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white animate-shimmer relative"
+                          className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 dark:shadow-amber-500/20 shadow-amber-500/20 dark:hover:shadow-amber-500/30 text-white animate-shimmer relative"
                           onClick={handleUpgradeClick}
                         >
                           <CreditCard className="h-4 w-4 relative z-10" />
@@ -438,11 +425,11 @@ const SettingsSidebar = () => {
                   </div>
                 </div>
                 <Logo className="h-8 w-8 flex justify-center items-center" />
-                <div className="flex items-center gap-2 text-sm text-black/50 dark:text-white/50">
-                  <Info className="h-4 w-4" />
+                <div className="flex items-center gap-2 text-xs text-black/50 dark:text-white/50">
+                  <Info className="h-3 w-3" />
                   <span>Version 1.0.0-beta.1</span>
                 </div>
-                <div className="text-xs text-black/30 dark:text-white/30 text-center">
+                <div className="text-[10px] text-black/30 dark:text-white/30 text-center">
                   <div>© {new Date().getFullYear()} Evolve</div>
                   <div>Developed by @zivtamary</div>
                   <div>Support: support@evolve-app.com</div>
