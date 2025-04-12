@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, Loader2 } from 'lucide-react';
+import { MessageSquare, Loader2, MessageCircle, MessageCircleHeart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useSettings } from '@/context/SettingsContext';
 import { PostgrestError } from '@supabase/supabase-js';
@@ -84,7 +84,7 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ open, onOpenChange }) =
       <DialogContent className="glass dark:glass-dark border-white/10 backdrop-blur-md shadow-xl">
         <DialogHeader className="border-b border-white/10 pb-3">
           <DialogTitle className="text-white text-xl font-semibold flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" />
+            <MessageCircleHeart className="h-5 w-5" />
             Leave Feedback
           </DialogTitle>
           <DialogDescription className="text-white/70 text-sm mt-1">
