@@ -217,7 +217,7 @@ const Pomodoro: React.FC = () => {
       <div className="flex items-center justify-between p-4 border-b border-white/10">
         <div className="flex items-center gap-2">
           <Timer className="h-5 w-5" />
-          <h2 className="text-xl font-semibold">Pomodoro</h2>
+          <h2 className="text-xl font-semibold">Focus Timer</h2>
         </div>
         <div className="text-xs text-white/70">
           Session {sessionCount + 1}

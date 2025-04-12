@@ -46,7 +46,7 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
     "clock-style",
     {
       font: FONT_OPTIONS[1].value,
-      color: COLOR_OPTIONS[0].value,
+      color: COLOR_OPTIONS[1].value,
     }
   );
 

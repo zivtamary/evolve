@@ -1,11 +1,18 @@
-import React from 'react';
-import { Sun, Moon, Coffee, Bed, MoonStarIcon, SunDim, Star, Cloud } from 'lucide-react';
+import React, { useState } from 'react';
+import { Sun, Moon, Coffee, Bed, MoonStarIcon, SunDim, Star, Cloud, Pencil, User } from 'lucide-react';
 import type { Variants } from 'framer-motion';
 import { motion, useAnimation } from 'framer-motion';
 import type { HTMLAttributes } from 'react';
 import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 
 const FloatingStar = ({ delay, size, x, y }) => (
@@ -78,14 +85,17 @@ const FloatingZ = ({ delay, x, y, size }) => (
 );
 
 const TimeGreeting = () => {
-  const [displayName] = useLocalStorage('display_name', '');
+  const [displayName, setDisplayName] = useLocalStorage('display_name', '');
+  const [isEditing, setIsEditing] = useState(false);
+  const [newName, setNewName] = useState(displayName);
+  const [nameError, setNameError] = useState('');
   
   const getGreetingAndIcon = () => {
     const hour = new Date().getHours();
     
     if (hour >= 5 && hour < 12) {
       return {
-        greeting: `Good morning${displayName ? `, ${displayName}` : ''}.`,
+        greeting: `Good morning${displayName ? ',' : '.'}`,
         icon: (
           <div className="relative">
             <motion.div
@@ -104,7 +114,7 @@ const TimeGreeting = () => {
       };
     } else if (hour >= 12 && hour < 17) {
       return {
-        greeting: `Good afternoon${displayName ? `, ${displayName}` : ''}.`,
+        greeting: `Good afternoon${displayName ? ',' : '.'}`,
         icon: (
           <div className="relative">
             <motion.div
@@ -123,7 +133,7 @@ const TimeGreeting = () => {
       };
     } else if (hour >= 17 && hour < 22) {
       return {
-        greeting: `Good evening${displayName ? `, ${displayName}` : ''}.`,
+        greeting: `Good evening${displayName ? ',' : '.'}`,
         icon: (
           <div className="relative">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{
@@ -150,7 +160,7 @@ const TimeGreeting = () => {
       };
     } else {
       return {
-        greeting: `Good night${displayName ? `, ${displayName}` : ''}.`,
+        greeting: `Good night${displayName ? ',' : '.'}`,
         icon: (
           <div className="relative">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{
@@ -179,20 +189,114 @@ const TimeGreeting = () => {
     }
   };
 
+  const handleNameClick = () => {
+    setNewName(displayName);
+    setIsEditing(true);
+  };
+
+  const handleSaveName = () => {
+    if (!newName || newName.trim() === '') {
+      setNameError('Please enter your name');
+      return;
+    }
+    setDisplayName(newName.trim());
+    setIsEditing(false);
+    setNameError('');
+  };
+
   const { greeting, icon } = getGreetingAndIcon();
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="text-center text-white/90 text-2xl md:text-3xl lg:text-4xl font-medium mb-2 flex flex-col items-center gap-2"
-    >
-      <div className="text-white/90">
-        {icon}
-      </div>
-      {greeting}
-    </motion.div>
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="text-center text-white/90 text-2xl md:text-3xl lg:text-4xl font-medium mb-2 flex flex-col items-center gap-2"
+      >
+        <div className="text-white/90">
+          {icon}
+        </div>
+        <div className="flex items-center whitespace-nowrap">
+          <span>{greeting}</span>
+          {displayName && (
+            <>
+              <span className="ml-2">{/* Add space after comma */}</span>
+              <motion.span
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleNameClick}
+                className="inline-flex items-center gap-1 cursor-pointer group"
+              >
+                <span className="text-white group-hover:text-white/90 transition-colors">
+                  {displayName}
+                </span>
+              </motion.span>
+              <span className="ml-0">.</span>
+            </>
+          )}
+        </div>
+      </motion.div>
+
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent className="sm:max-w-[425px] glass dark:glass-dark border-white/10">
+          <DialogHeader className="border-b border-white/10 pb-3">
+            <DialogTitle className="text-white text-xl font-semibold flex items-center gap-2">
+              <Pencil className="h-5 w-5" />
+              <span>Edit Your Name</span>
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            handleSaveName();
+          }} className="grid gap-5 mt-4">
+            <div className="space-y-2">
+              <label 
+                htmlFor="name-input" 
+                className="block text-sm mb-1.5 text-white/80 font-medium cursor-pointer hover:text-white transition-colors"
+              >
+                Name
+              </label>
+              <input
+                id="name-input"
+                type="text"
+                value={newName}
+                onChange={(e) => {
+                  setNewName(e.target.value);
+                  setNameError('');
+                }}
+                placeholder="Enter your name"
+                className="w-full bg-black/10 dark:bg-black/20 px-4 py-2.5 rounded-lg outline-none border border-white/10 focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all duration-200 text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              />
+              {nameError && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-red-500 text-sm"
+                >
+                  {nameError}
+                </motion.p>
+              )}
+            </div>
+            <div className="flex justify-end space-x-3 border-t border-white/10 pt-4 mt-2">
+              <button
+                type="button"
+                onClick={() => setIsEditing(false)}
+                className="flex items-center gap-2 px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex items-center gap-2 px-4 py-2 text-sm bg-white/20 hover:bg-white/30 rounded text-white transition-colors"
+              >
+                Save
+              </button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
