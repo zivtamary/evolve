@@ -35,7 +35,7 @@ const ALARM_SOUNDS = [
 const Pomodoro: React.FC = () => {
   const { syncPomodoroOnBlur } = useSettings();
   const [settings, setSettings] = useLocalStorage<PomodoroSettings>('pomodoro-settings', {
-    workDuration: 0.05,
+    workDuration: 25,
     breakDuration: 5,
     longBreakDuration: 15,
     sessions: 4,
@@ -281,85 +281,100 @@ const Pomodoro: React.FC = () => {
                     Settings
                   </button>
                 </DialogTrigger>
-                <DialogContent className="bg-black/90 text-white border-white/10">
-                  <DialogHeader>
-                    <DialogTitle>Pomodoro Settings</DialogTitle>
+                <DialogContent className="glass dark:glass-dark border-white/10 backdrop-blur-md shadow-xl">
+                  <DialogHeader className="border-b border-white/10 pb-3">
+                    <DialogTitle className="text-white text-xl font-semibold">Pomodoro Settings</DialogTitle>
+                    <p className="text-sm text-white/70">Customize your timer and notification preferences</p>
                   </DialogHeader>
-                  <div className="space-y-6 py-4">
-                    <div className="space-y-2">
-                      <Label>Work Duration (minutes)</Label>
-                      <input
-                        type="number"
-                        value={settings.workDuration}
-                        onChange={(e) => setSettings({ ...settings, workDuration: Number(e.target.value) })}
-                        className="w-full bg-white/10 rounded px-3 py-2 text-white"
-                        min="1"
-                        max="60"
-                      />
+                  <div className="space-y-8 py-6">
+                    <div className="space-y-4">
+                      <h3 className="text-sm font-medium text-white/90">Timer Durations</h3>
+                      <div className="grid gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-sm text-white/80">Focus Duration (minutes)</Label>
+                          <input
+                            type="number"
+                            value={settings.workDuration}
+                            onChange={(e) => setSettings({ ...settings, workDuration: Number(e.target.value) })}
+                            className="w-full bg-white/10 rounded-lg px-3 py-2 text-white border border-white/10 focus:border-white/20 focus:outline-none transition-colors"
+                            min="1"
+                            max="60"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm text-white/80">Short Break Duration (minutes)</Label>
+                          <input
+                            type="number"
+                            value={settings.breakDuration}
+                            onChange={(e) => setSettings({ ...settings, breakDuration: Number(e.target.value) })}
+                            className="w-full bg-white/10 rounded-lg px-3 py-2 text-white border border-white/10 focus:border-white/20 focus:outline-none transition-colors"
+                            min="1"
+                            max="30"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm text-white/80">Long Break Duration (minutes)</Label>
+                          <input
+                            type="number"
+                            value={settings.longBreakDuration}
+                            onChange={(e) => setSettings({ ...settings, longBreakDuration: Number(e.target.value) })}
+                            className="w-full bg-white/10 rounded-lg px-3 py-2 text-white border border-white/10 focus:border-white/20 focus:outline-none transition-colors"
+                            min="1"
+                            max="60"
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Short Break Duration (minutes)</Label>
-                      <input
-                        type="number"
-                        value={settings.breakDuration}
-                        onChange={(e) => setSettings({ ...settings, breakDuration: Number(e.target.value) })}
-                        className="w-full bg-white/10 rounded px-3 py-2 text-white"
-                        min="1"
-                        max="30"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Long Break Duration (minutes)</Label>
-                      <input
-                        type="number"
-                        value={settings.longBreakDuration}
-                        onChange={(e) => setSettings({ ...settings, longBreakDuration: Number(e.target.value) })}
-                        className="w-full bg-white/10 rounded px-3 py-2 text-white"
-                        min="1"
-                        max="60"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Alarm Sound</Label>
-                      <Select
-                        value={settings.alarmSound}
-                        onValueChange={(value) => {
-                          setSettings({ ...settings, alarmSound: value });
-                          // Stop any playing sound when changing the alarm
-                          if (audioRef.current && isPlaying) {
-                            audioRef.current.pause();
-                            audioRef.current.currentTime = 0;
-                            setIsPlaying(false);
-                          }
-                        }}
-                      >
-                        <SelectTrigger className="bg-white/10 text-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-black/90 text-white border-white/10">
-                          {ALARM_SOUNDS.map((sound) => (
-                            <SelectItem key={sound.value} value={sound.value}>
-                              {sound.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <button
-                        onClick={previewSound}
-                        className="w-full mt-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded text-white transition-colors flex items-center justify-center"
-                      >
-                        {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                      </button>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Volume</Label>
-                      <Slider
-                        value={[settings.volume * 100]}
-                        onValueChange={([value]) => setSettings({ ...settings, volume: value / 100 })}
-                        max={100}
-                        step={1}
-                        className="w-full"
-                      />
+
+                    <div className="space-y-4">
+                      <h3 className="text-sm font-medium text-white/90">Notification Settings</h3>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label className="text-sm text-white/80">Alarm Sound</Label>
+                          <Select
+                            value={settings.alarmSound}
+                            onValueChange={(value) => {
+                              setSettings({ ...settings, alarmSound: value });
+                              if (audioRef.current && isPlaying) {
+                                audioRef.current.pause();
+                                audioRef.current.currentTime = 0;
+                                setIsPlaying(false);
+                              }
+                            }}
+                          >
+                            <SelectTrigger className="w-full bg-white/10 text-white border-white/10 focus:border-white/20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-black/90 text-white border-white/10">
+                              {ALARM_SOUNDS.map((sound) => (
+                                <SelectItem key={sound.value} value={sound.value}>
+                                  {sound.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <button
+                            onClick={previewSound}
+                            className="w-full mt-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors flex items-center justify-center gap-2 border border-white/10"
+                          >
+                            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                            <span className="text-sm">{isPlaying ? 'Stop' : 'Preview'} Sound</span>
+                          </button>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-sm text-white/80">Volume</Label>
+                            <span className="text-sm text-white/60">{Math.round(settings.volume * 100)}%</span>
+                          </div>
+                          <Slider
+                            value={[settings.volume * 100]}
+                            onValueChange={([value]) => setSettings({ ...settings, volume: value / 100 })}
+                            max={100}
+                            step={1}
+                            className="w-full"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </DialogContent>
