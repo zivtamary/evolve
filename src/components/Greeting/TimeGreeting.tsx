@@ -65,7 +65,7 @@ const FloatingZ = ({ delay, x, y, size }) => (
       repeat: Infinity,
       ease: "easeInOut"
     }}
-    className="absolute text-white/70 font-bold"
+    className="absolute text-white/70 font-bold pointer-events-none select-none"
     style={{
       fontSize: size,
       left: x,
@@ -127,16 +127,21 @@ const TimeGreeting = () => {
         icon: (
           <div className="relative">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{
-              filter: 'drop-shadow(0 0 10px rgba(167, 139, 250, 0.5)) drop-shadow(0 0 15px rgba(79, 70, 229, 0.3))'
+              filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.3)) drop-shadow(0 0 12px rgba(0, 0, 0, 0.5))'
             }}>
               <defs>
                 <linearGradient id="moonGradientEvening" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="rgba(251, 191, 36, 0.9)" />
-                  <stop offset="50%" stopColor="rgba(167, 139, 250, 0.8)" />
-                  <stop offset="100%" stopColor="rgba(79, 70, 229, 0.7)" />
+                  <stop offset="0%" stopColor="rgba(255, 255, 255, 0.9)" />
+                  <stop offset="50%" stopColor="rgba(200, 200, 200, 0.7)" />
+                  <stop offset="100%" stopColor="rgba(17, 24, 39, 0.8)" />
                 </linearGradient>
+                <filter id="noise">
+                  <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+                  <feColorMatrix type="saturate" values="0"/>
+                </filter>
               </defs>
               <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" fill="url(#moonGradientEvening)" />
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" fill="url(#noise)" opacity="0.1" />
             </svg>
             <FloatingStar delay={0} size="size-3" x={-20} y={-15} />
             <FloatingStar delay={0.5} size="size-2" x={20} y={-10} />
@@ -149,16 +154,21 @@ const TimeGreeting = () => {
         icon: (
           <div className="relative">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{
-              filter: 'drop-shadow(0 0 10px rgba(99, 102, 241, 0.5)) drop-shadow(0 0 15px rgba(67, 56, 202, 0.3))'
+              filter: 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.2)) drop-shadow(0 0 10px rgba(0, 0, 0, 0.6))'
             }}>
               <defs>
                 <linearGradient id="moonGradientNight" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="rgba(167, 139, 250, 0.9)" />
-                  <stop offset="50%" stopColor="rgba(99, 102, 241, 0.8)" />
-                  <stop offset="100%" stopColor="rgba(67, 56, 202, 0.7)" />
+                  <stop offset="0%" stopColor="rgba(255, 255, 255, 0.8)" />
+                  <stop offset="50%" stopColor="rgba(180, 180, 180, 0.6)" />
+                  <stop offset="100%" stopColor="rgba(17, 24, 39, 0.9)" />
                 </linearGradient>
+                <filter id="noiseNight">
+                  <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+                  <feColorMatrix type="saturate" values="0"/>
+                </filter>
               </defs>
               <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" fill="url(#moonGradientNight)" />
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" fill="url(#noiseNight)" opacity="0.15" />
             </svg>
             <FloatingZ delay={0} x="25px" y="-15px" size="0.8rem" />
             <FloatingZ delay={0.3} x="32px" y="-12px" size="1rem" />

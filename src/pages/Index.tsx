@@ -285,7 +285,7 @@ const Index = () => {
                     >
                       {/* First slide - Clock, Weather, Search */}
                       <div className="h-full w-full flex flex-col items-center justify-center px-6 shrink-0">
-                        <div className="absolute top-12 xs:top-16 sm:top-24 md:top-32 left-1/2 -translate-x-1/2 w-full">
+                        <div className="absolute top-12 xs:top-16 sm:top-24 md:top-20 lg:top-20 xl:top-32 left-1/2 -translate-x-1/2 w-full">
                           <motion.div 
                             className="container mx-auto flex flex-col items-center px-4"
                             initial={{ opacity: 0, y: -20 }}
@@ -298,7 +298,7 @@ const Index = () => {
                         
                         <div className="flex flex-col items-center justify-center flex-1">
                           <motion.div 
-                            className="mb-12"
+                            className="mb-8 lg:mb-12"
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ 
                               opacity: isSearchFocused ? 0.6 : 1,
@@ -314,7 +314,7 @@ const Index = () => {
                             <TimeGreeting />
                           </motion.div>
                           <motion.div 
-                            className="w-full max-w-xs mb-8"
+                            className="w-full max-w-xs sm:mb-24 2xl:mb-8"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ 
                               opacity: isSearchFocused ? 0.6 : 1,
