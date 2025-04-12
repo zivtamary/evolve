@@ -30,6 +30,8 @@ import {
   Download,
   Sidebar,
   MessageSquare,
+  Layout,
+  MessageCircle,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import SubscriptionModal from "./SubscriptionModal";
@@ -48,7 +50,7 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({ onClick }) => {
           shadow-sm hover:shadow-md dark:hover:bg-black/30 dark:active:bg-black/40 active:bg-black/40 text-white/90 hover:text-white border-white/10 hover:border-white/20 bottom-4  text-white hover:bg-black/30"
       title="Settings"
     >
-      <Sidebar className="size-4" />
+      <Settings className="size-4" />
     </button>
   );
 };
@@ -124,7 +126,7 @@ const SettingsSidebar = () => {
       <SettingsButton onClick={() => setIsSettingsOpen(true)} />
 
       <Sheet open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <SheetContent className="glass dark:glass-dark border-l border-white/10 dark:border-white/10 border-black/10 backdrop-blur-xl p-0">
+        <SheetContent className="glass dark:glass-dark border-l border-white/0 dark:border-white/5 dark:bg-transparent backdrop-blur-xl p-0">
           <div className="h-full flex flex-col">
             <SheetHeader className="p-6 border-b border-black/10 dark:border-white/10">
               <SheetTitle className="flex items-center gap-2 text-black dark:text-white">
@@ -135,11 +137,12 @@ const SettingsSidebar = () => {
 
             <div className="flex-1 overflow-y-auto">
               <div className="p-6 border-b border-black/10 dark:border-white/10">
-                <h3 className="mb-4 text-lg font-medium text-black dark:text-white">
-                  Widget Visibility
+                <h3 className="mb-4 text-lg font-medium text-black dark:text-white flex items-center gap-2">
+                  <Layout className="h-5 w-5" />
+                  <span>Widget Visibility</span>
                 </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
+                <div className="space-y-0">
+                  <div className="flex items-center justify-between py-3">
                     <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
                       <StickyNote className="h-4 w-4" />
                       <span>Notes</span>
@@ -149,8 +152,9 @@ const SettingsSidebar = () => {
                       onCheckedChange={() => toggleWidget("notes")}
                     />
                   </div>
-
-                  <div className="flex items-center justify-between">
+                  <Separator className="bg-black/10 dark:bg-white/10" />
+                  
+                  <div className="flex items-center justify-between py-3">
                     <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
                       <CheckSquare className="h-4 w-4" />
                       <span>Todo List</span>
@@ -160,8 +164,9 @@ const SettingsSidebar = () => {
                       onCheckedChange={() => toggleWidget("todoList")}
                     />
                   </div>
+                  <Separator className="bg-black/10 dark:bg-white/10" />
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between py-3">
                     <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
                       <Timer className="h-4 w-4" />
                       <span>Pomodoro Timer</span>
@@ -171,8 +176,9 @@ const SettingsSidebar = () => {
                       onCheckedChange={() => toggleWidget("pomodoro")}
                     />
                   </div>
+                  <Separator className="bg-black/10 dark:bg-white/10" />
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between py-3">
                     <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
                       <CalendarDays className="h-4 w-4" />
                       <span>Events</span>
@@ -186,43 +192,14 @@ const SettingsSidebar = () => {
               </div>
 
               <div className="p-6">
-                <h3 className="mb-4 text-lg font-medium text-black dark:text-white flex items-center gap-2">
+                <h3 className="mb-3 text-lg font-medium text-black dark:text-white flex items-center gap-2">
                   <Cloud className="h-5 w-5" />
                   <span>Data Synchronization</span>
                 </h3>
 
-                <div className="space-y-4">
-                  <div className="text-sm text-black/70 dark:text-white/70">
-                    {isAuthenticated ? (
-                      <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                        <Lock className="h-4 w-4" />
-                        <span>Logged in as {userEmail}</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
-                        <Lock className="h-4 w-4" />
-                        <span>Authentication required for sync</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="text-sm text-black/70 dark:text-white/70">
-                    <div className="flex items-center gap-2">
-                      <span>Last synced:</span>
-                      <span
-                        className={`${
-                          !userProfile?.last_synced
-                            ? "text-amber-600 dark:text-amber-400"
-                            : "text-black/50 dark:text-white/50"
-                        }`}
-                      >
-                        {formatLastSynced()}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col space-y-4">
-                    <div className="flex items-center justify-between">
+                <div className="space-y-3 flex flex-col gap-2">
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex items-center justify-between py-2">
                       <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
                         <span>Cloud Sync</span>
                         {!isAuthenticated || !isPremium ? (
@@ -237,45 +214,77 @@ const SettingsSidebar = () => {
                         disabled={!isAuthenticated || isSyncing || !isPremium}
                       />
                     </div>
+                    <Separator className="bg-black/10 dark:bg-white/10" />
 
-                    {isSyncing && (
-                      <div className="flex items-center justify-center text-sm text-black/50 dark:text-white/50">
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        <span>Syncing data...</span>
+                    <div className="flex items-center justify-between py-2">
+                      <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
+                        <span>Last synced</span>
                       </div>
-                    )}
+                      <span
+                        className={`text-sm ${
+                          !userProfile?.last_synced
+                            ? "text-amber-600 dark:text-amber-400"
+                            : "text-black/50 dark:text-white/50"
+                        }`}
+                      >
+                        {formatLastSynced()}
+                      </span>
+                    </div>
+                    <Separator className="bg-black/10 dark:bg-white/10" />
 
-                    {isAuthenticated &&
-                      isPremium &&
-                      !userProfile?.cloud_sync_enabled && (
-                        <div className="flex items-start gap-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-500/10 p-2 rounded">
-                          <Cloud className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                          <span className="leading-tight">
-                            Cloud sync is currently disabled. Enable it to keep
-                            your data backed up and synchronized across devices.
-                          </span>
+                    <div className="flex items-center justify-between py-2">
+                      <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
+                        <span>Account Status</span>
+                      </div>
+                      {isAuthenticated ? (
+                        <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                          <Lock className="h-4 w-4 mr-1" />
+                          <span className="text-sm">{userEmail}</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                          <Lock className="h-4 w-4" />
+                          <span className="text-sm">Not signed in</span>
                         </div>
                       )}
-
-                    <Button
-                      className="w-full mt-4"
-                      variant="outline"
-                      onClick={handleAuthClick}
-                      disabled={isSyncing}
-                    >
-                      {isAuthenticated ? (
-                        <>
-                          <LogOut className="h-4 w-4 mr-2" />
-                          Sign Out
-                        </>
-                      ) : (
-                        <>
-                          <LogIn className="h-4 w-4 mr-2" />
-                          Sign In
-                        </>
-                      )}
-                    </Button>
+                    </div>
                   </div>
+
+                  {isSyncing && (
+                    <div className="flex items-center justify-center text-sm text-black/50 dark:text-white/50 bg-black/5 dark:bg-white/5 p-2 rounded-lg">
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <span>Syncing data...</span>
+                    </div>
+                  )}
+
+                  {isAuthenticated && isPremium && !userProfile?.cloud_sync_enabled && (
+                    <div className="flex items-start gap-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-500/10 p-2 rounded-lg">
+                      <Cloud className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                      <span className="leading-tight">
+                        Cloud sync is currently disabled. Enable it to keep
+                        your data backed up and synchronized across devices.
+                      </span>
+                    </div>
+                  )}
+
+                  <Button
+                    className="ml-auto w-max mt-2"
+                    variant="outline"
+                    onClick={handleAuthClick}
+                    disabled={isSyncing}
+                  >
+                    {isAuthenticated ? (
+                      <>
+                        <LogOut className="h-4 w-4" />
+                        Sign Out
+                      </>
+                    ) : (
+                      <>
+                        <LogIn className="h-4 w-4" />
+                        Sign In
+                      </>
+                    )}
+                  </Button>
                 </div>
               </div>
 
@@ -333,11 +342,13 @@ const SettingsSidebar = () => {
               <div className="flex flex-col items-center gap-4">
                 <Button
                   variant="outline"
-                  className="w-full mb-4"
+                  className="w-full mb-4 relative overflow-hidden bg-gradient-to-r from-gray-950 via-gray-900/80 to-gray-950
+                  dark:bg-gradient-to-r dark:from-white/90 dark:via-white/70 dark:text-black dark:to-white/90
+                  text-white transition-all duration-1000 animate-gradient-x"
                   onClick={() => setShowFeedbackDialog(true)}
                 >
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Leave Feedback
+                  <MessageCircle className="h-4 w-4" />
+                  Feedback
                 </Button>
                 <Logo className="h-8 w-8 flex justify-center items-center" />
                 <div className="flex items-center gap-2 text-sm text-black/50 dark:text-white/50">
