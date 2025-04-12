@@ -32,6 +32,7 @@ import {
   MessageSquare,
   Layout,
   MessageCircle,
+  User,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import SubscriptionModal from "./SubscriptionModal";
@@ -212,7 +213,66 @@ const SettingsSidebar = () => {
                 </div>
               </div>
 
-              <div className="p-6">
+              <div className="p-6 border-black/10 dark:border-white/10">
+                <h3 className="mb-3 text-lg font-medium text-black dark:text-white flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  <span>User Profile</span>
+                </h3>
+
+                <div className="space-y-3 flex flex-col gap-2">
+                  {isAuthenticated ? (
+                    <div className="flex flex-col space-y-2">
+                      <div className="flex items-center justify-between py-2">
+                        <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
+                          <span>Email</span>
+                        </div>
+                        <span className="text-sm text-black/50 dark:text-white/50">
+                          {userEmail}
+                        </span>
+                      </div>
+                      <Separator className="bg-black/10 dark:bg-white/10" />
+
+                      <div className="flex items-center justify-between py-2">
+                        <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
+                          <span>Account Type</span>
+                        </div>
+                        <span className={`text-sm ${isPremium ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"}`}>
+                          {isPremium ? "Premium" : "Free"}
+                        </span>
+                      </div>
+                      
+                      <Button
+                        className="w-full mt-2"
+                        variant="outline"
+                        onClick={signOut}
+                        disabled={isSyncing}
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Sign Out
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-3 py-4">
+                      <p className="text-sm text-black/50 dark:text-white/50 text-center">
+                        Sign in to access your profile and sync your data across devices
+                      </p>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          navigate("/auth");
+                          setIsSettingsOpen(false);
+                        }}
+                        className="w-full"
+                      >
+                        <LogIn className="h-4 w-4" />
+                        Sign In
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-6 border-t">
                 <h3 className="mb-3 text-lg font-medium text-black dark:text-white flex items-center gap-2">
                   <Cloud className="h-5 w-5" />
                   <span>Data Synchronization</span>
@@ -287,25 +347,6 @@ const SettingsSidebar = () => {
                       </span>
                     </div>
                   )}
-
-                  <Button
-                    className="ml-auto w-max mt-2"
-                    variant="outline"
-                    onClick={handleAuthClick}
-                    disabled={isSyncing}
-                  >
-                    {isAuthenticated ? (
-                      <>
-                        <LogOut className="h-4 w-4" />
-                        Sign Out
-                      </>
-                    ) : (
-                      <>
-                        <LogIn className="h-4 w-4" />
-                        Sign In
-                      </>
-                    )}
-                  </Button>
                 </div>
               </div>
 
