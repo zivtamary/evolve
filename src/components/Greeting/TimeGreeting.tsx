@@ -223,6 +223,7 @@ const TimeGreeting = () => {
             <>
               <span className="ml-2">{/* Add space after comma */}</span>
               <motion.span
+                title='Click to edit your name'
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleNameClick}

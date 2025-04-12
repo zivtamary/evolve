@@ -298,6 +298,7 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
               <DrawerTrigger asChild>
                 <div className="absolute -right-8 sm:-right-10 top-9 sm:top-10 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
+                    title="Clock and date settings"
                     className="text-white/70 hover:text-white text-sm p-1.5 sm:p-0"
                   >
                    <Settings2 className="w-4 h-4" />
