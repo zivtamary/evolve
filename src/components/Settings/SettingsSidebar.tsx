@@ -121,6 +121,27 @@ const SettingsSidebar = () => {
     return formatDistanceToNow(date, { addSuffix: true });
   };
 
+  const sparkleKeyframes = `
+    @keyframes sparkle {
+      0%, 100% { opacity: 0.2; transform: scale(0.6); }
+      50% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes shooting {
+      0% { transform: translateX(-100%) translateY(100%) rotate(-45deg); opacity: 0; }
+      20%, 80% { opacity: 1; }
+      100% { transform: translateX(200%) translateY(-200%) rotate(-45deg); opacity: 0; }
+    }
+  `;
+
+  React.useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = sparkleKeyframes;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   return (
     <>
       <SettingsButton onClick={() => setIsSettingsOpen(true)} />
@@ -340,16 +361,41 @@ const SettingsSidebar = () => {
 
             <div className="p-6 border-t border-black/10 dark:border-white/10">
               <div className="flex flex-col items-center gap-4">
-                <Button
-                  variant="outline"
-                  className="w-full mb-4 relative overflow-hidden bg-gradient-to-r from-gray-950 via-gray-900/80 to-gray-950
-                  dark:bg-gradient-to-r dark:from-white/90 dark:via-white/70 dark:text-black dark:to-white/90
-                  text-white transition-all duration-1000 animate-gradient-x"
+                <div 
                   onClick={() => setShowFeedbackDialog(true)}
+                  className="w-full p-6 rounded-xl cursor-pointer transition-all duration-300
+                    bg-gradient-to-br from-purple-900/80 via-indigo-900/80 to-black 
+                    hover:from-purple-800/90 hover:via-indigo-800/90 hover:to-black/90
+                    border border-white/10 hover:border-white/20
+                    relative overflow-hidden group"
                 >
-                  <MessageCircle className="h-4 w-4" />
-                  Feedback
-                </Button>
+                  {/* Sparkle effects */}
+                  <div className="absolute inset-0">
+                    {/* Large sparkles */}
+                    <div className="absolute top-1/4 left-1/4 h-2 w-2 bg-white/80 rounded-full animate-[sparkle_3s_ease-in-out_infinite]" />
+                    <div className="absolute top-3/4 right-1/4 h-2 w-2 bg-purple-300/80 rounded-full animate-[sparkle_4s_ease-in-out_infinite_1s]" />
+                    <div className="absolute bottom-1/3 left-1/2 h-2 w-2 bg-indigo-300/80 rounded-full animate-[sparkle_3.5s_ease-in-out_infinite_0.5s]" />
+                    
+                    {/* Medium sparkles */}
+                    <div className="absolute top-1/2 right-1/3 h-1.5 w-1.5 bg-white/70 rounded-full animate-[sparkle_4s_ease-in-out_infinite_1.5s]" />
+                    <div className="absolute bottom-1/4 left-1/3 h-1.5 w-1.5 bg-purple-200/70 rounded-full animate-[sparkle_3s_ease-in-out_infinite_2s]" />
+                    
+                    {/* Small sparkles */}
+                    <div className="absolute top-2/3 right-1/2 h-1 w-1 bg-indigo-200/60 rounded-full animate-[sparkle_3s_ease-in-out_infinite_0.7s]" />
+                    <div className="absolute bottom-1/2 right-1/4 h-1 w-1 bg-white/60 rounded-full animate-[sparkle_3.5s_ease-in-out_infinite_1.2s]" />
+                    
+                    {/* Shooting star effect */}
+                    <div className="absolute h-px w-16 bg-gradient-to-r from-transparent via-white to-transparent 
+                      -rotate-45 animate-[shooting_4s_linear_infinite]
+                      top-1/4 -left-8" />
+                  </div>
+                  
+                  <div className="relative z-10 flex flex-col items-center gap-3 text-center">
+                    <Sparkles className="h-6 w-6 text-purple-300 group-hover:text-purple-200 transition-colors" />
+                    <h4 className="text-lg font-medium text-white group-hover:text-purple-100 transition-colors">What do you think about Evolve?</h4>
+                    <p className="text-sm text-purple-200/80 group-hover:text-purple-100/90 transition-colors">Share your thoughts and help us make Evolve even better!</p>
+                  </div>
+                </div>
                 <Logo className="h-8 w-8 flex justify-center items-center" />
                 <div className="flex items-center gap-2 text-sm text-black/50 dark:text-white/50">
                   <Info className="h-4 w-4" />
