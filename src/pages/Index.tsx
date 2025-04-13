@@ -472,7 +472,10 @@ const Index = () => {
               </BackgroundImage>
             ) : backgroundType === "dynamic" ? (
               <BackgroundVideo
-                videoPath={backgroundStyle}
+                videoPath={
+                    /* random video from DYNAMIC_OPTIONS */
+                    DYNAMIC_OPTIONS[Math.floor(Math.random() * DYNAMIC_OPTIONS.length)].value
+                }
                 className={
                   DYNAMIC_OPTIONS.find((opt) => opt.value === backgroundStyle)
                     ?.effects

@@ -48,29 +48,41 @@ const IMAGE_OPTIONS = [
 const GRADIENT_OPTIONS = [
   {
     name: "Black and Gray",
-    value: "from-black/50 via-gray-900/50 to-gray-900/50",
+    value: "bg-gradient-to-br from-black/50 via-gray-900/50 to-gray-900/50",
   },
   {
     name: "Emerald Teal Cyan",
-    value: "from-emerald-700/60 via-teal-700/60 to-cyan-700/60",
+    value: "bg-gradient-to-br from-emerald-700/60 via-teal-700/60 to-cyan-700/60",
   },
   {
     name: "Violet Purple Fuchsia",
-    value: "from-violet-600/60 via-purple-600/60 to-fuchsia-600/60",
+    value: "bg-gradient-to-br from-violet-600/60 via-purple-600/60 to-fuchsia-600/60",
   },
-  { name: "Slate Gray Zinc", value: "from-slate-700 via-gray-700 to-zinc-700" },
+  { name: "Slate Gray Zinc", value: "bg-gradient-to-br from-slate-700 via-gray-700 to-zinc-700" },
   {
     name: "Blue Cyan Teal",
-    value: "from-blue-700/60 via-cyan-700/60 to-teal-700/60",
+    value: "bg-gradient-to-br from-blue-700/60 via-cyan-700/60 to-teal-700/60",
   },
+  {
+    name: "Peach like color and Strong sky blue",
+    value: "bg-gradient-to-tl from-[#ffafcc] to-[#a2d2ff]",
+  }
 ];
 
 const SOLID_COLOR_OPTIONS = [
-  { name: "Black", value: "bg-black/50" },
-  { name: "Indigo", value: "bg-indigo-700/50" },
+  { name: "Nastia's Choice 1", value: "bg-[#ffafcc]" },
+//   { name: "Nastia's Choice 2", value: "bg-[#a2d2ff]" },
+  { name: "Nastia's Choice 3", value: "bg-[#d5bdaf]" },
+  { name: "Nastia's Choice 4", value: "bg-[#b0c4b1]" },
+//   { name: "Nastia's Choice 5", value: "bg-[#adc178]" },
+  { name: "Nastia's Choice 6", value: "bg-[#9b72cf]" },
+//   { name: "Nastia's Choice 7", value: "bg-[#8ecae6]" },
+//   { name: "Nastia's Choice 8", value: "bg-[#ef8354]" },
+  { name: "Black", value: "bg-gray-950" },
+//   { name: "Indigo", value: "bg-indigo-700/50" },
   { name: "Blue", value: "bg-blue-200/60" },
-  { name: "Amber", value: "bg-amber-100/40" },
-  { name: "Emerald", value: "bg-emerald-700/50" },
+//   { name: "Amber", value: "bg-amber-100/40" },
+//   { name: "Emerald", value: "bg-emerald-700/50" },
   { name: "Violet", value: "bg-violet-700/50" },
   { name: "Slate", value: "bg-slate-800" },
 ];
@@ -78,14 +90,29 @@ const SOLID_COLOR_OPTIONS = [
 // Dynamic background options
 export const DYNAMIC_OPTIONS = [
   { 
-    name: "Cozy Bedroom", 
-    value: "cozy-bedroom.mp4",
-    effects: "object-cover blur opacity-85 brightness-100 contrast-125"
+    name: "Sunny Patio", 
+    value: "https://fdcqozqhcmrvwzhkprwz.supabase.co/storage/v1/object/sign/evolve/dynamic/sunny-patio.mp4?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJldm9sdmUvZHluYW1pYy9zdW5ueS1wYXRpby5tcDQiLCJpYXQiOjE3NDQ1NzEwNDcsImV4cCI6MTc3NjEwNzA0N30.e3hCeqZkePhOhHI_EdK0M8KKRmba5eB5viGloH56x1A",
+    effects: "object-cover blur-sm contrast-125"
   },
   { 
-    name: "Morning Coffee", 
-    value: "morning-coffee.mp4",
-    effects: "object-fill scale-105 blur opacity-85 brightness-100 contrast-125"
+    name: "Rainy Bedroom", 
+    value: "https://fdcqozqhcmrvwzhkprwz.supabase.co/storage/v1/object/sign/evolve/dynamic/rainy-bedroom.mp4?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJldm9sdmUvZHluYW1pYy9yYWlueS1iZWRyb29tLm1wNCIsImlhdCI6MTc0NDU3MTAzOSwiZXhwIjoxNzc2MTA3MDM5fQ.HmWP5-gqPuZ-HeqeQ3SFTeoq9WfR6jHENMsaw1XO3QI",
+    effects: "object-cover blur-sm contrast-125"
+  },
+  { 
+    name: "Cyberpunk Room", 
+    value: "https://fdcqozqhcmrvwzhkprwz.supabase.co/storage/v1/object/sign/evolve/dynamic/cyberpunk-room.mp4?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJldm9sdmUvZHluYW1pYy9jeWJlcnB1bmstcm9vbS5tcDQiLCJpYXQiOjE3NDQ1NzEwMjksImV4cCI6MTc3NjEwNzAyOX0.QbBuP9baZTB9VXdDLUrJFG8nX5EiZkqaGZsmXOJBWmA",
+    effects: "object-cover blur-sm contrast-125"
+  },
+  { 
+    name: "Botanica", 
+    value: "https://fdcqozqhcmrvwzhkprwz.supabase.co/storage/v1/object/sign/evolve/dynamic/botanica.mp4?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJldm9sdmUvZHluYW1pYy9ib3RhbmljYS5tcDQiLCJpYXQiOjE3NDQ1NzEwMTksImV4cCI6MTc3NjEwNzAxOX0.hUB2W22IYh72VfCN8195RPtTSj90B3NpY0szL6dYkdc",
+    effects: "object-cover blur-sm contrast-125"
+  },
+  { 
+    name: "Anime Coffee Shop", 
+    value: "https://fdcqozqhcmrvwzhkprwz.supabase.co/storage/v1/object/sign/evolve/dynamic/anime-coffee-shop.mp4?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJldm9sdmUvZHluYW1pYy9hbmltZS1jb2ZmZWUtc2hvcC5tcDQiLCJpYXQiOjE3NDQ1NzA5OTgsImV4cCI6MTc3NjEwNjk5OH0.BabEKikGedP2LnKpfezJ8komRxo0ebviJCJ9o5icXyU",
+    effects: "object-cover blur-sm contrast-125"
   },
 ];
 
@@ -281,7 +308,7 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                             <div
                               className="absolute inset-0 bg-cover bg-center"
                               style={{
-                                  backgroundImage: "url(/backgrounds/static/image.jpg)",
+                                  backgroundImage: "url(https://fdcqozqhcmrvwzhkprwz.supabase.co/storage/v1/object/sign/evolve/static/thumbnail.jpg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJldm9sdmUvc3RhdGljL3RodW1ibmFpbC5qcGciLCJpYXQiOjE3NDQ1NzEzMzUsImV4cCI6MTc3NjEwNzMzNX0.4DuXQrBgnold15oG4oGfxLYL8nRKVJZy1WHraA53Euo)",
                               }}
                             />
                             <div className="absolute inset-0 bg-black/30" />
@@ -299,7 +326,7 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                             <div
                               className="absolute inset-0 bg-cover bg-center"
                               style={{
-                                backgroundImage: "url(/backgrounds/dynamic/clouds.gif)",
+                                backgroundImage: "url(https://fdcqozqhcmrvwzhkprwz.supabase.co/storage/v1/object/sign/evolve/dynamic/thumbnail.gif?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJldm9sdmUvZHluYW1pYy90aHVtYm5haWwuZ2lmIiwiaWF0IjoxNzQ0NTcxMzAwLCJleHAiOjE3NzYxMDczMDB9.k7NcX7ik7NQ6EKqbqHpH9-pk6dulBYO8qP2b4IwmebE)",
                               }}
                             />
                             <div className="absolute inset-0 bg-black/30" />
@@ -380,7 +407,7 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                             onClick={() => handleBackgroundStyleChange(option.value)}
                             className={cn(
                               "group relative size-10 mt-1 rounded-full transition-all flex-shrink-0",
-                              `bg-gradient-to-br ${option.value}`,
+                              `${option.value}`,
                               storedBackgroundStyle === option.value
                                 ? "ring-2 ring-white"
                                 : "ring-1 ring-white/20 hover:ring-white/40"

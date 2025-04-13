@@ -30,7 +30,7 @@ const BackgroundVideo: React.FC<BackgroundVideoProps> = ({ children, videoPath, 
         loop
         playsInline
       >
-        <source src={`/backgrounds/dynamic/${videoPath}`} type="video/mp4" />
+        <source src={videoPath} type="video/mp4" />
       </video>
       
       {/* Overlay for better text readability */}
