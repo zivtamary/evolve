@@ -16,6 +16,12 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Theme options
 const THEME_OPTIONS = [
@@ -69,8 +75,17 @@ const SOLID_COLOR_OPTIONS = [
 ];
 
 // Dynamic background options
-const DYNAMIC_OPTIONS = [
-  { name: "Morning Coffee", value: "morning-coffee.mp4" },
+export const DYNAMIC_OPTIONS = [
+  { 
+    name: "Cozy Bedroom", 
+    value: "cozy-bedroom.mp4",
+    effects: "object-cover blur opacity-85 brightness-100 contrast-125"
+  },
+  { 
+    name: "Morning Coffee", 
+    value: "morning-coffee.mp4",
+    effects: "object-fill scale-105 blur opacity-85 brightness-100 contrast-125"
+  },
 ];
 
 interface ThemeBackgroundDrawerProps {
@@ -187,19 +202,27 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
             <h4 className="text-sm font-medium text-white/70 mb-3">Theme</h4>
             <div className="flex gap-3">
               {THEME_OPTIONS.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => handleThemeChange(option.value)}
-                  className={cn(
-                    "flex-1 flex flex-col items-center justify-center p-3 rounded-lg transition-all",
-                    storedTheme === option.value
-                      ? "bg-zinc-700 text-white"
-                      : "bg-zinc-800/50 text-white/70 hover:bg-zinc-700/50"
-                  )}
-                >
-                  {option.icon}
-                  <span className="mt-2 text-xs">{option.name}</span>
-                </button>
+                <TooltipProvider key={option.value}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => handleThemeChange(option.value)}
+                        className={cn(
+                          "flex-1 flex flex-col items-center justify-center p-3 rounded-lg transition-all",
+                          storedTheme === option.value
+                            ? "bg-zinc-700 text-white"
+                            : "bg-zinc-800/50 text-white/70 hover:bg-zinc-700/50"
+                        )}
+                      >
+                        {option.icon}
+                        <span className="mt-2 text-xs">{option.name}</span>
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Set theme to {option.name.toLowerCase()}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               ))}
             </div>
           </div>
@@ -213,62 +236,70 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
             </h4>
             <div className="flex gap-3">
               {BACKGROUND_TYPE_OPTIONS.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() =>
-                    handleBackgroundTypeSelect(
-                      option.value as "image" | "gradient" | "solid" | "dynamic"
-                    )
-                  }
-                  className={cn(
-                    "group flex-1 flex flex-col items-center justify-center p-3 rounded-lg transition-all relative overflow-hidden",
-                    displayBackgroundType === option.value
-                      ? "bg-zinc-700 text-white"
-                      : "bg-zinc-800/50 text-white/70 hover:bg-zinc-700/50"
-                  )}
-                >
-                  {/* Preview background for gradient button */}
-                  {option.value === "gradient" && (
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-sky-600 via-blue-600 to-indigo-600" />
-                  )}
+                <TooltipProvider key={option.value}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() =>
+                          handleBackgroundTypeSelect(
+                            option.value as "image" | "gradient" | "solid" | "dynamic"
+                          )
+                        }
+                        className={cn(
+                          "group flex-1 flex flex-col items-center justify-center p-3 rounded-lg transition-all relative overflow-hidden",
+                          displayBackgroundType === option.value
+                            ? "bg-zinc-700 text-white"
+                            : "bg-zinc-800/50 text-white/70 hover:bg-zinc-700/50"
+                        )}
+                      >
+                        {/* Preview background for gradient button */}
+                        {option.value === "gradient" && (
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-sky-600 via-blue-600 to-indigo-600" />
+                        )}
 
-                  {/* Preview background for image button */}
-                  {option.value === "image" && (
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div
-                        className="absolute inset-0 bg-cover bg-center"
-                        style={{
-                            backgroundImage: "url(/backgrounds/static/image.jpg)",
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-black/30" />
-                    </div>
-                  )}
+                        {/* Preview background for image button */}
+                        {option.value === "image" && (
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div
+                              className="absolute inset-0 bg-cover bg-center"
+                              style={{
+                                  backgroundImage: "url(/backgrounds/static/image.jpg)",
+                              }}
+                            />
+                            <div className="absolute inset-0 bg-black/30" />
+                          </div>
+                        )}
 
-                  {/* Preview background for solid button */}
-                  {option.value === "solid" && (
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-indigo-600" />
-                  )}
+                        {/* Preview background for solid button */}
+                        {option.value === "solid" && (
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-indigo-600" />
+                        )}
 
-                  {/* Preview background for dynamic button */}
-                  {option.value === "dynamic" && (
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div
-                        className="absolute inset-0 bg-cover bg-center"
-                        style={{
-                          backgroundImage: "url(/backgrounds/dynamic/clouds.gif)",
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-black/30" />
-                    </div>
-                  )}
+                        {/* Preview background for dynamic button */}
+                        {option.value === "dynamic" && (
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div
+                              className="absolute inset-0 bg-cover bg-center"
+                              style={{
+                                backgroundImage: "url(/backgrounds/dynamic/clouds.gif)",
+                              }}
+                            />
+                            <div className="absolute inset-0 bg-black/30" />
+                          </div>
+                        )}
 
-                  {/* Content with z-index to appear above the preview */}
-                  <div className="relative z-10 flex flex-col items-center">
-                    {option.icon}
-                    <span className="mt-2 text-xs">{option.name}</span>
-                  </div>
-                </button>
+                        {/* Content with z-index to appear above the preview */}
+                        <div className="relative z-10 flex flex-col items-center">
+                          {option.icon}
+                          <span className="mt-2 text-xs">{option.name}</span>
+                        </div>
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Use {option.name.toLowerCase()} background</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               ))}
             </div>
           </div>
@@ -289,95 +320,128 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
               <div className="flex gap-3 min-w-96 pb-4">
                 {displayBackgroundType === "image" ? (
                   <>
-                    <button
-                      key="shuffle"
-                      onClick={handleShuffleImage}
-                      className={cn(
-                        "group relative size-10 mt-1 rounded-full transition-all flex-shrink-0",
-                        "bg-white/10 dark:bg-white/10 hover:bg-white/20 dark:hover:bg-white/20",
-                        "text-white/90 hover:text-white",
-                        "border border-white/10 hover:border-white/20",
-                        "shadow-sm hover:shadow-md",
-                        "flex items-center justify-center",
-                        "ring-2 ring-white"
-                      )}
-                    >
-                      <Shuffle className="h-4 w-4" />
-                      <div
-                        className={cn(
-                          "absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity",
-                          "bg-gradient-to-b from-white/10 to-transparent"
-                        )}
-                      />
-                    </button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            key="shuffle"
+                            onClick={handleShuffleImage}
+                            className={cn(
+                              "group relative size-10 mt-1 rounded-full transition-all flex-shrink-0",
+                              "bg-white/10 dark:bg-white/10 hover:bg-white/20 dark:hover:bg-white/20",
+                              "text-white/90 hover:text-white",
+                              "border border-white/10 hover:border-white/20",
+                              "shadow-sm hover:shadow-md",
+                              "flex items-center justify-center",
+                              "ring-2 ring-white"
+                            )}
+                          >
+                            <Shuffle className="h-4 w-4" />
+                            <div
+                              className={cn(
+                                "absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity",
+                                "bg-gradient-to-b from-white/10 to-transparent"
+                              )}
+                            />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Shuffle background image</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </>
                 ) : displayBackgroundType === "gradient" ? (
                   GRADIENT_OPTIONS.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => handleBackgroundStyleChange(option.value)}
-                      className={cn(
-                        "group relative size-10 mt-1 rounded-full transition-all flex-shrink-0",
-                        `bg-gradient-to-br ${option.value}`,
-                        storedBackgroundStyle === option.value
-                          ? "ring-2 ring-white"
-                          : "ring-1 ring-white/20 hover:ring-white/40"
-                      )}
-                    >
-                      <div
-                        className={cn(
-                          "absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity",
-                          "bg-gradient-to-b from-white/10 to-transparent"
-                        )}
-                      />
-                    </button>
+                    <TooltipProvider key={option.value}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => handleBackgroundStyleChange(option.value)}
+                            className={cn(
+                              "group relative size-10 mt-1 rounded-full transition-all flex-shrink-0",
+                              `bg-gradient-to-br ${option.value}`,
+                              storedBackgroundStyle === option.value
+                                ? "ring-2 ring-white"
+                                : "ring-1 ring-white/20 hover:ring-white/40"
+                            )}
+                          >
+                            <div
+                              className={cn(
+                                "absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity",
+                                "bg-gradient-to-b from-white/10 to-transparent"
+                              )}
+                            />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{option.name}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   ))
                 ) : displayBackgroundType === "dynamic" ? (
                   DYNAMIC_OPTIONS.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => handleBackgroundStyleChange(option.value)}
-                      className={cn(
-                        "group relative size-10 mt-1 rounded-full transition-all flex-shrink-0",
-                        "bg-white/10 dark:bg-white/10 hover:bg-white/20 dark:hover:bg-white/20",
-                        "text-white/90 hover:text-white",
-                        "border border-white/10 hover:border-white/20",
-                        "shadow-sm hover:shadow-md",
-                        "flex items-center justify-center",
-                        storedBackgroundStyle === option.value
-                          ? "ring-2 ring-white"
-                          : "ring-1 ring-white/20 hover:ring-white/40"
-                      )}
-                    >
-                      <Play className="h-4 w-4" />
-                      <div
-                        className={cn(
-                          "absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity",
-                          "bg-gradient-to-b from-white/10 to-transparent"
-                        )}
-                      />
-                    </button>
+                    <TooltipProvider key={option.value}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => handleBackgroundStyleChange(option.value)}
+                            className={cn(
+                              "group relative size-10 mt-1 rounded-full transition-all flex-shrink-0",
+                              "bg-white/10 dark:bg-white/10 hover:bg-white/20 dark:hover:bg-white/20",
+                              "text-white/90 hover:text-white",
+                              "border border-white/10 hover:border-white/20",
+                              "shadow-sm hover:shadow-md",
+                              "flex items-center justify-center",
+                              storedBackgroundStyle === option.value
+                                ? "ring-2 ring-white"
+                                : "ring-1 ring-white/20 hover:ring-white/40"
+                            )}
+                          >
+                            <Shuffle className="h-4 w-4" />
+                            <div
+                              className={cn(
+                                "absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity",
+                                "bg-gradient-to-b from-white/10 to-transparent"
+                              )}
+                            />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Shuffle Dynamic Background</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   ))
                 ) : (
                   SOLID_COLOR_OPTIONS.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => handleBackgroundStyleChange(option.value)}
-                      className={cn(
-                        "group relative size-10 mt-1 rounded-full transition-all flex-shrink-0",
-                        option.value,
-                        storedBackgroundStyle === option.value
-                          ? "ring-2 ring-white"
-                          : "ring-1 ring-white/20 hover:ring-white/40"
-                      )}
-                    >
-                      <div
-                        className={cn(
-                          "absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity",
-                          "bg-gradient-to-b from-white/10 to-transparent"
-                        )}
-                      />
-                    </button>
+                    <TooltipProvider key={option.value}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => handleBackgroundStyleChange(option.value)}
+                            className={cn(
+                              "group relative size-10 mt-1 rounded-full transition-all flex-shrink-0",
+                              option.value,
+                              storedBackgroundStyle === option.value
+                                ? "ring-2 ring-white"
+                                : "ring-1 ring-white/20 hover:ring-white/40"
+                            )}
+                          >
+                            <div
+                              className={cn(
+                                "absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity",
+                                "bg-gradient-to-b from-white/10 to-transparent"
+                              )}
+                            />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{option.name}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   ))
                 )}
               </div>

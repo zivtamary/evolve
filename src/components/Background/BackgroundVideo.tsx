@@ -1,11 +1,13 @@
 import React, { useEffect, useRef } from 'react';
+import { cn } from '../../lib/utils';
 
 interface BackgroundVideoProps {
   children: React.ReactNode;
   videoPath: string;
+  className?: string;
 }
 
-const BackgroundVideo: React.FC<BackgroundVideoProps> = ({ children, videoPath }) => {
+const BackgroundVideo: React.FC<BackgroundVideoProps> = ({ children, videoPath, className }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -22,7 +24,7 @@ const BackgroundVideo: React.FC<BackgroundVideoProps> = ({ children, videoPath }
       {/* Video background */}
       <video
         ref={videoRef}
-        className="absolute inset-0 h-full w-full object-cover"
+        className={cn("absolute inset-0 h-full w-full", className)}
         autoPlay
         muted
         loop

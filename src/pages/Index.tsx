@@ -5,7 +5,7 @@ import BackgroundImage from '../components/Background/BackgroundImage';
 import BackgroundVideo from '../components/Background/BackgroundVideo';
 import BackgroundTypeToggle from '../components/Background/BackgroundTypeToggle';
 import BackgroundColors from '../components/Background/BackgroundColors';
-import ThemeBackgroundDrawer from '../components/Settings/ThemeBackgroundDrawer';
+import ThemeBackgroundDrawer, { DYNAMIC_OPTIONS } from '../components/Settings/ThemeBackgroundDrawer';
 import Clock from '../components/Clock/Clock';
 import Weather from '../components/Weather/Weather';
 import SearchBar from '../components/Search/SearchBar';
@@ -400,7 +400,10 @@ const Index = () => {
                 </motion.div>
               </BackgroundImage>
             ) : backgroundType === 'dynamic' ? (
-              <BackgroundVideo videoPath={backgroundStyle}>
+              <BackgroundVideo 
+                videoPath={backgroundStyle}
+                className={DYNAMIC_OPTIONS.find(opt => opt.value === backgroundStyle)?.effects}
+              >
                 <motion.div 
                   className="min-h-screen relative overflow-hidden"
                   initial={{ opacity: 0 }}
