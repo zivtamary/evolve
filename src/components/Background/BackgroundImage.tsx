@@ -3,9 +3,13 @@ import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 interface BackgroundImageProps {
   children: React.ReactNode;
+  blurLevel?: number;
 }
 
-const BackgroundImage: React.FC<BackgroundImageProps> = ({ children }) => {
+const BackgroundImage: React.FC<BackgroundImageProps> = ({ 
+  children,
+  blurLevel = 2
+}) => {
   const [imageUrl, setImageUrl] = useLocalStorage<string>('background-image', '');
   const [lastUsedIndex, setLastUsedIndex] = useLocalStorage<number>('last-image-index', -1);
   const [loading, setLoading] = useState<boolean>(true);
@@ -57,6 +61,16 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({ children }) => {
     }, 1000);
   };
 
+  // Calculate blur value based on blur level
+  const getBlurValue = () => {
+    switch (blurLevel) {
+      case 0: return '0px'; // None
+      case 1: return '4px'; // Low
+      case 2: return '8px'; // High
+      default: return '8px';
+    }
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
       {/* Background image with blur effect */}
@@ -66,7 +80,7 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({ children }) => {
         }`}
         style={{ 
           backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
-          filter: 'blur(0px)',
+          filter: `blur(${getBlurValue()})`,
           transform: 'scale(1.1)',
         }}
       />

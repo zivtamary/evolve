@@ -59,6 +59,7 @@ const Auth = () => {
   const isSigningIn = useRef(false);
   const navigate = useNavigate();
   const { isAuthenticated } = useSettings();
+  const [blurLevel, setBlurLevel] = useState(0);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -646,7 +647,7 @@ const Auth = () => {
 
   return (
     <>
-      <BackgroundImage>
+      <BackgroundImage blurLevel={blurLevel}>
         <div className="flex justify-center items-center min-h-screen p-4">
           <Card className="w-full max-w-md overflow-hidden border-0 dark:bg-gray-900/60 dark:backdrop-blur-md">
             <CardHeader className="dark:text-gray-100">

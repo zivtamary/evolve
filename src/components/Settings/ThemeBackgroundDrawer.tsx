@@ -22,6 +22,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Slider } from "@/components/ui/slider";
 
 // Theme options
 const THEME_OPTIONS = [
@@ -96,6 +97,8 @@ interface ThemeBackgroundDrawerProps {
   backgroundStyle: string;
   onBackgroundStyleChange: (style: string) => void;
   onShuffleImage: () => void;
+  blurLevel: number;
+  onBlurLevelChange: (level: number) => void;
 }
 
 const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
@@ -106,6 +109,8 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
   backgroundStyle,
   onBackgroundStyleChange,
   onShuffleImage,
+  blurLevel,
+  onBlurLevelChange,
 }) => {
   // Use local storage hooks for each setting
   const [storedTheme, setStoredTheme] = useLocalStorage("theme", theme);
@@ -115,6 +120,10 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
   const [storedBackgroundStyle, setStoredBackgroundStyle] = useLocalStorage(
     "backgroundStyle",
     backgroundStyle
+  );
+  const [storedBlurLevel, setStoredBlurLevel] = useLocalStorage(
+    "blurLevel",
+    blurLevel
   );
   
   // Add temporary state for selected background type
@@ -133,6 +142,9 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
     }
     if (storedBackgroundStyle !== backgroundStyle) {
       onBackgroundStyleChange(storedBackgroundStyle);
+    }
+    if (storedBlurLevel !== blurLevel) {
+      onBlurLevelChange(storedBlurLevel);
     }
   }, []);
 
@@ -172,6 +184,12 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
       onBackgroundTypeChange(selectedBackgroundType);
       setSelectedBackgroundType(null); // Reset the selection
     }
+  };
+
+  // Handle blur level change
+  const handleBlurLevelChange = (newLevel: number[]) => {
+    setStoredBlurLevel(newLevel[0]);
+    onBlurLevelChange(newLevel[0]);
   };
 
   // Determine which background type to display in the UI
@@ -333,7 +351,9 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                               "border border-white/10 hover:border-white/20",
                               "shadow-sm hover:shadow-md",
                               "flex items-center justify-center",
-                              "ring-2 ring-white"
+                              backgroundType === "image"
+                                ? "ring-2 ring-white"
+                                : "ring-1 ring-white/20 hover:ring-white/40"
                             )}
                           >
                             <Shuffle className="h-4 w-4" />
@@ -381,39 +401,37 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                     </TooltipProvider>
                   ))
                 ) : displayBackgroundType === "dynamic" ? (
-                  DYNAMIC_OPTIONS.map((option) => (
-                    <TooltipProvider key={option.value}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            onClick={() => handleBackgroundStyleChange(option.value)}
+                    <TooltipProvider key={DYNAMIC_OPTIONS[0].value}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => handleBackgroundStyleChange(DYNAMIC_OPTIONS[0].value)}
+                          className={cn(
+                            "group relative size-10 mt-1 rounded-full transition-all flex-shrink-0",
+                            "bg-white/10 dark:bg-white/10 hover:bg-white/20 dark:hover:bg-white/20",
+                            "text-white/90 hover:text-white",
+                            "border border-white/10 hover:border-white/20",
+                            "shadow-sm hover:shadow-md",
+                            "flex items-center justify-center",
+                            backgroundType === "dynamic"
+                              ? "ring-2 ring-white"
+                              : "ring-1 ring-white/20 hover:ring-white/40"
+                          )}
+                        >
+                          <Shuffle className="h-4 w-4" />
+                          <div
                             className={cn(
-                              "group relative size-10 mt-1 rounded-full transition-all flex-shrink-0",
-                              "bg-white/10 dark:bg-white/10 hover:bg-white/20 dark:hover:bg-white/20",
-                              "text-white/90 hover:text-white",
-                              "border border-white/10 hover:border-white/20",
-                              "shadow-sm hover:shadow-md",
-                              "flex items-center justify-center",
-                              storedBackgroundStyle === option.value
-                                ? "ring-2 ring-white"
-                                : "ring-1 ring-white/20 hover:ring-white/40"
+                              "absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity",
+                              "bg-gradient-to-b from-white/10 to-transparent"
                             )}
-                          >
-                            <Shuffle className="h-4 w-4" />
-                            <div
-                              className={cn(
-                                "absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity",
-                                "bg-gradient-to-b from-white/10 to-transparent"
-                              )}
-                            />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Shuffle Dynamic Background</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  ))
+                          />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Shuffle Dynamic Background</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 ) : (
                   SOLID_COLOR_OPTIONS.map((option) => (
                     <TooltipProvider key={option.value}>
@@ -447,6 +465,38 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Extra Options - Only visible for image background type */}
+          {displayBackgroundType === "image" && (
+            <>
+              {/* <div className="h-px w-full bg-white/10 my-2" /> */}
+              
+              <div className="mb-4">
+                <h4 className="text-sm font-medium text-white/70 mb-3">
+                  Extra Options
+                </h4>
+                
+                <div className="space-y-6">
+                  {/* Blur Slider */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <label className="text-sm text-white/70">Blur</label>
+                      <span className="text-sm text-white/70">
+                        {storedBlurLevel === 0 ? "None" : storedBlurLevel === 1 ? "Low" : "High"}
+                      </span>
+                    </div>
+                    <Slider
+                      value={[storedBlurLevel]}
+                      onValueChange={handleBlurLevelChange}
+                      max={2}
+                      step={1}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </DrawerContent>
     </Drawer>

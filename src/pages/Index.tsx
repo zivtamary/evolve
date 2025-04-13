@@ -49,6 +49,7 @@ const Index = () => {
     "image" | "gradient" | "solid" | "dynamic"
   >("image");
   const [backgroundStyle, setBackgroundStyle] = useState("");
+  const [blurLevel, setBlurLevel] = useState(2);
   const [isBackgroundOptionsOpen, setIsBackgroundOptionsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -311,7 +312,7 @@ const Index = () => {
             transition={{ duration: 3, ease: "easeInOut" }}
           >
             {backgroundType === "image" ? (
-              <BackgroundImage>
+              <BackgroundImage blurLevel={blurLevel}>
                 <motion.div
                   className="min-h-screen relative overflow-hidden"
                   initial={{ opacity: 0 }}
@@ -327,6 +328,8 @@ const Index = () => {
                     backgroundStyle={backgroundStyle}
                     onBackgroundStyleChange={setBackgroundStyle}
                     onShuffleImage={handleShuffleImage}
+                    blurLevel={blurLevel}
+                    onBlurLevelChange={setBlurLevel}
                   />
 
                   {/* Settings sidebar */}
@@ -428,17 +431,15 @@ const Index = () => {
                   </motion.div>
 
                   {/* Motivation Phrase - Only visible on first slide */}
-                  {true && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      exit={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: currentSlide === 0 ? 1 : 0, y: -20 }}
-                      transition={{ duration: 0.8, delay: 0 }}
-                      className={cn("absolute bottom-8 left-0 right-0")}
-                    >
-                      <MotivationPhrase />
-                    </motion.div>
-                  )}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: currentSlide === 0 ? 1 : 0, y: -20 }}
+                    transition={{ duration: 0.8, delay: 0 }}
+                    className={cn("absolute bottom-8 left-0 right-0")}
+                  >
+                    <MotivationPhrase />
+                  </motion.div>
 
                   {/* Navigation dots */}
                   <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
@@ -492,6 +493,8 @@ const Index = () => {
                     backgroundStyle={backgroundStyle}
                     onBackgroundStyleChange={setBackgroundStyle}
                     onShuffleImage={handleShuffleImage}
+                    blurLevel={blurLevel}
+                    onBlurLevelChange={setBlurLevel}
                   />
 
                   {/* Settings sidebar */}
@@ -593,17 +596,15 @@ const Index = () => {
                   </motion.div>
 
                   {/* Motivation Phrase - Only visible on first slide */}
-                  {true && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      exit={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: currentSlide === 0 ? 1 : 0, y: -20 }}
-                      transition={{ duration: 0.8, delay: 0 }}
-                      className={cn("absolute bottom-8 left-0 right-0")}
-                    >
-                      <MotivationPhrase />
-                    </motion.div>
-                  )}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: currentSlide === 0 ? 1 : 0, y: -20 }}
+                    transition={{ duration: 0.8, delay: 0 }}
+                    className={cn("absolute bottom-8 left-0 right-0")}
+                  >
+                    <MotivationPhrase />
+                  </motion.div>
 
                   {/* Navigation dots */}
                   <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
@@ -656,6 +657,8 @@ const Index = () => {
                   backgroundStyle={backgroundStyle}
                   onBackgroundStyleChange={setBackgroundStyle}
                   onShuffleImage={handleShuffleImage}
+                  blurLevel={blurLevel}
+                  onBlurLevelChange={setBlurLevel}
                 />
 
                 {/* Settings sidebar */}
@@ -755,17 +758,15 @@ const Index = () => {
                 </motion.div>
 
                 {/* Motivation Phrase - Only visible on first slide */}
-                {true && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: currentSlide === 0 ? 1 : 0, y: -20 }}
-                    transition={{ duration: 0.8, delay: 0 }}
-                    className={cn("absolute bottom-8 left-0 right-0")}
-                  >
-                    <MotivationPhrase />
-                  </motion.div>
-                )}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: currentSlide === 0 ? 1 : 0, y: -20 }}
+                  transition={{ duration: 0.8, delay: 0 }}
+                  className={cn("absolute bottom-8 left-0 right-0")}
+                >
+                  <MotivationPhrase />
+                </motion.div>
 
                 {/* Navigation dots */}
                 <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
