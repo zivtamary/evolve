@@ -17,10 +17,8 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({ children }) => {
         // For now, we'll use a predefined Unsplash URL until we integrate the API
         const defaultImages = [
           'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
-          'https://images.unsplash.com/photo-1469474968028-56623f02e42e',
           'https://images.unsplash.com/photo-1506905925346-21bda4d32df4',
           'https://images.unsplash.com/photo-1511300636408-a63a89df3482',
-          'https://images.unsplash.com/photo-1434725039720-aaad6dd32dfe',
         ];
         
         if (!imageUrl) {
@@ -51,12 +49,12 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({ children }) => {
     <div className="relative min-h-screen overflow-hidden bg-black">
       {/* Background image with blur effect */}
       <div
-        className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${
+        className={`absolute inset-0 size-full bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${
           !loading ? 'opacity-100' : 'opacity-0'
         }`}
         style={{ 
           backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
-          filter: 'blur(8px)',
+          filter: 'blur(0px)',
           transform: 'scale(1.1)',
         }}
       />

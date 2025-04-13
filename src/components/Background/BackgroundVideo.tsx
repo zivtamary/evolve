@@ -32,7 +32,7 @@ const BackgroundVideo: React.FC<BackgroundVideoProps> = ({ children, videoPath }
       </video>
       
       {/* Overlay for better text readability */}
-      <div className="absolute inset-0 bg-black/30 dark:bg-black" />
+      <div className="absolute inset-0 bg-black/30 dark:bg-black/30" />
       
       {/* Content */}
       <div className="relative z-10 min-h-screen">
