@@ -217,7 +217,7 @@ const TimeGreeting = () => {
         <div className="text-white/90">
           {icon}
         </div>
-        <div className="flex items-center whitespace-nowrap">
+        <div className="flex items-center whitespace-nowrap select-none">
           <span>{greeting}</span>
           {displayName && (
             <>
