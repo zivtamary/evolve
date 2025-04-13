@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import {
@@ -101,6 +101,11 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
     "backgroundStyle",
     backgroundStyle
   );
+  
+  // Add temporary state for selected background type
+  const [selectedBackgroundType, setSelectedBackgroundType] = useState<
+    "image" | "gradient" | "solid" | "dynamic" | null
+  >(null);
 
   // Sync stored values with props when component mounts
   useEffect(() => {
@@ -122,19 +127,40 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
     onThemeChange(newTheme);
   };
 
-  // Handle background type change with local storage
-  const handleBackgroundTypeChange = (
+  // Handle background type selection (temporary, not applied yet)
+  const handleBackgroundTypeSelect = (
     newType: "image" | "gradient" | "solid" | "dynamic"
   ) => {
-    setStoredBackgroundType(newType);
-    onBackgroundTypeChange(newType);
+    setSelectedBackgroundType(newType);
   };
 
-  // Handle background style change with local storage
+  // Handle background style change with local storage and apply background type
   const handleBackgroundStyleChange = (newStyle: string) => {
     setStoredBackgroundStyle(newStyle);
     onBackgroundStyleChange(newStyle);
+    
+    // If we have a selected background type, apply it now
+    if (selectedBackgroundType) {
+      setStoredBackgroundType(selectedBackgroundType);
+      onBackgroundTypeChange(selectedBackgroundType);
+      setSelectedBackgroundType(null); // Reset the selection
+    }
   };
+
+  // Handle image shuffle with background type application
+  const handleShuffleImage = () => {
+    onShuffleImage();
+    
+    // If we have a selected background type, apply it now
+    if (selectedBackgroundType) {
+      setStoredBackgroundType(selectedBackgroundType);
+      onBackgroundTypeChange(selectedBackgroundType);
+      setSelectedBackgroundType(null); // Reset the selection
+    }
+  };
+
+  // Determine which background type to display in the UI
+  const displayBackgroundType = selectedBackgroundType || storedBackgroundType;
 
   return (
     <Drawer>
@@ -190,13 +216,13 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                 <button
                   key={option.value}
                   onClick={() =>
-                    handleBackgroundTypeChange(
+                    handleBackgroundTypeSelect(
                       option.value as "image" | "gradient" | "solid" | "dynamic"
                     )
                   }
                   className={cn(
                     "group flex-1 flex flex-col items-center justify-center p-3 rounded-lg transition-all relative overflow-hidden",
-                    storedBackgroundType === option.value
+                    displayBackgroundType === option.value
                       ? "bg-zinc-700 text-white"
                       : "bg-zinc-800/50 text-white/70 hover:bg-zinc-700/50"
                   )}
@@ -250,22 +276,22 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
           {/* Background Options */}
           <div>
             <h4 className="text-sm font-medium text-white/70 mb-3">
-              {storedBackgroundType === "image"
+              {displayBackgroundType === "image"
                 ? "Image Options"
-                : storedBackgroundType === "gradient"
+                : displayBackgroundType === "gradient"
                 ? "Gradient Options"
-                : storedBackgroundType === "dynamic"
+                : displayBackgroundType === "dynamic"
                 ? "Dynamic Options"
                 : "Color Options"}
             </h4>
 
             <div className="overflow-x-auto -mx-6 px-6">
               <div className="flex gap-3 min-w-96 pb-4">
-                {storedBackgroundType === "image" ? (
+                {displayBackgroundType === "image" ? (
                   <>
                     <button
                       key="shuffle"
-                      onClick={onShuffleImage}
+                      onClick={handleShuffleImage}
                       className={cn(
                         "group relative size-10 mt-1 rounded-full transition-all flex-shrink-0",
                         "bg-white/10 dark:bg-white/10 hover:bg-white/20 dark:hover:bg-white/20",
@@ -285,7 +311,7 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                       />
                     </button>
                   </>
-                ) : storedBackgroundType === "gradient" ? (
+                ) : displayBackgroundType === "gradient" ? (
                   GRADIENT_OPTIONS.map((option) => (
                     <button
                       key={option.value}
@@ -306,7 +332,7 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                       />
                     </button>
                   ))
-                ) : storedBackgroundType === "dynamic" ? (
+                ) : displayBackgroundType === "dynamic" ? (
                   DYNAMIC_OPTIONS.map((option) => (
                     <button
                       key={option.value}
