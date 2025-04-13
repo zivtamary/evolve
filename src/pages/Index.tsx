@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useSettings } from '../context/SettingsContext';
 import BackgroundImage from '../components/Background/BackgroundImage';
+import BackgroundVideo from '../components/Background/BackgroundVideo';
 import BackgroundTypeToggle from '../components/Background/BackgroundTypeToggle';
 import BackgroundColors from '../components/Background/BackgroundColors';
 import ThemeBackgroundDrawer from '../components/Settings/ThemeBackgroundDrawer';
@@ -39,7 +40,7 @@ const Index = () => {
   const [showMainContent, setShowMainContent] = useState(!showWelcome);
   const [backgroundLoaded, setBackgroundLoaded] = useState(false);
   const [contentLoaded, setContentLoaded] = useState(false);
-  const [backgroundType, setBackgroundType] = useState<'image' | 'gradient' | 'solid'>('image');
+  const [backgroundType, setBackgroundType] = useState<'image' | 'gradient' | 'solid' | 'dynamic'>('image');
   const [backgroundStyle, setBackgroundStyle] = useState('');
   const [isBackgroundOptionsOpen, setIsBackgroundOptionsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -192,9 +193,9 @@ const Index = () => {
       }));
   };
   
-  const handleBackgroundTypeChange = (type: 'image' | 'gradient' | 'solid') => {
-    // If switching to image, reset the background style and close options
-    if (type === 'image') {
+  const handleBackgroundTypeChange = (type: 'image' | 'gradient' | 'solid' | 'dynamic') => {
+    // If switching to image or dynamic, reset the background style and close options
+    if (type === 'image' || type === 'dynamic') {
       setBackgroundStyle('');
       setIsBackgroundOptionsOpen(false);
     } else {
@@ -398,6 +399,154 @@ const Index = () => {
                   </div>
                 </motion.div>
               </BackgroundImage>
+            ) : backgroundType === 'dynamic' ? (
+              <BackgroundVideo videoPath={backgroundStyle}>
+                <motion.div 
+                  className="min-h-screen relative overflow-hidden"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: backgroundLoaded ? 1 : 0 }}
+                  transition={{ duration: 1, ease: "easeInOut", delay: 1.5 }}
+                >
+                  {/* Theme and Background Settings Drawer */}
+                  <ThemeBackgroundDrawer
+                    theme={theme}
+                    onThemeChange={setTheme}
+                    backgroundType={backgroundType}
+                    onBackgroundTypeChange={handleBackgroundTypeChange}
+                    backgroundStyle={backgroundStyle}
+                    onBackgroundStyleChange={setBackgroundStyle}
+                    onShuffleImage={handleShuffleImage}
+                  />
+                  
+                  {/* Settings sidebar */}
+                  <SettingsSidebar />
+                  
+                  {/* Slides container */}
+                  <motion.div 
+                    className="fixed inset-0"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: contentLoaded ? 1 : 0 }}
+                    transition={{ duration: 1, ease: "easeInOut" }}
+                  >
+                    <div 
+                      className="h-full w-full flex transition-transform duration-500 ease-in-out"
+                      style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                    >
+                      {/* First slide - Clock, Weather, Search */}
+                      <div className="h-full w-full flex flex-col items-center justify-center px-6 shrink-0">
+                        <div className="absolute top-12 xs:top-16 sm:top-24 md:top-32 left-1/2 -translate-x-1/2 w-full">
+                          <motion.div 
+                            className="container mx-auto flex flex-col items-center px-4"
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 1.8 }}
+                          >
+                            <Clock />
+                          </motion.div>
+                        </div>
+                        
+                        <div className="flex flex-col items-center justify-center flex-1">
+                          <motion.div 
+                            className="mb-12"
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ 
+                              opacity: isSearchFocused ? 0.6 : 1,
+                              y: isSearchFocused ? 40 : 0,
+                              scale: isSearchFocused ? 0.9 : 1
+                            }}
+                            transition={{ 
+                              type: "spring",
+                              stiffness: 300,
+                              damping: 30
+                            }}
+                          >
+                            <TimeGreeting />
+                          </motion.div>
+                          <motion.div 
+                            className="w-full max-w-xs mb-8"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ 
+                              opacity: isSearchFocused ? 0.6 : 1,
+                              y: isSearchFocused ? 60 : 0,
+                              scale: isSearchFocused ? 0.95 : 1
+                            }}
+                            transition={{ 
+                              type: "spring",
+                              stiffness: 300,
+                              damping: 30
+                            }}
+                          >
+                            <Weather />
+                          </motion.div>
+                            <SearchBar onFocusChange={setIsSearchFocused} />
+                        </div>
+                      </div>
+                      
+                      {/* Second slide - Productivity Tools */}
+                      <div className="h-full w-full flex items-center justify-center px-6 shrink-0">
+                        <section className="w-full">
+                          <div className="container mx-auto max-w-4xl w-full">
+                            {expandedWidget ? (
+                              // When a widget is expanded, render it in a centered container
+                              <div className="flex justify-center items-center w-full">
+                                {getOrderedWidgets().map(({ type, component: Component }) => {
+                                  if (!widgetVisibility[type]) return null;
+                                  if (expandedWidget !== type) return null;
+                                  return <Component key={type} />;
+                                })}
+                              </div>
+                            ) : (
+                              // Normal grid layout when no widget is expanded
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 [&>*:only-child]:md:col-span-2 [&>*:last-child:nth-child(2n-1)]:md:col-span-2 w-full">
+                                {getOrderedWidgets().map(({ type, component: Component }) => {
+                                  if (!widgetVisibility[type]) return null;
+                                  return <Component key={type} />;
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        </section>
+                      </div>
+                    </div>
+                  </motion.div>
+                  
+                  {/* Motivation Phrase - Only visible on first slide */}
+                  {currentSlide === 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: -20 }}
+                      transition={{ duration: 0.8, delay: 2.6 }}
+                      className="absolute bottom-8 left-0 right-0"
+                    >
+                      <MotivationPhrase />
+                    </motion.div>
+                  )}
+                  
+                  {/* Navigation dots */}
+                  <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                    <button
+                      onClick={() => {
+                        setCurrentSlide(0);
+                        scrollToSlide(0);
+                      }}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        currentSlide === 0 ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/70'
+                      }`}
+                      title="Home"
+                    />
+                    <button
+                      onClick={() => {
+                        setCurrentSlide(1);
+                        scrollToSlide(1);
+                      }}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        currentSlide === 1 ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/70'
+                      }`}
+                      title="Productivity Tools"
+                    />
+                  </div>
+                </motion.div>
+              </BackgroundVideo>
             ) : (
               <motion.div 
                 className={`min-h-screen relative overflow-hidden ${

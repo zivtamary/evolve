@@ -12,6 +12,7 @@ import {
   Shuffle,
   SettingsIcon,
   PaletteIcon,
+  Play,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -26,6 +27,7 @@ const THEME_OPTIONS = [
 // Background type options
 const BACKGROUND_TYPE_OPTIONS = [
   { name: "Image", value: "image", icon: <Image className="w-5 h-5" /> },
+  { name: "Dynamic", value: "dynamic", icon: <Play className="w-5 h-5" /> },
   { name: "Gradient", value: "gradient", icon: <Waves className="w-5 h-5" /> },
   { name: "Solid", value: "solid", icon: <Palette className="w-5 h-5" /> },
 ];
@@ -66,11 +68,16 @@ const SOLID_COLOR_OPTIONS = [
   { name: "Slate", value: "bg-slate-800" },
 ];
 
+// Dynamic background options
+const DYNAMIC_OPTIONS = [
+  { name: "Morning Coffee", value: "morning-coffee.mp4" },
+];
+
 interface ThemeBackgroundDrawerProps {
   theme: string;
   onThemeChange: (theme: string) => void;
-  backgroundType: "image" | "gradient" | "solid";
-  onBackgroundTypeChange: (type: "image" | "gradient" | "solid") => void;
+  backgroundType: "image" | "gradient" | "solid" | "dynamic";
+  onBackgroundTypeChange: (type: "image" | "gradient" | "solid" | "dynamic") => void;
   backgroundStyle: string;
   onBackgroundStyleChange: (style: string) => void;
   onShuffleImage: () => void;
@@ -88,7 +95,7 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
   // Use local storage hooks for each setting
   const [storedTheme, setStoredTheme] = useLocalStorage("theme", theme);
   const [storedBackgroundType, setStoredBackgroundType] = useLocalStorage<
-    "image" | "gradient" | "solid"
+    "image" | "gradient" | "solid" | "dynamic"
   >("backgroundType", backgroundType);
   const [storedBackgroundStyle, setStoredBackgroundStyle] = useLocalStorage(
     "backgroundStyle",
@@ -117,7 +124,7 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
 
   // Handle background type change with local storage
   const handleBackgroundTypeChange = (
-    newType: "image" | "gradient" | "solid"
+    newType: "image" | "gradient" | "solid" | "dynamic"
   ) => {
     setStoredBackgroundType(newType);
     onBackgroundTypeChange(newType);
@@ -184,7 +191,7 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                   key={option.value}
                   onClick={() =>
                     handleBackgroundTypeChange(
-                      option.value as "image" | "gradient" | "solid"
+                      option.value as "image" | "gradient" | "solid" | "dynamic"
                     )
                   }
                   className={cn(
@@ -196,7 +203,7 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                 >
                   {/* Preview background for gradient button */}
                   {option.value === "gradient" && (
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600" />
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-sky-600 via-blue-600 to-indigo-600" />
                   )}
 
                   {/* Preview background for image button */}
@@ -205,8 +212,7 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                       <div
                         className="absolute inset-0 bg-cover bg-center"
                         style={{
-                          backgroundImage:
-                            "url(https://source.unsplash.com/random/800x600?nature)",
+                            backgroundImage: "url(/backgrounds/static/image.jpg)",
                         }}
                       />
                       <div className="absolute inset-0 bg-black/30" />
@@ -215,7 +221,20 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
 
                   {/* Preview background for solid button */}
                   {option.value === "solid" && (
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-indigo-700" />
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-indigo-600" />
+                  )}
+
+                  {/* Preview background for dynamic button */}
+                  {option.value === "dynamic" && (
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div
+                        className="absolute inset-0 bg-cover bg-center"
+                        style={{
+                          backgroundImage: "url(/backgrounds/dynamic/clouds.gif)",
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-black/30" />
+                    </div>
                   )}
 
                   {/* Content with z-index to appear above the preview */}
@@ -235,6 +254,8 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                 ? "Image Options"
                 : storedBackgroundType === "gradient"
                 ? "Gradient Options"
+                : storedBackgroundType === "dynamic"
+                ? "Dynamic Options"
                 : "Color Options"}
             </h4>
 
@@ -277,6 +298,32 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                           : "ring-1 ring-white/20 hover:ring-white/40"
                       )}
                     >
+                      <div
+                        className={cn(
+                          "absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity",
+                          "bg-gradient-to-b from-white/10 to-transparent"
+                        )}
+                      />
+                    </button>
+                  ))
+                ) : storedBackgroundType === "dynamic" ? (
+                  DYNAMIC_OPTIONS.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => handleBackgroundStyleChange(option.value)}
+                      className={cn(
+                        "group relative size-10 mt-1 rounded-full transition-all flex-shrink-0",
+                        "bg-white/10 dark:bg-white/10 hover:bg-white/20 dark:hover:bg-white/20",
+                        "text-white/90 hover:text-white",
+                        "border border-white/10 hover:border-white/20",
+                        "shadow-sm hover:shadow-md",
+                        "flex items-center justify-center",
+                        storedBackgroundStyle === option.value
+                          ? "ring-2 ring-white"
+                          : "ring-1 ring-white/20 hover:ring-white/40"
+                      )}
+                    >
+                      <Play className="h-4 w-4" />
                       <div
                         className={cn(
                           "absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity",
