@@ -368,6 +368,18 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isAuthenticated) {
       const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+      
+      // If widget_visibility doesn't exist, create it with all widgets enabled
+      if (!evolveData.widget_visibility) {
+        evolveData.widget_visibility = {
+          notes: true,
+          todoList: true,
+          pomodoro: true,
+          events: true
+        };
+        localStorage.setItem('evolve_data', JSON.stringify(evolveData));
+      }
+      
       const localVisibility = evolveData.widget_visibility;
       if (localVisibility) {
         try {
@@ -572,8 +584,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('Fetching local notes...');
       const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
-      const localNotesStr = evolveData.notes;
-      const localNotesData = localNotesStr ? JSON.parse(localNotesStr) : null;
+      const localNotesData = evolveData.notes || null;
       
       // Handle both old format (array) and new format (StoredData)
       const localNotes = localNotesData && typeof localNotesData === 'object' && 'value' in localNotesData
@@ -642,8 +653,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('Fetching local todos...');
       const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
-      const localTodosStr = evolveData.todos;
-      const localTodosData = localTodosStr ? JSON.parse(localTodosStr) : null;
+      const localTodosData = evolveData.todos || null;
       
       // Handle both old format (array) and new format (StoredData)
       const localTodos = localTodosData && typeof localTodosData === 'object' && 'value' in localTodosData
@@ -716,7 +726,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         value: finalTodos,
         timestamp: Date.now()
       };
-      evolveData.todos = JSON.stringify(storedData);
+      evolveData.todos = storedData;
       localStorage.setItem('evolve_data', JSON.stringify(evolveData));
       
       // Sync merged data back to cloud
@@ -754,8 +764,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('Fetching local events...');
       const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
-      const localEventsStr = evolveData['dashboard-events'];
-      const localEventsData = localEventsStr ? JSON.parse(localEventsStr) : null;
+      const localEventsData = evolveData['dashboard-events'] || null;
       
       // Handle both old format (array) and new format (StoredData)
       const localEvents = localEventsData && typeof localEventsData === 'object' && 'value' in localEventsData
@@ -809,8 +818,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('Fetching local pomodoro settings...');
       const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
-      const localSettingsStr = evolveData['pomodoro-settings'];
-      const localSettingsData = localSettingsStr ? JSON.parse(localSettingsStr) : null;
+      const localSettingsData = evolveData['pomodoro-settings'] || null;
       
       // Handle both old format (object) and new format (StoredData)
       const localSettings = localSettingsData && typeof localSettingsData === 'object' && 'value' in localSettingsData

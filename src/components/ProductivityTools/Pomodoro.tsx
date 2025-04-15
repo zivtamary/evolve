@@ -63,6 +63,7 @@ const Pomodoro: React.FC = () => {
   const [tempSettings, setTempSettings] = useState<PomodoroSettings>(settings);
   const intervalRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
   
   // Initialize audio element
   useEffect(() => {
@@ -187,17 +188,31 @@ const Pomodoro: React.FC = () => {
   };
   
   const previewSound = () => {
-    if (audioRef.current) {
+    if (isPlaying) {
       // Stop any currently playing sound
-      if (isPlaying) {
+      if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
-        setIsPlaying(false);
-      } else {
-        audioRef.current.currentTime = 0;
-        audioRef.current.play();
-        setIsPlaying(true);
       }
+      if (previewAudioRef.current) {
+        previewAudioRef.current.pause();
+        previewAudioRef.current.currentTime = 0;
+      }
+      setIsPlaying(false);
+    } else {
+      // Create a new audio element with the currently selected sound
+      const previewAudio = new Audio(tempSettings.alarmSound);
+      previewAudio.volume = tempSettings.volume;
+      previewAudioRef.current = previewAudio;
+      
+      // Play the sound
+      previewAudio.play();
+      setIsPlaying(true);
+      
+      // Set up event listener for when the sound ends
+      previewAudio.addEventListener('ended', () => {
+        setIsPlaying(false);
+      });
     }
   };
 
@@ -221,6 +236,11 @@ const Pomodoro: React.FC = () => {
     if (!isSettingsOpen && audioRef.current && isPlaying) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
+      setIsPlaying(false);
+    }
+    if (!isSettingsOpen && previewAudioRef.current && isPlaying) {
+      previewAudioRef.current.pause();
+      previewAudioRef.current.currentTime = 0;
       setIsPlaying(false);
     }
   }, [isSettingsOpen]);
@@ -377,8 +397,12 @@ const Pomodoro: React.FC = () => {
                                 if (audioRef.current && isPlaying) {
                                   audioRef.current.pause();
                                   audioRef.current.currentTime = 0;
-                                  setIsPlaying(false);
                                 }
+                                if (previewAudioRef.current && isPlaying) {
+                                  previewAudioRef.current.pause();
+                                  previewAudioRef.current.currentTime = 0;
+                                }
+                                setIsPlaying(false);
                               }}
                             >
                               <SelectTrigger id="alarmSound" className="w-full bg-white/10 text-white border-white/10 focus:border-white/20">

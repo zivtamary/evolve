@@ -170,7 +170,7 @@ const SettingsSidebar = () => {
                       <span>Notes</span>
                     </div>
                     <Switch
-                      checked={widgetVisibility.notes}
+                      checked={widgetVisibility?.notes}
                       onCheckedChange={() => toggleWidget("notes")}
                     />
                   </div>
@@ -182,7 +182,7 @@ const SettingsSidebar = () => {
                       <span>Todo List</span>
                     </div>
                     <Switch
-                      checked={widgetVisibility.todoList}
+                      checked={widgetVisibility?.todoList}
                       onCheckedChange={() => toggleWidget("todoList")}
                     />
                   </div>
@@ -194,7 +194,7 @@ const SettingsSidebar = () => {
                       <span>Pomodoro Timer</span>
                     </div>
                     <Switch
-                      checked={widgetVisibility.pomodoro}
+                      checked={widgetVisibility?.pomodoro}
                       onCheckedChange={() => toggleWidget("pomodoro")}
                     />
                   </div>
@@ -206,7 +206,7 @@ const SettingsSidebar = () => {
                       <span>Events</span>
                     </div>
                     <Switch
-                      checked={widgetVisibility.events}
+                      checked={widgetVisibility?.events}
                       onCheckedChange={() => toggleWidget("events")}
                     />
                   </div>

@@ -3,7 +3,7 @@ ALTER TABLE profiles
 ADD COLUMN widget_visibility JSONB NOT NULL DEFAULT '{
   "notes": true,
   "todoList": true,
-  "pomodoro": false,
+  "pomodoro": true,
   "events": true
 }'::jsonb,
 ADD COLUMN cloud_sync_enabled BOOLEAN NOT NULL DEFAULT false,
