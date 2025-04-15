@@ -361,8 +361,8 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                 : "Color Options"}
             </h4>
 
-            <div className="overflow-x-auto -mx-6 px-6">
-              <div className="flex gap-3 min-w-96 pb-4">
+            <div className="-mx-6 px-6 overflow-x-auto w-full min-w-[40rem] max-w-md">
+              <div className="flex gap-3 pb-4">
                 {displayBackgroundType === "image" ? (
                   <>
                     <TooltipProvider>

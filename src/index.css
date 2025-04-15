@@ -124,7 +124,7 @@
 
 @layer components {
   .glass {
-    @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-lg transition-colors duration-300;
+    @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-sm transition-colors duration-300;
   }
   
   .glass-dark {

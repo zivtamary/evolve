@@ -220,7 +220,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '', onFocusChange }) 
               className="glass dark:glass-dark flex items-center rounded-full px-3 sm:px-5 py-2 text-white"
               animate={{
                 scale: isFocused ? 1.02 : 1,
-                boxShadow: isFocused ? '0 0 20px rgba(255,255,255,0.2)' : 'none'
+                boxShadow: isFocused ? '0 0 20px rgba(255,255,255,0.2)' : ''
               }}
               transition={{ 
                 duration: 0.3,

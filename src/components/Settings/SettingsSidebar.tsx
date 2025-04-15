@@ -427,11 +427,10 @@ const SettingsSidebar = () => {
                 <Logo className="h-8 w-8 flex justify-center items-center" />
                 <div className="flex items-center gap-2 text-xs text-black/50 dark:text-white/50">
                   <Info className="h-3 w-3" />
-                  <span>Version 1.0.0-beta.1</span>
+                  <span>Version 1.0.0-beta</span>
                 </div>
                 <div className="text-[10px] text-black/30 dark:text-white/30 text-center">
                   <div>© {new Date().getFullYear()} Evolve</div>
-                  <div>Developed by @zivtamary</div>
                   <div>Support: support@evolve-app.com</div>
                 </div>
               </div>

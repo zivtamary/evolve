@@ -669,7 +669,7 @@ const Events = () => {
       )}
       style={{
         width: isExpanded ? "855px" : "100%",
-        boxShadow: isExpanded ? "0 0 0 100vw rgba(0, 0, 0, 0.5)" : "none",
+        boxShadow: isExpanded ? "0 0 0 100vw rgba(0, 0, 0, 0.5)" : "",
         transformOrigin: getTransformOrigin(),
       }}
     >

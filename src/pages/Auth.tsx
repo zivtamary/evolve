@@ -192,7 +192,7 @@ const Auth = () => {
       }
 
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: window.location.origin + "/auth",
+        redirectTo: "https://evolve-app.com/reset-password"
       });
 
       if (error) {
@@ -323,7 +323,7 @@ const Auth = () => {
     if (view === "reset_password") {
       return (
         <motion.div {...slideAnimation}>
-          <form onSubmit={handleResetPassword} className="space-y-6">
+          <form onSubmit={handleResetPassword} className="space-y-6 mt-4">
             <div className="space-y-2">
               <Label htmlFor="reset-email" className="dark:text-gray-200">
                 Email

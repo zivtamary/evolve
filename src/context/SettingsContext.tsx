@@ -110,10 +110,10 @@ interface SettingsContextType {
   setWidgetPositions: (positions: { notes: number; todoList: number; pomodoro: number; events: number; }) => void;
 }
 
-const defaultWidgetVisibility: WidgetVisibility = {
+const defaultWidgetVisibility: WidgetVisibility = localStorage.getItem('evolve_data') ? JSON.parse(localStorage.getItem('evolve_data') || '{}').widget_visibility : {
   notes: true,
   todoList: true,
-  pomodoro: false,
+  pomodoro: true,
   events: true,
 };
 

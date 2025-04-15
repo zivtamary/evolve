@@ -4,10 +4,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Timer, Play, Pause, RotateCcw, Settings } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useSettings } from '../../context/SettingsContext';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 type TimerMode = 'work' | 'shortBreak' | 'longBreak';
 
@@ -27,33 +28,45 @@ interface PomodoroSettings {
 }
 
 const ALARM_SOUNDS = [
-  { value: 'alarm-1.mp3', label: 'Alarm 1' },
-  { value: 'alarm-2.mp3', label: 'Alarm 2' },
-  { value: 'alarm-3.mp3', label: 'Alarm 3' },
+  { 
+    value: 'https://fdcqozqhcmrvwzhkprwz.supabase.co/storage/v1/object/sign/evolve/sounds/timer01.wav?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJldm9sdmUvc291bmRzL3RpbWVyMDEud2F2IiwiaWF0IjoxNzQ0NTcyNDY0LCJleHAiOjE3NzYxMDg0NjR9.XRPhAD7WqvfVIiotD7I58PW3fAvo-Rl-rl_-uk-G4s4', 
+    label: 'Alarm 1' 
+  },
+  { 
+    value: 'https://fdcqozqhcmrvwzhkprwz.supabase.co/storage/v1/object/sign/evolve/sounds/timer02.mp3?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJldm9sdmUvc291bmRzL3RpbWVyMDIubXAzIiwiaWF0IjoxNzQ0NTcyNDg4LCJleHAiOjE3NzYxMDg0ODh9.kD3gpxG2noJqD0pLFOOgPPpeqKodDDbdPZjCs5tATqE', 
+    label: 'Alarm 2' 
+  },
+  { 
+    value: 'https://fdcqozqhcmrvwzhkprwz.supabase.co/storage/v1/object/sign/evolve/sounds/timer03.mp3?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJldm9sdmUvc291bmRzL3RpbWVyMDMubXAzIiwiaWF0IjoxNzQ0NTcyNjc1LCJleHAiOjE3NzYxMDg2NzV9.vZFQ0kQ-9AEjCVUQNQMFokQdXGUVNdIpAgmhSTvGK0M', 
+    label: 'Alarm 3' 
+  },
 ];
+
+const DEFAULT_SETTINGS: PomodoroSettings = {
+  workDuration: 25,
+  breakDuration: 5,
+  longBreakDuration: 15,
+  sessions: 4,
+  alarmSound: 'https://fdcqozqhcmrvwzhkprwz.supabase.co/storage/v1/object/sign/evolve/sounds/timer01.wav?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJldm9sdmUvc291bmRzL3RpbWVyMDEud2F2IiwiaWF0IjoxNzQ0NTcyNDY0LCJleHAiOjE3NzYxMDg0NjR9.XRPhAD7WqvfVIiotD7I58PW3fAvo-Rl-rl_-uk-G4s4',
+  volume: 0.5
+};
 
 const Pomodoro: React.FC = () => {
   const { syncPomodoroOnBlur } = useSettings();
-  const [settings, setSettings] = useLocalStorage<PomodoroSettings>('pomodoro-settings', {
-    workDuration: 25,
-    breakDuration: 5,
-    longBreakDuration: 15,
-    sessions: 4,
-    alarmSound: 'alarm-1.mp3',
-    volume: 0.5
-  });
+  const [settings, setSettings] = useLocalStorage<PomodoroSettings>('pomodoro-settings', DEFAULT_SETTINGS);
   const [mode, setMode] = useState<TimerMode>('work');
   const [timeLeft, setTimeLeft] = useState(settings.workDuration * 60);
   const [isActive, setIsActive] = useState(false);
   const [sessionCount, setSessionCount] = useState(0);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [tempSettings, setTempSettings] = useState<PomodoroSettings>(settings);
   const intervalRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
   // Initialize audio element
   useEffect(() => {
-    audioRef.current = new Audio(`/sounds/${settings.alarmSound}`);
+    audioRef.current = new Audio(settings.alarmSound);
     audioRef.current.volume = settings.volume;
 
     // Cleanup function to stop audio when component unmounts
@@ -212,6 +225,25 @@ const Pomodoro: React.FC = () => {
     }
   }, [isSettingsOpen]);
 
+  // Update tempSettings when settings change
+  useEffect(() => {
+    setTempSettings(settings);
+  }, [settings]);
+
+  const handleSaveSettings = () => {
+    setSettings(tempSettings);
+    setIsSettingsOpen(false);
+  };
+
+  const handleCancelSettings = () => {
+    setTempSettings(settings);
+    setIsSettingsOpen(false);
+  };
+
+  const handleResetToDefault = () => {
+    setTempSettings(DEFAULT_SETTINGS);
+  };
+
   return (
     <div className="glass dark:glass-dark rounded-xl text-white overflow-hidden h-[400px] flex flex-col">
       <div className="flex items-center justify-between p-4 border-b border-white/10">
@@ -286,97 +318,136 @@ const Pomodoro: React.FC = () => {
                     <DialogTitle className="text-white text-xl font-semibold">Pomodoro Settings</DialogTitle>
                     <p className="text-sm text-white/70">Customize your timer and notification preferences</p>
                   </DialogHeader>
-                  <div className="space-y-8 py-6">
-                    <div className="space-y-4">
-                      <h3 className="text-sm font-medium text-white/90">Timer Durations</h3>
-                      <div className="grid gap-4">
-                        <div className="space-y-2">
-                          <Label className="text-sm text-white/80">Focus Duration (minutes)</Label>
-                          <input
-                            type="number"
-                            value={settings.workDuration}
-                            onChange={(e) => setSettings({ ...settings, workDuration: Number(e.target.value) })}
-                            className="w-full bg-white/10 rounded-lg px-3 py-2 text-white border border-white/10 focus:border-white/20 focus:outline-none transition-colors"
-                            min="1"
-                            max="60"
-                          />
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSaveSettings();
+                  }}>
+                    <div className="space-y-8 py-6">
+                      <div className="space-y-4">
+                        <h3 className="text-sm font-medium text-white/90">Timer Durations</h3>
+                        <div className="grid gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="workDuration" className="text-sm text-white/80">Focus Duration (minutes)</Label>
+                            <input
+                              id="workDuration"
+                              type="number"
+                              value={tempSettings.workDuration}
+                              onChange={(e) => setTempSettings({ ...tempSettings, workDuration: Number(e.target.value) })}
+                              className="w-full bg-white/10 rounded-lg px-3 py-2 text-white border border-white/10 focus:border-white/20 focus:outline-none transition-colors"
+                              min="1"
+                              max="60"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="breakDuration" className="text-sm text-white/80">Short Break Duration (minutes)</Label>
+                            <input
+                              id="breakDuration"
+                              type="number"
+                              value={tempSettings.breakDuration}
+                              onChange={(e) => setTempSettings({ ...tempSettings, breakDuration: Number(e.target.value) })}
+                              className="w-full bg-white/10 rounded-lg px-3 py-2 text-white border border-white/10 focus:border-white/20 focus:outline-none transition-colors"
+                              min="1"
+                              max="30"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="longBreakDuration" className="text-sm text-white/80">Long Break Duration (minutes)</Label>
+                            <input
+                              id="longBreakDuration"
+                              type="number"
+                              value={tempSettings.longBreakDuration}
+                              onChange={(e) => setTempSettings({ ...tempSettings, longBreakDuration: Number(e.target.value) })}
+                              className="w-full bg-white/10 rounded-lg px-3 py-2 text-white border border-white/10 focus:border-white/20 focus:outline-none transition-colors"
+                              min="1"
+                              max="60"
+                            />
+                          </div>
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-sm text-white/80">Short Break Duration (minutes)</Label>
-                          <input
-                            type="number"
-                            value={settings.breakDuration}
-                            onChange={(e) => setSettings({ ...settings, breakDuration: Number(e.target.value) })}
-                            className="w-full bg-white/10 rounded-lg px-3 py-2 text-white border border-white/10 focus:border-white/20 focus:outline-none transition-colors"
-                            min="1"
-                            max="30"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-sm text-white/80">Long Break Duration (minutes)</Label>
-                          <input
-                            type="number"
-                            value={settings.longBreakDuration}
-                            onChange={(e) => setSettings({ ...settings, longBreakDuration: Number(e.target.value) })}
-                            className="w-full bg-white/10 rounded-lg px-3 py-2 text-white border border-white/10 focus:border-white/20 focus:outline-none transition-colors"
-                            min="1"
-                            max="60"
-                          />
+                      </div>
+
+                      <div className="space-y-4">
+                        <h3 className="text-sm font-medium text-white/90">Notification Settings</h3>
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="alarmSound" className="text-sm text-white/80">Alarm Sound</Label>
+                            <Select
+                              value={tempSettings.alarmSound}
+                              onValueChange={(value) => {
+                                setTempSettings({ ...tempSettings, alarmSound: value });
+                                if (audioRef.current && isPlaying) {
+                                  audioRef.current.pause();
+                                  audioRef.current.currentTime = 0;
+                                  setIsPlaying(false);
+                                }
+                              }}
+                            >
+                              <SelectTrigger id="alarmSound" className="w-full bg-white/10 text-white border-white/10 focus:border-white/20">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent className="bg-black/90 text-white border-white/10">
+                                {ALARM_SOUNDS.map((sound) => (
+                                  <SelectItem key={sound.value} value={sound.value}>
+                                    {sound.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <button
+                              type="button"
+                              onClick={previewSound}
+                              className="w-full mt-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors flex items-center justify-center gap-2 border border-white/10"
+                            >
+                              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                              <span className="text-sm">{isPlaying ? 'Stop' : 'Preview'} Sound</span>
+                            </button>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <Label htmlFor="volume" className="text-sm text-white/80">Volume</Label>
+                              <span className="text-sm text-white/60">{Math.round(tempSettings.volume * 100)}%</span>
+                            </div>
+                            <Slider
+                              id="volume"
+                              value={[tempSettings.volume * 100]}
+                              onValueChange={([value]) => setTempSettings({ ...tempSettings, volume: value / 100 })}
+                              max={100}
+                              step={1}
+                              className="w-full"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
-
-                    <div className="space-y-4">
-                      <h3 className="text-sm font-medium text-white/90">Notification Settings</h3>
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label className="text-sm text-white/80">Alarm Sound</Label>
-                          <Select
-                            value={settings.alarmSound}
-                            onValueChange={(value) => {
-                              setSettings({ ...settings, alarmSound: value });
-                              if (audioRef.current && isPlaying) {
-                                audioRef.current.pause();
-                                audioRef.current.currentTime = 0;
-                                setIsPlaying(false);
-                              }
-                            }}
-                          >
-                            <SelectTrigger className="w-full bg-white/10 text-white border-white/10 focus:border-white/20">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-black/90 text-white border-white/10">
-                              {ALARM_SOUNDS.map((sound) => (
-                                <SelectItem key={sound.value} value={sound.value}>
-                                  {sound.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                    <DialogFooter className="border-t border-white/10 pt-4">
+                      <div className="flex w-full">
+                        <div className="flex-1 flex justify-start">
                           <button
-                            onClick={previewSound}
-                            className="w-full mt-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors flex items-center justify-center gap-2 border border-white/10"
+                            type="button"
+                            onClick={handleResetToDefault}
+                            className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded text-white transition-colors"
                           >
-                            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                            <span className="text-sm">{isPlaying ? 'Stop' : 'Preview'} Sound</span>
+                            Reset
                           </button>
                         </div>
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <Label className="text-sm text-white/80">Volume</Label>
-                            <span className="text-sm text-white/60">{Math.round(settings.volume * 100)}%</span>
-                          </div>
-                          <Slider
-                            value={[settings.volume * 100]}
-                            onValueChange={([value]) => setSettings({ ...settings, volume: value / 100 })}
-                            max={100}
-                            step={1}
-                            className="w-full"
-                          />
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={handleCancelSettings}
+                            className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded text-white transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <Button
+                          type="submit"
+                          variant="outline" 
+                          onClick={handleSaveSettings}
+                          className="bg-white/20 px-4 py-2 text-white rounded border-white/10 hover:bg-white/30">
+                            Save
+                          </Button>
                         </div>
                       </div>
-                    </div>
-                  </div>
+                    </DialogFooter>
+                  </form>
                 </DialogContent>
               </Dialog>
             </div>

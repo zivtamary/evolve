@@ -249,6 +249,94 @@ async function handleSubscriptionUpdated(supabaseClient: any, body: any) {
   }
 }
 
+async function handleSubscriptionRevoked(supabaseClient: any, body: any) {
+  try {
+    const { data: existingSub } = await supabaseClient
+      .from("subscriptions")
+      .select()
+      .eq("id", body.data.id)
+      .single();
+
+    if (existingSub) {
+      const { error } = await supabaseClient
+        .from("subscriptions")
+        .update({
+            status: body.data.status,
+            current_period_start: body.data.current_period_start,
+            current_period_end: body.data.current_period_end,
+            cancel_at_period_end: body.data.cancel_at_period_end,
+        })
+        .eq("id", body.data.id);
+
+      if (error) {
+        console.error("Error handleSubscriptionRevoked subscription:", error);
+        throw error;
+      }
+    }
+
+    return new Response(
+      JSON.stringify({ message: "handleSubscriptionRevoked updated successfully" }),
+      {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  } catch (error) {
+    console.error("Error updating handleSubscriptionUpdated:", error);
+    return new Response(
+      JSON.stringify({ error: "Failed to handleSubscriptionUpdated subscription" }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  }
+}
+
+async function handleSubscriptionCanceled(supabaseClient: any, body: any) {
+  try {
+    const { data: existingSub } = await supabaseClient
+      .from("subscriptions")
+      .select()
+      .eq("id", body.data.id)
+      .single();
+
+    if (existingSub) {
+      const { error } = await supabaseClient
+        .from("subscriptions")
+        .update({
+            status: body.data.status,
+            current_period_start: body.data.current_period_start,
+            current_period_end: body.data.current_period_end,
+            cancel_at_period_end: body.data.cancel_at_period_end,
+        })
+        .eq("id", body.data.id);
+
+      if (error) {
+        console.error("Error handleSubscriptionRevoked subscription:", error);
+        throw error;
+      }
+    }
+
+    return new Response(
+      JSON.stringify({ message: "handleSubscriptionRevoked updated successfully" }),
+      {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  } catch (error) {
+    console.error("Error updating handleSubscriptionUpdated:", error);
+    return new Response(
+      JSON.stringify({ error: "Failed to handleSubscriptionUpdated subscription" }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  }
+}
+
 // Main webhook handler
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -296,6 +384,10 @@ serve(async (req) => {
         return await handleSubscriptionCreated(supabaseClient, body);
       case "subscription.updated":
         return await handleSubscriptionUpdated(supabaseClient, body);
+      case "subscription.revoked":
+        return await handleSubscriptionRevoked(supabaseClient, body);
+      case "subscription.canceled":
+        return await handleSubscriptionCanceled(supabaseClient, body);
       default:
         return new Response(
           JSON.stringify({ message: `Unhandled event type: ${body.type}` }),
