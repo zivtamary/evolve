@@ -116,7 +116,8 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      const localData = JSON.parse(localStorage.getItem(`_${dataType}`) || '[]') as LocalData[];
+      const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+      const localData = JSON.parse(evolveData[`_${dataType}`] || '[]') as LocalData[];
       const { data: cloudData, error } = await supabase
         .from(dataType)
         .select('*')
@@ -127,7 +128,10 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const formattedLocalData = localData.map((item) => ({
         id: item.id,
         user_id: userProfile.id,
-        ...(dataType === 'todos' ? { title: (item as LocalTodo).title, completed: (item as LocalTodo).completed } :
+        ...(dataType === 'todos' ? { 
+          title: (item as LocalTodo).title.substring(0, 100),
+          completed: (item as LocalTodo).completed 
+        } :
           dataType === 'notes' ? { content: (item as LocalNote).content } :
           dataType === 'events' ? { title: (item as LocalEvent).title, date: (item as LocalEvent).date, time: (item as LocalEvent).time, description: (item as LocalEvent).description } :
           { sessions: (item as LocalPomodoro).sessions }),
@@ -137,7 +141,10 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const formattedCloudData = cloudData.map((item: CloudData) => ({
         id: item.id,
-        ...(dataType === 'todos' ? { title: (item as CloudTodo).title, completed: (item as CloudTodo).completed } :
+        ...(dataType === 'todos' ? { 
+          title: (item as CloudTodo).title.substring(0, 100),
+          completed: (item as CloudTodo).completed 
+        } :
           dataType === 'notes' ? { content: (item as CloudNote).content } :
           dataType === 'events' ? { title: (item as CloudEvent).title, date: (item as CloudEvent).date, time: (item as CloudEvent).time, description: (item as CloudEvent).description } :
           { sessions: (item as CloudPomodoro).sessions }),
@@ -164,7 +171,8 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (cloudNewer.length > 0) {
-        localStorage.setItem(`_${dataType}`, JSON.stringify(cloudNewer));
+        evolveData[`_${dataType}`] = JSON.stringify(cloudNewer);
+        localStorage.setItem('evolve_data', JSON.stringify(evolveData));
       }
 
       setLastSynced(new Date());

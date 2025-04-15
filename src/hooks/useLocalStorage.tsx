@@ -1,10 +1,43 @@
-
 import { useState, useEffect } from 'react';
 
 interface StoredData<T> {
   value: T;
   timestamp: number;
 }
+
+interface EvolveData {
+  [key: string]: StoredData<unknown> | unknown;
+}
+
+const STORAGE_KEY = 'evolve_data';
+
+// Helper function to get the entire evolve_data object from localStorage
+const getEvolveData = (): EvolveData => {
+  if (typeof window === 'undefined') {
+    return {};
+  }
+
+  try {
+    const data = window.localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : {};
+  } catch (error) {
+    console.warn(`Error reading ${STORAGE_KEY} from localStorage:`, error);
+    return {};
+  }
+};
+
+// Helper function to save the entire evolve_data object to localStorage
+const saveEvolveData = (data: EvolveData): void => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.warn(`Error saving ${STORAGE_KEY} to localStorage:`, error);
+  }
+};
 
 export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] {
   // Get from local storage then parse stored json or return initialValue
@@ -14,15 +47,15 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
     }
 
     try {
-      const item = window.localStorage.getItem(key);
+      const evolveData = getEvolveData();
+      const item = evolveData[key];
+      
       if (item) {
-        const parsedItem = JSON.parse(item) as StoredData<T> | T;
-        
         // Handle both old format (just the value) and new format (with timestamp)
-        if (parsedItem && typeof parsedItem === 'object' && 'value' in parsedItem && 'timestamp' in parsedItem) {
-          return parsedItem.value;
+        if (item && typeof item === 'object' && 'value' in item && 'timestamp' in item) {
+          return (item as StoredData<T>).value;
         }
-        return parsedItem as T;
+        return item as T;
       }
       return initialValue;
     } catch (error) {
@@ -45,11 +78,12 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
       
       // Save to local storage with timestamp
       if (typeof window !== 'undefined') {
-        const dataToStore: StoredData<T> = {
+        const evolveData = getEvolveData();
+        evolveData[key] = {
           value: valueToStore,
           timestamp: Date.now()
         };
-        window.localStorage.setItem(key, JSON.stringify(dataToStore));
+        saveEvolveData(evolveData);
       }
     } catch (error) {
       console.warn(`Error setting localStorage key "${key}":`, error);
@@ -58,15 +92,18 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
 
   useEffect(() => {
     const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === key && event.newValue) {
+      if (event.key === STORAGE_KEY && event.newValue) {
         try {
-          const parsedData = JSON.parse(event.newValue) as StoredData<T> | T;
+          const evolveData = JSON.parse(event.newValue) as EvolveData;
+          const item = evolveData[key];
           
-          // Handle both formats
-          if (parsedData && typeof parsedData === 'object' && 'value' in parsedData && 'timestamp' in parsedData) {
-            setStoredValue(parsedData.value);
-          } else {
-            setStoredValue(parsedData as T);
+          if (item) {
+            // Handle both formats
+            if (item && typeof item === 'object' && 'value' in item && 'timestamp' in item) {
+              setStoredValue((item as StoredData<T>).value);
+            } else {
+              setStoredValue(item as T);
+            }
           }
         } catch (e) {
           console.error('Error parsing storage event data', e);

@@ -134,7 +134,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   if (isLoading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-background">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-center gap-2 text-xl">
               <Sparkles className="h-5 w-5 text-yellow-500" />
@@ -151,7 +151,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-background">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-center gap-2 text-xl">
             <Sparkles className="h-5 w-5 text-yellow-500" />
@@ -223,7 +223,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           </Button>
           <Button
             onClick={handleSubscribe}
-            className="sm:w-auto w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600"
+            className="sm:w-auto w-full bg-gradient-to-r from-amber-500 to-yellow-500 dark:shadow-amber-500/20 shadow-amber-500/20 dark:hover:shadow-amber-500/30 hover:from-amber-600 hover:to-yellow-600"
             disabled={isProcessing || !selectedPlan}
           >
             {isProcessing ? (

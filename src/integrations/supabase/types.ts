@@ -42,6 +42,43 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback: {
+        Row: {
+          id: string
+          user_id: string
+          content: string
+          created_at: string
+          updated_at: string
+          status: 'pending' | 'reviewed' | 'addressed' | 'closed'
+          category: 'general' | 'bug' | 'feature' | 'improvement' | 'other'
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          content: string
+          created_at?: string
+          updated_at?: string
+          status?: 'pending' | 'reviewed' | 'addressed' | 'closed'
+          category?: 'general' | 'bug' | 'feature' | 'improvement' | 'other'
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          content?: string
+          created_at?: string
+          updated_at?: string
+          status?: 'pending' | 'reviewed' | 'addressed' | 'closed'
+          category?: 'general' | 'bug' | 'feature' | 'improvement' | 'other'
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       notes: {
         Row: {
           content: string

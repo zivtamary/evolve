@@ -19,6 +19,7 @@ interface Note {
   user_id?: string;
   created_at?: string;
   updated_at?: string;
+  updatedAt: number;
 }
 
 interface CloudNote {
@@ -37,7 +38,8 @@ interface Todo {
   user_id?: string;
   created_at?: string;
   updated_at?: string;
-  createdAt?: number;
+  createdAt: number;
+  updatedAt: number;
 }
 
 interface StoredData<T> {
@@ -62,6 +64,7 @@ interface Event {
   user_id?: string;
   created_at?: string;
   updated_at?: string;
+  updatedAt: number;
 }
 
 interface CloudEvent {
@@ -79,6 +82,10 @@ interface SettingsContextType {
   setIsSettingsOpen: (value: boolean) => void;
   widgetVisibility: WidgetVisibility;
   toggleWidget: (widget: keyof WidgetVisibility) => void;
+  expandedWidget: keyof WidgetVisibility | null;
+  setExpandedWidget: (widget: keyof WidgetVisibility | null) => void;
+  temporaryHideWidgets: boolean;
+  setTemporaryHideWidgets: (value: boolean) => void;
   isAuthenticated: boolean;
   setIsAuthenticated: (value: boolean) => void;
   syncWithCloud: () => Promise<void>;
@@ -94,12 +101,19 @@ interface SettingsContextType {
   syncTodosOnBlur: () => Promise<void>;
   syncEventsOnBlur: () => Promise<void>;
   syncPomodoroOnBlur: () => Promise<void>;
+  widgetPositions: {
+    notes: number;
+    todoList: number;
+    pomodoro: number;
+    events: number;
+  };
+  setWidgetPositions: (positions: { notes: number; todoList: number; pomodoro: number; events: number; }) => void;
 }
 
-const defaultWidgetVisibility: WidgetVisibility = {
+const defaultWidgetVisibility: WidgetVisibility = localStorage.getItem('evolve_data') ? JSON.parse(localStorage.getItem('evolve_data') || '{}').widget_visibility : {
   notes: true,
   todoList: true,
-  pomodoro: false,
+  pomodoro: true,
   events: true,
 };
 
@@ -110,6 +124,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [temporaryHideWidgets, setTemporaryHideWidgets] = useState(false);
+  const [expandedWidget, setExpandedWidget] = useState<keyof WidgetVisibility | null>(null);
   const [userProfile, setUserProfile] = useState<Profile | null>({
     id: 'local',
     widget_visibility: defaultWidgetVisibility,
@@ -119,6 +135,12 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const isAuthenticatedRef = useRef(isAuthenticated);
   const isCheckingSessionRef = useRef(false);
+  const [widgetPositions, setWidgetPositions] = useState({
+    notes: 1,
+    todoList: 2,
+    pomodoro: 3,
+    events: 4
+  });
 
   // Update ref when state changes
   useEffect(() => {
@@ -127,53 +149,37 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const checkSession = async () => {
-      // If we're already checking the session, don't start another check
-      if (isCheckingSessionRef.current) {
-        console.log('[SettingsContext] Session check already in progress, skipping');
-        return;
-      }
+      if (isCheckingSessionRef.current) return;
+      isCheckingSessionRef.current = true;
 
       try {
-        isCheckingSessionRef.current = true;
-        console.log('[SettingsContext] Starting session check...');
-        
-        // 1. Get session and user
-        console.log('[SettingsContext] Getting session...');
+        // 1. Check if there's a session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        console.log('[SettingsContext] Session check result:', { session: !!session, error: sessionError });
-        
-        console.log('[SettingsContext] Getting user...');
+        console.log('[SettingsContext] Session check result:', { hasSession: !!session, error: sessionError });
+
+        if (sessionError) {
+          console.error('[SettingsContext] Session error:', sessionError);
+          throw sessionError;
+        }
+
+        // 2. Get user from session
         const { data: { user }, error: userError } = await supabase.auth.getUser();
-        console.log('[SettingsContext] User check result:', { user: !!user, error: userError });
-        
-        if (sessionError || userError) {
-          console.error('[SettingsContext] Session or user error:', sessionError || userError);
+        console.log('[SettingsContext] User check result:', { hasUser: !!user, error: userError });
+
+        if (userError) {
+          console.error('[SettingsContext] User error:', userError);
+          throw userError;
+        }
+
+        if (!user) {
+          console.log('[SettingsContext] No user found, setting isAuthenticated to false');
           setIsAuthenticated(false);
           setUserProfile(null);
           setSubscription(null);
-          setIsLoading(false);
           return;
         }
-        
-        console.log('[SettingsContext] Session state:', {
-          exists: !!session,
-          user: user?.id,
-          expiresAt: session?.expires_at
-        });
 
-        // Set initial state based on session and user
-        const hasValidSession = !!session && !!user;
-        console.log('[SettingsContext] Setting auth state:', hasValidSession);
-        setIsAuthenticated(hasValidSession);
-        
-        // If no valid session, clear state and return early
-        if (!hasValidSession) {
-          console.log('[SettingsContext] No valid session, clearing state');
-          setUserProfile(null);
-          setSubscription(null);
-          setIsLoading(false);
-          return;
-        }
+        setIsAuthenticated(true);
 
         try {
           // 3. Fetch profile
@@ -225,41 +231,54 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
             .from('subscriptions')
             .select('*')
             .eq('user_id', user.id)
-            .maybeSingle();
+            .single();
           console.log('[SettingsContext] Subscription fetch result:', { data: !!subscriptionData, error: subscriptionError });
 
-          if (subscriptionError) {
-            console.error('[SettingsContext] Error fetching subscription:', subscriptionError);
-            // Don't throw error, just log it
-          } else {
-            console.log('[SettingsContext] Subscription state:', subscriptionData);
-            setSubscription(subscriptionData);
+          if (subscriptionError && subscriptionError.code !== 'PGRST116') {
+            console.error('[SettingsContext] Subscription error:', subscriptionError);
+            throw subscriptionError;
           }
+          setSubscription(subscriptionData);
+
+          // 5. Fetch notes, todos, and events
+          console.log('[SettingsContext] Fetching notes, todos, and events');
+          await Promise.all([
+            syncNotes(user.id),
+            syncTodos(user.id),
+            syncEvents(user.id)
+          ]);
+
+          // 6. Update last_synced timestamp after all data is fetched
+          console.log('[SettingsContext] Updating last_synced timestamp');
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ last_synced: new Date().toISOString() })
+            .eq('id', user.id);
+            
+          if (updateError) {
+            console.error('[SettingsContext] Error updating last_synced:', updateError);
+            throw updateError;
+          }
+          
+          // Update local profile state with new last_synced
+          setUserProfile(prev => prev ? {
+            ...prev,
+            last_synced: new Date().toISOString()
+          } : null);
+          
+          console.log('[SettingsContext] Last synced timestamp updated successfully');
         } catch (error) {
           console.error('[SettingsContext] Error in data fetching:', error);
-          // Don't reset auth state on profile/subscription errors
-          toast({
-            title: "Error",
-            description: "Error loading user data",
-            variant: "destructive"
-          });
-        } finally {
-          console.log('[SettingsContext] Setting isLoading to false');
-          setIsLoading(false);
+          // Don't throw here, we want to keep the user logged in even if data fetching fails
         }
       } catch (error) {
-        console.error('[SettingsContext] Error in session check:', error);
+        console.error('[SettingsContext] Error in checkSession:', error);
         setIsAuthenticated(false);
         setUserProfile(null);
         setSubscription(null);
-        setIsLoading(false);
-        toast({
-          title: "Session Error",
-          description: "Please try logging in again",
-          variant: "destructive"
-        });
       } finally {
         isCheckingSessionRef.current = false;
+        setIsLoading(false);
       }
     };
 
@@ -325,7 +344,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         });
       } else {
         // Save to localStorage if not authenticated
-        localStorage.setItem('widget_visibility', JSON.stringify(newVisibility));
+        const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+        evolveData.widget_visibility = newVisibility;
+        localStorage.setItem('evolve_data', JSON.stringify(evolveData));
         setUserProfile({
           id: 'local',
           widget_visibility: newVisibility,
@@ -346,18 +367,18 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   // Load local widget visibility on mount
   useEffect(() => {
     if (!isAuthenticated) {
-      const localVisibility = localStorage.getItem('widget_visibility');
+      const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+      const localVisibility = evolveData.widget_visibility;
       if (localVisibility) {
         try {
-          const parsedVisibility = JSON.parse(localVisibility);
           setUserProfile({
             id: 'local',
-            widget_visibility: parsedVisibility,
+            widget_visibility: localVisibility,
             cloud_sync_enabled: false,
             last_synced: null
           } as Profile);
         } catch (error) {
-          console.error('Error parsing local widget visibility:', error);
+          console.error('Error parsing widget visibility from localStorage:', error);
         }
       }
     }
@@ -550,7 +571,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const syncNotes = async (userId: string) => {
     try {
       console.log('Fetching local notes...');
-      const localNotesStr = localStorage.getItem('notes');
+      const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+      const localNotesStr = evolveData.notes;
       const localNotesData = localNotesStr ? JSON.parse(localNotesStr) : null;
       
       // Handle both old format (array) and new format (StoredData)
@@ -563,22 +585,40 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       console.log('Local notes found:', localNotes.length);
       
       console.log('Fetching cloud notes...');
-    const { data: cloudNotes, error } = await supabase
-      .from('notes')
-      .select('*')
-      .eq('user_id', userId);
+      const { data: cloudNotes, error } = await supabase
+        .from('notes')
+        .select('*')
+        .eq('user_id', userId);
     
-    if (error) throw error;
+      if (error) throw error;
     
       console.log('Cloud notes found:', cloudNotes?.length || 0);
       
+      // Create sets of IDs for comparison
+      const localNoteIds = new Set(localNotes.map(note => note.id));
+      const cloudNoteIds = new Set(cloudNotes?.map(note => note.id) || []);
+
+      // Find notes to delete (in cloud but not in local)
+      const notesToDelete = Array.from(cloudNoteIds).filter(id => !localNoteIds.has(id));
+      
+      if (notesToDelete.length > 0) {
+        console.log('Deleting', notesToDelete.length, 'notes from cloud...');
+        const { error: deleteError } = await supabase
+          .from('notes')
+          .delete()
+          .in('id', notesToDelete);
+          
+        if (deleteError) throw deleteError;
+        console.log('Notes deleted successfully');
+      }
+      
       // Merge and sync
       const notesToSync = localNotes.map((note: Note) => ({
-            id: note.id,
-            user_id: userId,
-            content: note.content,
+        id: note.id,
+        user_id: userId,
+        content: note.content,
         created_at: note.created_at || new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date(note.updatedAt).toISOString()
       }));
       
       if (notesToSync.length > 0) {
@@ -601,7 +641,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const syncTodos = async (userId: string) => {
     try {
       console.log('Fetching local todos...');
-      const localTodosStr = localStorage.getItem('todos');
+      const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+      const localTodosStr = evolveData.todos;
       const localTodosData = localTodosStr ? JSON.parse(localTodosStr) : null;
       
       // Handle both old format (array) and new format (StoredData)
@@ -651,7 +692,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
             id: todo.id,
             text: todo.title,
             completed: todo.completed,
-            createdAt: new Date(todo.created_at).getTime()
+            createdAt: new Date(todo.created_at).getTime(),
+            updatedAt: new Date(todo.updated_at).getTime()
           });
         });
       }
@@ -659,7 +701,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       // Add local todos, keeping the most recent version if there's a conflict
       localTodos.forEach(todo => {
         const existingTodo = mergedTodos.get(todo.id);
-        if (!existingTodo || (todo.createdAt && todo.createdAt > (existingTodo.createdAt || 0))) {
+        if (!existingTodo || (todo.updatedAt && todo.updatedAt > (existingTodo.updatedAt || 0))) {
           mergedTodos.set(todo.id, todo);
         }
       });
@@ -674,18 +716,20 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         value: finalTodos,
         timestamp: Date.now()
       };
-      localStorage.setItem('todos', JSON.stringify(storedData));
+      evolveData.todos = JSON.stringify(storedData);
+      localStorage.setItem('evolve_data', JSON.stringify(evolveData));
       
       // Sync merged data back to cloud
       const todosToSync = finalTodos.map(todo => {
-        const now = new Date().toISOString();
+        // Ensure the title doesn't exceed 100 characters
+        const title = todo.text.substring(0, 100);
         return {
           id: todo.id,
           user_id: userId,
-          title: todo.text,
+          title: title,
           completed: todo.completed || false,
-          created_at: now,
-          updated_at: now
+          created_at: new Date(todo.createdAt).toISOString(),
+          updated_at: new Date(todo.updatedAt).toISOString()
         };
       });
       
@@ -709,7 +753,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const syncEvents = async (userId: string) => {
     try {
       console.log('Fetching local events...');
-      const localEventsStr = localStorage.getItem('dashboard-events');
+      const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+      const localEventsStr = evolveData['dashboard-events'];
       const localEventsData = localEventsStr ? JSON.parse(localEventsStr) : null;
       
       // Handle both old format (array) and new format (StoredData)
@@ -736,11 +781,11 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
             id: event.id,
             user_id: userId,
             title: event.title,
-        date: event.start.split('T')[0], // Extract date from start time
-        time: event.start.split('T')[1], // Extract time from start time
-        description: event.title, // Use title as description
-        created_at: event.created_at || new Date().toISOString(),
-        updated_at: new Date().toISOString()
+            date: event.start.split('T')[0], // Extract date from start time
+            time: event.start.split('T')[1], // Extract time from start time
+            description: event.title, // Use title as description
+            created_at: event.created_at || new Date().toISOString(),
+            updated_at: new Date(event.updatedAt).toISOString()
       }));
       
       if (eventsToSync.length > 0) {
@@ -763,7 +808,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const syncPomodoroSettings = async (userId: string) => {
     try {
       console.log('Fetching local pomodoro settings...');
-      const localSettingsStr = localStorage.getItem('pomodoro-settings');
+      const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+      const localSettingsStr = evolveData['pomodoro-settings'];
       const localSettingsData = localSettingsStr ? JSON.parse(localSettingsStr) : null;
       
       // Handle both old format (object) and new format (StoredData)
@@ -781,7 +827,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
           longBreakDuration: 15,
           sessions: 0
         };
-        localStorage.setItem('pomodoro-settings', JSON.stringify(defaultSettings));
+        evolveData['pomodoro-settings'] = JSON.stringify(defaultSettings);
+        localStorage.setItem('evolve_data', JSON.stringify(evolveData));
         return;
       }
       
@@ -826,6 +873,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         setIsSettingsOpen,
     widgetVisibility: userProfile?.widget_visibility || defaultWidgetVisibility,
         toggleWidget,
+        expandedWidget,
+        setExpandedWidget,
+        temporaryHideWidgets,
+        setTemporaryHideWidgets,
         isAuthenticated,
         setIsAuthenticated,
         syncWithCloud,
@@ -840,7 +891,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     syncNotesOnBlur,
     syncTodosOnBlur,
     syncEventsOnBlur,
-    syncPomodoroOnBlur
+    syncPomodoroOnBlur,
+    widgetPositions,
+    setWidgetPositions,
   };
 
   return (

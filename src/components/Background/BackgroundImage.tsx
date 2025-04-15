@@ -3,29 +3,42 @@ import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 interface BackgroundImageProps {
   children: React.ReactNode;
+  blurLevel?: number;
 }
 
-const BackgroundImage: React.FC<BackgroundImageProps> = ({ children }) => {
+const BackgroundImage: React.FC<BackgroundImageProps> = ({ 
+  children,
+  blurLevel = 2
+}) => {
   const [imageUrl, setImageUrl] = useLocalStorage<string>('background-image', '');
+  const [lastUsedIndex, setLastUsedIndex] = useLocalStorage<number>('last-image-index', -1);
   const [loading, setLoading] = useState<boolean>(true);
   const [isSpinning, setIsSpinning] = useState<boolean>(false);
+
+  const defaultImages = [
+    'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
+    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4',
+    'https://images.unsplash.com/photo-1511300636408-a63a89df3482',
+  ];
+
+  const getNewRandomImage = () => {
+    let newIndex;
+    do {
+      newIndex = Math.floor(Math.random() * defaultImages.length);
+    } while (newIndex === lastUsedIndex && defaultImages.length > 1);
+    
+    setLastUsedIndex(newIndex);
+    return defaultImages[newIndex];
+  };
 
   useEffect(() => {
     const fetchRandomImage = async () => {
       try {
         setLoading(true);
-        // For now, we'll use a predefined Unsplash URL until we integrate the API
-        const defaultImages = [
-          'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
-          'https://images.unsplash.com/photo-1469474968028-56623f02e42e',
-          'https://images.unsplash.com/photo-1506905925346-21bda4d32df4',
-          'https://images.unsplash.com/photo-1511300636408-a63a89df3482',
-          'https://images.unsplash.com/photo-1434725039720-aaad6dd32dfe',
-        ];
         
         if (!imageUrl) {
-          const randomIndex = Math.floor(Math.random() * defaultImages.length);
-          setImageUrl(defaultImages[randomIndex]);
+          const newImageUrl = getNewRandomImage();
+          setImageUrl(newImageUrl);
         }
         
         setLoading(false);
@@ -40,23 +53,34 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({ children }) => {
 
   const handleRefreshBackground = () => {
     setIsSpinning(true);
-    setImageUrl('');
+    const newImageUrl = getNewRandomImage();
+    setImageUrl(newImageUrl);
     // Stop spinning after the background change animation completes
     setTimeout(() => {
       setIsSpinning(false);
     }, 1000);
   };
 
+  // Calculate blur value based on blur level
+  const getBlurValue = () => {
+    switch (blurLevel) {
+      case 0: return '0px'; // None
+      case 1: return '4px'; // Low
+      case 2: return '8px'; // High
+      default: return '8px';
+    }
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
       {/* Background image with blur effect */}
       <div
-        className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${
+        className={`absolute inset-0 size-full bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${
           !loading ? 'opacity-100' : 'opacity-0'
         }`}
         style={{ 
           backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
-          filter: 'blur(8px)',
+          filter: `blur(${getBlurValue()})`,
           transform: 'scale(1.1)',
         }}
       />

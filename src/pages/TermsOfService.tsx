@@ -1,14 +1,27 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowLeft, ExternalLink } from 'lucide-react';
 
 const TermsOfService = () => {
+  const location = useLocation();
+  const isDialog = location.state?.isDialog || false;
+  
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <Card className="w-full max-w-4xl">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Terms of Service</CardTitle>
+          {!isDialog ? (
+            <div className="flex items-center gap-2">
+              <Link to="/auth" className="text-muted-foreground hover:text-foreground transition-colors">
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
+              <CardTitle className="text-2xl font-bold">Terms of Service</CardTitle>
+            </div>
+          ) : (
+            <CardTitle className="text-2xl font-bold">Terms of Service</CardTitle>
+          )}
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
           <h2 className="text-lg font-semibold">1. Acceptance of Terms</h2>
@@ -103,9 +116,18 @@ const TermsOfService = () => {
           </p>
         </CardContent>
         <CardFooter>
-          <Button asChild className="w-full">
-            <Link to="/auth">Return to Login</Link>
-          </Button>
+          {!isDialog ? (
+            <Button asChild className="w-full">
+              <Link to="/auth?tab=signup">Return to Sign Up</Link>
+            </Button>
+          ) : (
+            <Button asChild variant="outline" className="w-full gap-2">
+              <Link to="/terms-of-service" target="_blank" rel="noopener noreferrer">
+                Open in new page
+                <ExternalLink className="h-4 w-4" />
+              </Link>
+            </Button>
+          )}
         </CardFooter>
       </Card>
     </div>

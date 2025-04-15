@@ -1,14 +1,58 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Add a custom hook to detect if we're on mobile
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768); // 768px is a common breakpoint for mobile
+    };
+    
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
+
+  return isMobile;
+};
 
 interface SearchBarProps {
   className?: string;
+  onFocusChange?: (focused: boolean) => void;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
+const SUGGESTIONS = [
+  'Weather forecast',
+  'Latest news',
+  'Popular movies',
+  'Top restaurants',
+  'Travel destinations',
+  'Tech reviews',
+  'Fitness tips',
+  'Recipe ideas',
+  'Shopping deals',
+  'Local events'
+];
+
+const SearchBar: React.FC<SearchBarProps> = ({ className = '', onFocusChange }) => {
   const [searchEngine, setSearchEngine] = useLocalStorage<string>('search-engine', 'google');
+  const [isFocused, setIsFocused] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [googleSuggestions, setGoogleSuggestions] = useState<string[]>([]);
+  const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
+  const searchTimeoutRef = useRef<number | null>(null);
   
+  useEffect(() => {
+    onFocusChange?.(isFocused);
+  }, [isFocused, onFocusChange]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -69,38 +113,218 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '' }) => {
         return null;
     }
   };
+
+  const fetchGoogleSuggestions = async (query: string) => {
+    if (!query.trim()) {
+      setGoogleSuggestions([]);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await fetch(`https://www.google.com/complete/search?client=chrome&q=${encodeURIComponent(query)}`);
+      const data = await response.json();
+      
+      // Google's API returns an array where the first element is the query and the second is an array of suggestions
+      if (data && Array.isArray(data) && data.length > 1 && Array.isArray(data[1])) {
+        setGoogleSuggestions(data[1]);
+      } else {
+        setGoogleSuggestions([]);
+      }
+    } catch (error) {
+      console.error('Error fetching Google suggestions:', error);
+      setGoogleSuggestions([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInputValue(value);
+    
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      window.clearTimeout(searchTimeoutRef.current);
+    }
+    
+    if (value.trim()) {
+      // Filter local suggestions
+      const filtered = SUGGESTIONS.filter(suggestion => 
+        suggestion.toLowerCase().includes(value.toLowerCase())
+      );
+      setSuggestions(filtered);
+      
+      // Only fetch Google suggestions if Google is the selected search engine
+      if (searchEngine === 'google') {
+        searchTimeoutRef.current = window.setTimeout(() => {
+          fetchGoogleSuggestions(value);
+        }, 300);
+      } else {
+        setGoogleSuggestions([]);
+      }
+    } else {
+      setSuggestions([]);
+      setGoogleSuggestions([]);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setInputValue(suggestion);
+    if (inputRef.current) {
+      inputRef.current.value = suggestion;
+    }
+    setSuggestions([]);
+    setGoogleSuggestions([]);
+  };
   
   return (
-    <div className={`w-[90vw] sm:w-[400px] mx-auto transition-all duration-500 ease-in-out focus-within:w-[95vw] sm:focus-within:w-[600px] ${className}`}>
-      <form onSubmit={handleSearch} className="relative">
-        <div className="glass dark:glass-dark flex items-center rounded-full px-3 sm:px-5 py-2 text-white transition-all duration-500 ease-in-out focus-within:ring focus-within:ring-white/30">
-          <button
-            type="button"
-            className="relative mr-2 sm:mr-3 shrink-0 transition-opacity duration-300"
-            onClick={changeSearchEngine}
-            title={`Search with ${searchEngine.charAt(0).toUpperCase() + searchEngine.slice(1)}`}
-          >
-            <div className="absolute -top-0.5 right-0 w-1 h-1 bg-white/60 rounded-full animate-pulse" />
-            {getSearchEngineLogo()}
-          </button>
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder="Search the web..."
-            className="w-full bg-transparent py-2 outline-none placeholder:text-white/70 transition-all duration-500 ease-in-out text-sm sm:text-base"
+    <>
+      <AnimatePresence>
+        {isFocused && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+            onClick={() => setIsFocused(false)}
           />
-          <button 
-            type="submit"
-            className="ml-2 sm:ml-3 shrink-0 text-white/70 hover:text-white transition-colors duration-300"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.3-4.3" />
-            </svg>
-          </button>
-        </div>
-      </form>
-    </div>
+        )}
+      </AnimatePresence>
+      
+      <div className="relative w-[90vw] sm:w-[400px] mx-auto">
+        <motion.div 
+          className={className}
+          initial={false}
+          animate={{ 
+            position: 'fixed',
+            top: isFocused ? '20vh' : (isMobile ? '70vh' : '63vh'),
+            left: '50%',
+            x: '-50%',
+            y: '-50%',
+            width: isFocused ? '95vw' : '90vw',
+            maxWidth: isFocused ? '800px' : '300px',
+            zIndex: isFocused ? 50 : 1
+          }}
+          transition={{ 
+            type: "spring",
+            stiffness: 180,
+            damping: 28,
+            mass: 1.1,
+            restDelta: 0.001
+          }}
+        >
+          <form onSubmit={handleSearch} className="relative">
+            <motion.div 
+              className="glass dark:glass-dark flex items-center rounded-full px-3 sm:px-5 py-2 text-white"
+              animate={{
+                scale: isFocused ? 1.02 : 1,
+                boxShadow: isFocused ? '0 0 20px rgba(255,255,255,0.2)' : ''
+              }}
+              transition={{ 
+                duration: 0.3,
+                ease: "easeInOut"
+              }}
+            >
+              <button
+                type="button"
+                className="relative mr-2 sm:mr-3 shrink-0 transition-opacity duration-300"
+                onClick={changeSearchEngine}
+                title={`Search with ${searchEngine.charAt(0).toUpperCase() + searchEngine.slice(1)}`}
+              >
+                <div className="absolute -top-0.5 right-0 w-1 h-1 bg-white/60 rounded-full animate-pulse" />
+                {getSearchEngineLogo()}
+              </button>
+              <input
+                ref={inputRef}
+                type="text"
+                value={inputValue}
+                onChange={handleInputChange}
+                onFocus={() => setIsFocused(true)}
+                placeholder="Search the web..."
+                className="w-full bg-transparent py-2 outline-none placeholder:text-white/70 text-base"
+              />
+              <button 
+                type="submit"
+                className="ml-2 sm:ml-3 shrink-0 text-white/70 hover:text-white transition-colors duration-300"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.3-4.3" />
+                </svg>
+              </button>
+            </motion.div>
+            
+            <AnimatePresence>
+              {isFocused && (suggestions.length > 0 || googleSuggestions.length > 0) && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute top-full left-0 right-0 mt-2 glass dark:glass-dark rounded-xl overflow-hidden"
+                >
+                  {suggestions.length > 0 && (
+                    <div className="px-3 py-2 text-xs font-medium text-white/60 uppercase tracking-wider">
+                      Suggestions
+                    </div>
+                  )}
+                  
+                  {suggestions.map((suggestion, index) => (
+                    <motion.button
+                      key={`suggestion-${suggestion}`}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className="w-full px-4 py-3 text-left text-white/90 hover:bg-white/10 transition-colors flex items-center gap-2"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/50">
+                        <path d="m21 21-4.3-4.3" />
+                      </svg>
+                      {suggestion}
+                    </motion.button>
+                  ))}
+                  
+                  {googleSuggestions.length > 0 && (
+                    <div className="px-3 py-2 text-xs font-medium text-white/60 uppercase tracking-wider border-t border-white/10">
+                      By Google
+                    </div>
+                  )}
+                  
+                  {googleSuggestions.map((suggestion, index) => (
+                    <motion.button
+                      key={`google-${suggestion}`}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: (suggestions.length + index) * 0.05 }}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className="w-full px-4 py-3 text-left text-white/90 hover:bg-white/10 transition-colors flex items-center gap-2"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/50">
+                        <path d="m21 21-4.3-4.3" />
+                      </svg>
+                      {suggestion}
+                    </motion.button>
+                  ))}
+                  
+                  {isLoading && (
+                    <div className="px-4 py-3 text-white/60 text-sm flex items-center gap-2">
+                      <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Loading suggestions...
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </form>
+        </motion.div>
+      </div>
+    </>
   );
 };
 
