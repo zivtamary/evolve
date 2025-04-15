@@ -418,7 +418,7 @@ const Index = () => {
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 [&>*:only-child]:md:col-span-2 [&>*:last-child:nth-child(2n-1)]:md:col-span-2 w-full">
                                 {getOrderedWidgets().map(
                                   ({ type, component: Component }) => {
-                                    if (!widgetVisibility[type]) return null;
+                                    if (!widgetVisibility?.[type]) return null;
                                     return <Component key={type} />;
                                   }
                                 )}

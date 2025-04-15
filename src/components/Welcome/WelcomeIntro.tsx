@@ -100,6 +100,11 @@ const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete, onStartFadeOut 
                   setName(e.target.value);
                   setNameError('');
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && name.trim()) {
+                    handleNext();
+                  }
+                }}
                 placeholder="Enter your name"
                 className={`px-4 py-2 rounded-lg bg-white/10 text-white placeholder-white/50 border ${nameError ? 'border-red-500' : 'border-white/20'} focus:outline-none focus:border-white/50 w-64 text-center text-xl`}
               />
