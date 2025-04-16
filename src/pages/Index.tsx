@@ -350,7 +350,7 @@ const Index = () => {
                     >
                       {/* First slide - Clock, Weather, Search */}
                       <div className="h-full w-full flex flex-col items-center justify-center px-6 shrink-0">
-                        <div className="absolute top-12 xs:top-16 sm:top-24 md:top-20 lg:top-20 xl:top-32 left-1/2 -translate-x-1/2 w-full">
+                        <div className="absolute top-12 xs:top-16 sm:top-24 md:top-20 lg:top-20 xl:top-32 h-sm:top-10 h-xl:top-32 left-1/2 -translate-x-1/2 w-full">
                           <motion.div
                             className="container mx-auto flex flex-col items-center px-4"
                             initial={{ opacity: 0, y: -20 }}
@@ -363,7 +363,7 @@ const Index = () => {
 
                         <div className="flex flex-col items-center justify-center flex-1">
                           <motion.div
-                            className="mb-8 lg:mb-12"
+                            className="mb-8 lg:mb-12 h-sm:mb-0 h-xl:mb-12"
                             initial={{ opacity: 0, y: -20 }}
                             animate={{
                               opacity: isSearchFocused ? 0.6 : 1,
@@ -379,7 +379,7 @@ const Index = () => {
                             <TimeGreeting />
                           </motion.div>
                           <motion.div
-                            className="w-full max-w-xs sm:mb-24 2xl:mb-8"
+                            className="w-full max-w-xs mb-8 pt-4 h-xl:pt-0"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{
                               opacity: isSearchFocused ? 0.6 : 1,
@@ -394,7 +394,7 @@ const Index = () => {
                           >
                             <Weather />
                           </motion.div>
-                          <SearchBar onFocusChange={setIsSearchFocused} />
+                          <SearchBar className="mt-0 h-sm:mt-10 h-md:mt-12 h-xl:mt-0" onFocusChange={setIsSearchFocused} />
                         </div>
                       </div>
 
@@ -415,7 +415,7 @@ const Index = () => {
                               </div>
                             ) : (
                               // Normal grid layout when no widget is expanded
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 [&>*:only-child]:md:col-span-2 [&>*:last-child:nth-child(2n-1)]:md:col-span-2 w-full">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 [&>*:only-child]:md:col-span-2 [&>*:last-child:nth-child(2n-1)]:md:col-span-2 w-full h-screen h-xl:h-max py-4">
                                 {getOrderedWidgets().map(
                                   ({ type, component: Component }) => {
                                     if (!widgetVisibility?.[type]) return null;
@@ -518,7 +518,7 @@ const Index = () => {
                     >
                       {/* First slide - Clock, Weather, Search */}
                       <div className="h-full w-full flex flex-col items-center justify-center px-6 shrink-0">
-                        <div className="absolute top-12 xs:top-16 sm:top-24 md:top-32 left-1/2 -translate-x-1/2 w-full">
+                        <div className="absolute top-12 xs:top-16 sm:top-24 md:top-32 left-1/2 h-sm:top-10 h-xl:top-32 -translate-x-1/2 w-full">
                           <motion.div
                             className="container mx-auto flex flex-col items-center px-4"
                             initial={{ opacity: 0, y: -20 }}
@@ -531,7 +531,7 @@ const Index = () => {
 
                         <div className="flex flex-col items-center justify-center flex-1">
                           <motion.div
-                            className="mb-12"
+                            className="mb-12 h-sm:mb-0 h-xl:mb-12"
                             initial={{ opacity: 0, y: -20 }}
                             animate={{
                               opacity: isSearchFocused ? 0.6 : 1,
@@ -547,7 +547,7 @@ const Index = () => {
                             <TimeGreeting />
                           </motion.div>
                           <motion.div
-                            className="w-full max-w-xs mb-8"
+                            className="w-full max-w-xs mb-8 pt-4 h-xl:pt-0"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{
                               opacity: isSearchFocused ? 0.6 : 1,
@@ -562,7 +562,7 @@ const Index = () => {
                           >
                             <Weather />
                           </motion.div>
-                          <SearchBar onFocusChange={setIsSearchFocused} />
+                          <SearchBar className="mt-0 h-sm:mt-10 h-md:mt-12 h-xl:mt-0" onFocusChange={setIsSearchFocused} />
                         </div>
                       </div>
 
@@ -583,7 +583,7 @@ const Index = () => {
                               </div>
                             ) : (
                               // Normal grid layout when no widget is expanded
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 [&>*:only-child]:md:col-span-2 [&>*:last-child:nth-child(2n-1)]:md:col-span-2 w-full">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 [&>*:only-child]:md:col-span-2 [&>*:last-child:nth-child(2n-1)]:md:col-span-2 w-full h-screen h-xl:h-max py-4">
                                 {getOrderedWidgets().map(
                                   ({ type, component: Component }) => {
                                     console.log(type, widgetVisibility[type], widgetVisibility);
@@ -681,7 +681,7 @@ const Index = () => {
                   >
                     {/* First slide - Clock, Weather, Search */}
                     <div className="h-full w-full flex flex-col items-center justify-center px-6 shrink-0">
-                      <div className="absolute top-12 xs:top-16 sm:top-24 md:top-32 left-1/2 -translate-x-1/2 w-full">
+                      <div className="absolute top-12 xs:top-16 sm:top-24 h-sm:top-10 h-xl:top-32 md:top-32 left-1/2 -translate-x-1/2 w-full">
                         <motion.div
                           className="container mx-auto flex flex-col items-center px-4"
                           initial={{ opacity: 0, y: -20 }}
@@ -694,7 +694,7 @@ const Index = () => {
 
                       <div className="flex flex-col items-center justify-center flex-1">
                         <motion.div
-                          className="mb-12"
+                          className="mb-12 h-sm:mb-0 h-xl:mb-12"
                           initial={{ opacity: 0, y: -20 }}
                           animate={{
                             opacity: isSearchFocused ? 0.6 : 1,
@@ -710,7 +710,7 @@ const Index = () => {
                           <TimeGreeting />
                         </motion.div>
                         <motion.div
-                          className="w-full max-w-xs mb-8"
+                           className="w-full max-w-xs mb-8 pt-4 h-xl:pt-0"
                           initial={{ opacity: 0, y: 20 }}
                           animate={{
                             opacity: isSearchFocused ? 0.6 : 1,
@@ -725,7 +725,7 @@ const Index = () => {
                         >
                           <Weather />
                         </motion.div>
-                        <SearchBar onFocusChange={setIsSearchFocused} />
+                        <SearchBar className="mt-0 h-sm:mt-10 h-md:mt-12 h-xl:mt-0" onFocusChange={setIsSearchFocused} />
                       </div>
                     </div>
 
@@ -746,7 +746,7 @@ const Index = () => {
                             </div>
                           ) : (
                             // Normal grid layout when no widget is expanded
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 [&>*:only-child]:md:col-span-2 [&>*:last-child:nth-child(2n-1)]:md:col-span-2 w-full">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 [&>*:only-child]:md:col-span-2 [&>*:last-child:nth-child(2n-1)]:md:col-span-2 w-full h-screen h-xl:h-max py-4">
                               {getOrderedWidgets().map(
                                 ({ type, component: Component }) => {
                                   if (!widgetVisibility[type]) return null;

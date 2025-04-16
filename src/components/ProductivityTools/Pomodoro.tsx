@@ -265,7 +265,7 @@ const Pomodoro: React.FC = () => {
   };
 
   return (
-    <div className="glass dark:glass-dark rounded-xl text-white overflow-hidden h-[400px] flex flex-col">
+    <div className="glass dark:glass-dark rounded-xl text-white overflow-hidden h-full h-xl:h-[400px] flex flex-col">
       <div className="flex items-center justify-between p-4 border-b border-white/10">
         <div className="flex items-center gap-2">
           <Timer className="h-5 w-5" />
