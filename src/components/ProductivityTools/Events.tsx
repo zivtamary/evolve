@@ -646,11 +646,26 @@ const Events = () => {
     );
   };
 
+  const screenHeight = window.innerHeight;
   const getHeightByScreenSize = () => {
     if (window.innerHeight >= 1080) {
       return isExpanded ? '800px' : '400px';
     };
-    return '100%';
+    if (window.innerHeight >= 768) {
+        // screen height / 2
+      return isExpanded ? screenHeight - 40 : screenHeight / 2 - 30;
+    };
+    if (window.innerHeight >= 480) {
+      return isExpanded ? '400px' : '200px';
+    };
+    return isExpanded ? '300px' : '150px';
+  };
+
+  const getWidthByScreenSize = () => {
+    if (window.innerHeight >= 1080) {
+      return isExpanded ? '800px' : '100%';
+    };
+    return isExpanded ? '100%' : '100%';
   };
 
   return (
@@ -675,7 +690,7 @@ const Events = () => {
         isExpanded ? "mx-auto" : "w-full"
       )}
       style={{
-        width: isExpanded ? "855px" : "100%",
+        width: getWidthByScreenSize(),
         boxShadow: isExpanded ? "0 0 0 100vw rgba(0, 0, 0, 0.5)" : "",
         transformOrigin: getTransformOrigin(),
       }}
