@@ -1,7 +1,7 @@
 
 {
   "manifest_version": 3,
-  "name": "Evolve Startpage",
+  "name": "Evolve: Productivity Startpage",
   "short_name": "Evolve",
   "version": "1.0.0",
   "description": "Transform your new tab into an elegant productivity dashboard with customizable widgets, weather, tasks, calendar, notes, and focus timer - all seamlessly synced to the cloud.",

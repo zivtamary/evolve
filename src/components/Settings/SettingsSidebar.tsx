@@ -357,7 +357,7 @@ const SettingsSidebar = () => {
                             <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
                               <span>Email</span>
                             </div>
-                            <span className="text-sm font-semibold text-black dark:text-white">
+                            <span className="text-sm font-medium text-black/70 dark:text-white/70">
                               {userEmail}
                             </span>
                           </div>
