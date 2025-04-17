@@ -233,9 +233,8 @@ const SettingsSidebar = () => {
         <SheetContent className="glass dark:glass-dark border-l border-white/0 dark:border-white/5 dark:bg-transparent backdrop-blur-xl p-0">
           <div className="h-full flex flex-col">
             <SheetHeader className="p-6 border-b border-black/10 dark:border-white/10">
-              <SheetTitle className="flex items-center gap-2 text-black dark:text-white text-base">
-                <Settings className="h-4 w-4" />
-                <span>Settings</span>
+              <SheetTitle className="flex items-center gap-2 text-black dark:text-white text-xl font-medium tracking-tight">
+        Settings
               </SheetTitle>
             </SheetHeader>
 
@@ -253,7 +252,7 @@ const SettingsSidebar = () => {
                     </TabsTrigger>
                     <TabsTrigger value="sync" className="flex items-center gap-2">
                       <Cloud className="h-4 w-4" />
-                      <span>Sync</span>
+                      <span>Data</span>
                     </TabsTrigger>
                     {isAuthenticated && (!isPremium || userProfile?.polar_customer_id) && (
                       <TabsTrigger value="billing" className="flex items-center gap-2">
@@ -269,9 +268,9 @@ const SettingsSidebar = () => {
                     <Layout className="h-4 w-4" />
                     <span>Widget Visibility</span>
                   </h3>
-                  <div className="space-y-0">
+                  <div className="space-y-0 border px-4 py-2 bg-black/5 dark:glass-dark rounded-lg">
                     <div className="flex items-center justify-between py-3">
-                      <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
+                      <div className="flex items-center space-x-2 text-black dark:text-white">
                         <StickyNote className="h-4 w-4" />
                         <span>Notes</span>
                       </div>
@@ -283,7 +282,7 @@ const SettingsSidebar = () => {
                     <Separator className="bg-black/10 dark:bg-white/10" />
                     
                     <div className="flex items-center justify-between py-3">
-                      <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
+                      <div className="flex items-center space-x-2 text-black dark:text-white">
                         <CheckSquare className="h-4 w-4" />
                         <span>Todo List</span>
                       </div>
@@ -295,7 +294,7 @@ const SettingsSidebar = () => {
                     <Separator className="bg-black/10 dark:bg-white/10" />
 
                     <div className="flex items-center justify-between py-3">
-                      <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
+                      <div className="flex items-center space-x-2 text-black dark:text-white">
                         <Timer className="h-4 w-4" />
                         <span>Pomodoro Timer</span>
                       </div>
@@ -307,7 +306,7 @@ const SettingsSidebar = () => {
                     <Separator className="bg-black/10 dark:bg-white/10" />
 
                     <div className="flex items-center justify-between py-3">
-                      <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
+                      <div className="flex items-center space-x-2 text-black dark:text-white">
                         <CalendarDays className="h-4 w-4" />
                         <span>Events</span>
                       </div>
@@ -328,6 +327,7 @@ const SettingsSidebar = () => {
                   <div className="space-y-3 flex flex-col gap-2">
                     {isAuthenticated ? (
                       <div className="flex flex-col space-y-2">
+                        <div className="border px-4 py-2 bg-black/5 dark:glass-dark rounded-lg mb-2">
                         <div className="flex items-center justify-between py-2">
                           <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
                             <span>Email</span>
@@ -350,6 +350,7 @@ const SettingsSidebar = () => {
                               </>
                             )}
                           </span>
+                        </div>
                         </div>
                         
                         <Button
@@ -400,6 +401,7 @@ const SettingsSidebar = () => {
                       </div>
                     )}
                   </div>
+
                 </TabsContent>
 
                 <TabsContent value="sync" className="p-6">
