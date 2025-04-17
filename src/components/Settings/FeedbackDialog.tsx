@@ -106,8 +106,9 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ open, onOpenChange }) =
             )}
             
             <div className="space-y-2">
-              <label className="text-sm text-white/80 font-medium">Your Feedback</label>
+              <label htmlFor="feedback" className="text-sm text-white/80 font-medium">Your Feedback</label>
               <textarea
+                id="feedback"
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
                 className="w-full h-32 bg-black/10 dark:bg-black/20 px-4 py-2.5 rounded-lg outline-none border border-white/10 focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all duration-200 text-white placeholder-white/40 resize-none"

@@ -36,8 +36,10 @@ import {
   Trash2,
   AlertTriangle,
   FileDown,
+  Monitor,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import SubscriptionModal from "./SubscriptionModal";
 import FeedbackDialog from "./FeedbackDialog";
 import Logo from "../Logo/Logo";
@@ -238,207 +240,230 @@ const SettingsSidebar = () => {
             </SheetHeader>
 
             <div className="flex-1 overflow-y-auto">
-              <div className="p-6 border-b border-black/10 dark:border-white/10">
-                <h3 className="mb-4 text-base font-medium text-black dark:text-white flex items-center gap-2">
-                  <Layout className="h-4 w-4" />
-                  <span>Widget Visibility</span>
-                </h3>
-                <div className="space-y-0">
-                  <div className="flex items-center justify-between py-3">
-                    <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
-                      <StickyNote className="h-4 w-4" />
-                      <span>Notes</span>
-                    </div>
-                    <Switch
-                      checked={widgetVisibility?.notes}
-                      onCheckedChange={() => toggleWidget("notes")}
-                    />
-                  </div>
-                  <Separator className="bg-black/10 dark:bg-white/10" />
-                  
-                  <div className="flex items-center justify-between py-3">
-                    <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
-                      <CheckSquare className="h-4 w-4" />
-                      <span>Todo List</span>
-                    </div>
-                    <Switch
-                      checked={widgetVisibility?.todoList}
-                      onCheckedChange={() => toggleWidget("todoList")}
-                    />
-                  </div>
-                  <Separator className="bg-black/10 dark:bg-white/10" />
-
-                  <div className="flex items-center justify-between py-3">
-                    <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
-                      <Timer className="h-4 w-4" />
-                      <span>Pomodoro Timer</span>
-                    </div>
-                    <Switch
-                      checked={widgetVisibility?.pomodoro}
-                      onCheckedChange={() => toggleWidget("pomodoro")}
-                    />
-                  </div>
-                  <Separator className="bg-black/10 dark:bg-white/10" />
-
-                  <div className="flex items-center justify-between py-3">
-                    <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
-                      <CalendarDays className="h-4 w-4" />
-                      <span>Events</span>
-                    </div>
-                    <Switch
-                      checked={widgetVisibility?.events}
-                      onCheckedChange={() => toggleWidget("events")}
-                    />
-                  </div>
+              <Tabs defaultValue="widgets" className="w-full">
+                <div className="border-b border-black/10 dark:border-white/10">
+                  <TabsList className="w-full p-0 h-12 bg-transparent">
+                    <TabsTrigger value="widgets" className="flex items-center gap-2">
+                      <Monitor className="h-4 w-4" />
+                      <span>Display</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="profile" className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      <span>Profile</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="sync" className="flex items-center gap-2">
+                      <Cloud className="h-4 w-4" />
+                      <span>Sync</span>
+                    </TabsTrigger>
+                    {isAuthenticated && (!isPremium || userProfile?.polar_customer_id) && (
+                      <TabsTrigger value="billing" className="flex items-center gap-2">
+                        <CreditCard className="h-4 w-4" />
+                        <span>Billing</span>
+                      </TabsTrigger>
+                    )}
+                  </TabsList>
                 </div>
-              </div>
 
-              <div className="p-6 border-black/10 dark:border-white/10">
-                <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <span>User Profile</span>
-                </h3>
+                <TabsContent value="widgets" className="p-6">
+                  <h3 className="mb-4 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                    <Layout className="h-4 w-4" />
+                    <span>Widget Visibility</span>
+                  </h3>
+                  <div className="space-y-0">
+                    <div className="flex items-center justify-between py-3">
+                      <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
+                        <StickyNote className="h-4 w-4" />
+                        <span>Notes</span>
+                      </div>
+                      <Switch
+                        checked={widgetVisibility?.notes}
+                        onCheckedChange={() => toggleWidget("notes")}
+                      />
+                    </div>
+                    <Separator className="bg-black/10 dark:bg-white/10" />
+                    
+                    <div className="flex items-center justify-between py-3">
+                      <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
+                        <CheckSquare className="h-4 w-4" />
+                        <span>Todo List</span>
+                      </div>
+                      <Switch
+                        checked={widgetVisibility?.todoList}
+                        onCheckedChange={() => toggleWidget("todoList")}
+                      />
+                    </div>
+                    <Separator className="bg-black/10 dark:bg-white/10" />
 
-                <div className="space-y-3 flex flex-col gap-2">
-                  {isAuthenticated ? (
+                    <div className="flex items-center justify-between py-3">
+                      <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
+                        <Timer className="h-4 w-4" />
+                        <span>Pomodoro Timer</span>
+                      </div>
+                      <Switch
+                        checked={widgetVisibility?.pomodoro}
+                        onCheckedChange={() => toggleWidget("pomodoro")}
+                      />
+                    </div>
+                    <Separator className="bg-black/10 dark:bg-white/10" />
+
+                    <div className="flex items-center justify-between py-3">
+                      <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
+                        <CalendarDays className="h-4 w-4" />
+                        <span>Events</span>
+                      </div>
+                      <Switch
+                        checked={widgetVisibility?.events}
+                        onCheckedChange={() => toggleWidget("events")}
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="profile" className="p-6">
+                  <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    <span>User Profile</span>
+                  </h3>
+
+                  <div className="space-y-3 flex flex-col gap-2">
+                    {isAuthenticated ? (
+                      <div className="flex flex-col space-y-2">
+                        <div className="flex items-center justify-between py-2">
+                          <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
+                            <span>Email</span>
+                          </div>
+                          <span className="text-sm font-semibold text-black dark:text-white">
+                            {userEmail}
+                          </span>
+                        </div>
+                        <Separator className="bg-black/10 dark:bg-white/10" />
+
+                        <div className="flex items-center justify-between py-2">
+                          <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
+                            <span>Account Type</span>
+                          </div>
+                          <span className={`text-sm ${isPremium ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"} flex items-center gap-1`}>
+                            {isPremium ? "Premium" : (
+                              <>
+                                <Lock className="h-3 w-3" />
+                                Free
+                              </>
+                            )}
+                          </span>
+                        </div>
+                        
+                        <Button
+                          className="w-full mt-2"
+                          variant="outline"
+                          onClick={signOut}
+                          disabled={isSyncing}
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Sign Out
+                        </Button>
+                        
+                        <Button
+                          className="w-full mt-2"
+                          variant="outline"
+                          onClick={handleExportData}
+                        >
+                          <FileDown className="h-4 w-4" />
+                          Export Data
+                        </Button>
+                        
+                        <Button
+                          className="w-full mt-2 border-none bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-red-800 shadow-sm hover:shadow-md dark:shadow-red-900/20 dark:hover:shadow-red-900/30 transition-all duration-300"
+                          variant="outline"
+                          onClick={() => setShowDeleteAccountDialog(true)}
+                          disabled={isSyncing || isDeletingAccount}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Delete Account
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-3 py-4">
+                        <p className="text-sm text-black/50 dark:text-white/50 text-center">
+                          Sign in to access your profile and sync your data across devices
+                        </p>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            navigate("/auth");
+                            setIsSettingsOpen(false);
+                          }}
+                          className="w-full"
+                        >
+                          <LogIn className="h-4 w-4" />
+                          Sign In
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="sync" className="p-6">
+                  <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                    <Cloud className="h-4 w-4" />
+                    <span>Data Synchronization</span>
+                  </h3>
+
+                  <div className="space-y-3 flex flex-col gap-2">
                     <div className="flex flex-col space-y-2">
                       <div className="flex items-center justify-between py-2">
                         <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
-                          <span>Email</span>
+                          <span>Cloud Sync</span>
+                          {!isAuthenticated || !isPremium ? (
+                            <span className="text-xs bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 px-2 py-0.5 rounded">
+                              Premium
+                            </span>
+                          ) : null}
                         </div>
-                        <span className="text-sm font-semibold text-black dark:text-white">
-                          {userEmail}
-                        </span>
+                        <Switch
+                          checked={userProfile?.cloud_sync_enabled || false}
+                          onCheckedChange={toggleSyncEnabled}
+                          disabled={!isAuthenticated || isSyncing || !isPremium}
+                        />
                       </div>
                       <Separator className="bg-black/10 dark:bg-white/10" />
 
                       <div className="flex items-center justify-between py-2">
                         <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
-                          <span>Account Type</span>
+                          <span>Last synced</span>
                         </div>
-                        <span className={`text-sm ${isPremium ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"} flex items-center gap-1`}>
-                          {isPremium ? "Premium" : (
-                            <>
-                              <Lock className="h-3 w-3" />
-                              Free
-                            </>
-                          )}
+                        <span
+                          className={`text-sm ${
+                            !userProfile?.last_synced
+                              ? "text-amber-600 dark:text-amber-400"
+                              : "text-black/50 dark:text-white/50"
+                          }`}
+                        >
+                          {formatLastSynced()}
                         </span>
                       </div>
-                      
-                      <Button
-                        className="w-full mt-2"
-                        variant="outline"
-                        onClick={signOut}
-                        disabled={isSyncing}
-                      >
-                        <LogOut className="h-4 w-4" />
-                        Sign Out
-                      </Button>
-                      
-                      <Button
-                        className="w-full mt-2"
-                        variant="outline"
-                        onClick={handleExportData}
-                      >
-                        <FileDown className="h-4 w-4" />
-                        Export Data
-                      </Button>
-                      
-                      <Button
-                        className="w-full mt-2 border-none bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-red-800 shadow-sm hover:shadow-md dark:shadow-red-900/20 dark:hover:shadow-red-900/30 transition-all duration-300"
-                        variant="outline"
-                        onClick={() => setShowDeleteAccountDialog(true)}
-                        disabled={isSyncing || isDeletingAccount}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        Delete Account
-                      </Button>
                     </div>
-                  ) : (
-                    <div className="flex flex-col items-center gap-3 py-4">
-                      <p className="text-sm text-black/50 dark:text-white/50 text-center">
-                        Sign in to access your profile and sync your data across devices
-                      </p>
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          navigate("/auth");
-                          setIsSettingsOpen(false);
-                        }}
-                        className="w-full"
-                      >
-                        <LogIn className="h-4 w-4" />
-                        Sign In
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </div>
 
-              <div className="p-6 border-t">
-                <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
-                  <Cloud className="h-4 w-4" />
-                  <span>Data Synchronization</span>
-                </h3>
-
-                <div className="space-y-3 flex flex-col gap-2">
-                  <div className="flex flex-col space-y-2">
-                    <div className="flex items-center justify-between py-2">
-                      <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
-                        <span>Cloud Sync</span>
-                        {!isAuthenticated || !isPremium ? (
-                          <span className="text-xs bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 px-2 py-0.5 rounded">
-                            Premium
-                          </span>
-                        ) : null}
+                    {isSyncing && (
+                      <div className="flex items-center justify-center text-sm text-black/50 dark:text-white/50 bg-black/5 dark:bg-white/5 p-2 rounded-lg">
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <span>Syncing data...</span>
                       </div>
-                      <Switch
-                        checked={userProfile?.cloud_sync_enabled || false}
-                        onCheckedChange={toggleSyncEnabled}
-                        disabled={!isAuthenticated || isSyncing || !isPremium}
-                      />
-                    </div>
-                    <Separator className="bg-black/10 dark:bg-white/10" />
+                    )}
 
-                    <div className="flex items-center justify-between py-2">
-                      <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
-                        <span>Last synced</span>
+                    {isAuthenticated && isPremium && !userProfile?.cloud_sync_enabled && (
+                      <div className="flex items-start gap-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-500/10 p-2 rounded-lg">
+                        <Cloud className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                        <span className="leading-tight">
+                          Cloud sync is currently disabled. Enable it to keep
+                          your data backed up and synchronized across devices.
+                        </span>
                       </div>
-                      <span
-                        className={`text-sm ${
-                          !userProfile?.last_synced
-                            ? "text-amber-600 dark:text-amber-400"
-                            : "text-black/50 dark:text-white/50"
-                        }`}
-                      >
-                        {formatLastSynced()}
-                      </span>
-                    </div>
+                    )}
                   </div>
+                </TabsContent>
 
-                  {isSyncing && (
-                    <div className="flex items-center justify-center text-sm text-black/50 dark:text-white/50 bg-black/5 dark:bg-white/5 p-2 rounded-lg">
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      <span>Syncing data...</span>
-                    </div>
-                  )}
-
-                  {isAuthenticated && isPremium && !userProfile?.cloud_sync_enabled && (
-                    <div className="flex items-start gap-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-500/10 p-2 rounded-lg">
-                      <Cloud className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                      <span className="leading-tight">
-                        Cloud sync is currently disabled. Enable it to keep
-                        your data backed up and synchronized across devices.
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {isAuthenticated &&
-                (!isPremium || userProfile?.polar_customer_id) && (
-                  <div className="p-6 border-t border-black/10 dark:border-white/10">
+                {isAuthenticated && (!isPremium || userProfile?.polar_customer_id) && (
+                  <TabsContent value="billing" className="p-6">
                     <h3 className="mb-4 text-base font-medium text-black dark:text-white flex items-center gap-2">
                       <CreditCard className="h-4 w-4" />
                       <span>Billing</span>
@@ -482,47 +507,49 @@ const SettingsSidebar = () => {
                         </Button>
                       )}
                     </div>
-                  </div>
+                  </TabsContent>
                 )}
-                <div className="p-6 border-t border-black/10 dark:border-white/10">
+              </Tabs>
+
+              <div className="p-6 border-t border-black/10 dark:border-white/10">
                 <div className="flex flex-col items-center gap-4">
-                <div 
-                  onClick={() => setShowFeedbackDialog(true)}
-                  className="w-full p-6 rounded-xl cursor-pointer transition-all duration-300
-                    bg-gradient-to-br from-purple-900/80 via-indigo-900/80 to-black 
-                    hover:from-purple-800/90 hover:via-indigo-800/90 hover:to-black/90
-                    border border-white/10 hover:border-white/20
-                    relative overflow-hidden group"
-                >
-                  {/* Sparkle effects */}
-                  <div className="absolute inset-0">
-                    {/* Large sparkles */}
-                    <div className="absolute top-1/4 left-1/4 h-2 w-2 bg-white/80 rounded-full animate-[sparkle_3s_ease-in-out_infinite]" />
-                    <div className="absolute top-3/4 right-1/4 h-2 w-2 bg-purple-300/80 rounded-full animate-[sparkle_4s_ease-in-out_infinite_1s]" />
-                    <div className="absolute bottom-1/3 left-1/2 h-2 w-2 bg-indigo-300/80 rounded-full animate-[sparkle_3.5s_ease-in-out_infinite_0.5s]" />
+                  <div 
+                    onClick={() => setShowFeedbackDialog(true)}
+                    className="w-full p-6 rounded-xl cursor-pointer transition-all duration-300
+                      bg-gradient-to-br from-purple-900/80 via-indigo-900/80 to-black 
+                      hover:from-purple-800/90 hover:via-indigo-800/90 hover:to-black/90
+                      border border-white/10 hover:border-white/20
+                      relative overflow-hidden group"
+                  >
+                    {/* Sparkle effects */}
+                    <div className="absolute inset-0">
+                      {/* Large sparkles */}
+                      <div className="absolute top-1/4 left-1/4 h-2 w-2 bg-white/80 rounded-full animate-[sparkle_3s_ease-in-out_infinite]" />
+                      <div className="absolute top-3/4 right-1/4 h-2 w-2 bg-purple-300/80 rounded-full animate-[sparkle_4s_ease-in-out_infinite_1s]" />
+                      <div className="absolute bottom-1/3 left-1/2 h-2 w-2 bg-indigo-300/80 rounded-full animate-[sparkle_3.5s_ease-in-out_infinite_0.5s]" />
+                      
+                      {/* Medium sparkles */}
+                      <div className="absolute top-1/2 right-1/3 h-1.5 w-1.5 bg-white/70 rounded-full animate-[sparkle_4s_ease-in-out_infinite_1.5s]" />
+                      <div className="absolute bottom-1/4 left-1/3 h-1.5 w-1.5 bg-purple-200/70 rounded-full animate-[sparkle_3s_ease-in-out_infinite_2s]" />
+                      
+                      {/* Small sparkles */}
+                      <div className="absolute top-2/3 right-1/2 h-1 w-1 bg-indigo-200/60 rounded-full animate-[sparkle_3s_ease-in-out_infinite_0.7s]" />
+                      <div className="absolute bottom-1/2 right-1/4 h-1 w-1 bg-white/60 rounded-full animate-[sparkle_3.5s_ease-in-out_infinite_1.2s]" />
+                      
+                      {/* Shooting star effect */}
+                      <div className="absolute h-px w-16 bg-gradient-to-r from-transparent via-white to-transparent 
+                        -rotate-45 animate-[shooting_4s_linear_infinite]
+                        top-1/4 -left-8" />
+                    </div>
                     
-                    {/* Medium sparkles */}
-                    <div className="absolute top-1/2 right-1/3 h-1.5 w-1.5 bg-white/70 rounded-full animate-[sparkle_4s_ease-in-out_infinite_1.5s]" />
-                    <div className="absolute bottom-1/4 left-1/3 h-1.5 w-1.5 bg-purple-200/70 rounded-full animate-[sparkle_3s_ease-in-out_infinite_2s]" />
-                    
-                    {/* Small sparkles */}
-                    <div className="absolute top-2/3 right-1/2 h-1 w-1 bg-indigo-200/60 rounded-full animate-[sparkle_3s_ease-in-out_infinite_0.7s]" />
-                    <div className="absolute bottom-1/2 right-1/4 h-1 w-1 bg-white/60 rounded-full animate-[sparkle_3.5s_ease-in-out_infinite_1.2s]" />
-                    
-                    {/* Shooting star effect */}
-                    <div className="absolute h-px w-16 bg-gradient-to-r from-transparent via-white to-transparent 
-                      -rotate-45 animate-[shooting_4s_linear_infinite]
-                      top-1/4 -left-8" />
-                  </div>
-                  
-                  <div className="relative z-10 flex flex-col items-center gap-3 text-center">
-                    <Sparkles className="h-6 w-6 text-purple-300 group-hover:text-purple-200 transition-colors" />
-                    <h4 className="text-lg font-medium text-white group-hover:text-purple-100 transition-colors">What do you think about Evolve?</h4>
-                    <p className="text-sm text-purple-200/80 group-hover:text-purple-100/90 transition-colors">Share your thoughts and help us make Evolve even better!</p>
+                    <div className="relative z-10 flex flex-col items-center gap-3 text-center">
+                      <Sparkles className="h-6 w-6 text-purple-300 group-hover:text-purple-200 transition-colors" />
+                      <h4 className="text-lg font-medium text-white group-hover:text-purple-100 transition-colors">What do you think about Evolve?</h4>
+                      <p className="text-sm text-purple-200/80 group-hover:text-purple-100/90 transition-colors">Share your thoughts and help us make Evolve even better!</p>
+                    </div>
                   </div>
                 </div>
-                    </div>
-                    </div>
+              </div>
             </div>
 
             <div className="p-6 border-t border-black/10 dark:border-white/10">

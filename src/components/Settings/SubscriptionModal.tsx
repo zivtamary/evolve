@@ -124,11 +124,10 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   };
 
   const benefits = [
-    "Cloud synchronization across devices",
-    "Unlimited notes and todos",
-    "Priority support",
+    "Cloud synchronization",
     "Early access to new features",
     "No ads or interruptions",
+    "Priority support",
   ];
 
   if (isLoading) {
