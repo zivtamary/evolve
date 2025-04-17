@@ -92,9 +92,12 @@ const SettingsSidebar = () => {
   const [showSubscriptionModal, setShowSubscriptionModal] =
     React.useState(false);
   const [showFeedbackDialog, setShowFeedbackDialog] = React.useState(false);
-  const [showDeleteAccountDialog, setShowDeleteAccountDialog] = React.useState(false);
+  const [showDeleteAccountDialog, setShowDeleteAccountDialog] =
+    React.useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = React.useState(false);
-  const [deleteAccountError, setDeleteAccountError] = React.useState<string | null>(null);
+  const [deleteAccountError, setDeleteAccountError] = React.useState<
+    string | null
+  >(null);
   const [userEmail, setUserEmail] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -153,7 +156,7 @@ const SettingsSidebar = () => {
   `;
 
   React.useEffect(() => {
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = sparkleKeyframes;
     document.head.appendChild(style);
     return () => {
@@ -164,23 +167,25 @@ const SettingsSidebar = () => {
   const handleDeleteAccount = async () => {
     setIsDeletingAccount(true);
     setDeleteAccountError(null);
-    
+
     try {
       // @ts-expect-error - The RPC function exists but might not be in the type definition
-      const { error } = await supabase.rpc('delete_user');
-      
+      const { error } = await supabase.rpc("delete_user");
+
       if (error) {
-        setDeleteAccountError(error.message || "Failed to delete account. Please try again.");
+        setDeleteAccountError(
+          error.message || "Failed to delete account. Please try again."
+        );
         setIsDeletingAccount(false);
         return;
       }
-      
+
       // Clear local storage
       localStorage.clear();
-      
+
       // Sign out the user
       await signOut();
-      
+
       // Refresh the page
       window.location.reload();
     } catch (error) {
@@ -193,34 +198,39 @@ const SettingsSidebar = () => {
   const handleExportData = () => {
     try {
       // Get data from localStorage
-      const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
-      
+      const evolveData = JSON.parse(
+        localStorage.getItem("evolve_data") || "{}"
+      );
+
       // Extract the relevant data
       const exportData = {
         todos: evolveData.todos?.value || [],
         notes: evolveData.notes?.value || [],
-        events: evolveData['dashboard-events']?.value || [],
-        pomodoro: evolveData['pomodoro-settings']?.value || {},
-        exportDate: new Date().toISOString()
+        events: evolveData["dashboard-events"]?.value || [],
+        pomodoro: evolveData["pomodoro-settings"]?.value || {},
+        exportDate: new Date().toISOString(),
       };
-      
+
       // Create a blob and download link
       const dataStr = JSON.stringify(exportData, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const dataBlob = new Blob([dataStr], { type: "application/json" });
       const url = URL.createObjectURL(dataBlob);
-      
+
       // Create a temporary link element and trigger download
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.download = `evolve-data-export-${format(new Date(), 'yyyy-MM-dd')}.json`;
+      link.download = `evolve-data-export-${format(
+        new Date(),
+        "yyyy-MM-dd"
+      )}.json`;
       document.body.appendChild(link);
       link.click();
-      
+
       // Clean up
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error exporting data:', error);
+      console.error("Error exporting data:", error);
       // You could add a toast notification here if you have one
     }
   };
@@ -230,11 +240,11 @@ const SettingsSidebar = () => {
       <SettingsButton onClick={() => setIsSettingsOpen(true)} />
 
       <Sheet open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <SheetContent className="glass dark:glass-dark border-l border-white/0 dark:border-white/5 dark:bg-transparent backdrop-blur-xl p-0">
+        <SheetContent className="glass dark:bg-black/90 border-l border-white/0 dark:border-white/5 backdrop-blur-xl p-0">
           <div className="h-full flex flex-col">
             <SheetHeader className="p-6 border-b border-black/10 dark:border-white/10">
               <SheetTitle className="flex items-center gap-2 text-black dark:text-white text-xl font-medium tracking-tight">
-        Settings
+                Settings
               </SheetTitle>
             </SheetHeader>
 
@@ -242,24 +252,37 @@ const SettingsSidebar = () => {
               <Tabs defaultValue="widgets" className="w-full">
                 <div className="border-b border-black/10 dark:border-white/10">
                   <TabsList className="w-full p-0 h-12 bg-transparent">
-                    <TabsTrigger value="widgets" className="flex items-center gap-2">
+                    <TabsTrigger
+                      value="widgets"
+                      className="flex items-center gap-2"
+                    >
                       <Monitor className="h-4 w-4" />
                       <span>Display</span>
                     </TabsTrigger>
-                    <TabsTrigger value="profile" className="flex items-center gap-2">
+                    <TabsTrigger
+                      value="profile"
+                      className="flex items-center gap-2"
+                    >
                       <User className="h-4 w-4" />
                       <span>Profile</span>
                     </TabsTrigger>
-                    <TabsTrigger value="sync" className="flex items-center gap-2">
+                    <TabsTrigger
+                      value="sync"
+                      className="flex items-center gap-2"
+                    >
                       <Cloud className="h-4 w-4" />
                       <span>Data</span>
                     </TabsTrigger>
-                    {isAuthenticated && (!isPremium || userProfile?.polar_customer_id) && (
-                      <TabsTrigger value="billing" className="flex items-center gap-2">
-                        <CreditCard className="h-4 w-4" />
-                        <span>Billing</span>
-                      </TabsTrigger>
-                    )}
+                    {isAuthenticated &&
+                      (!isPremium || userProfile?.polar_customer_id) && (
+                        <TabsTrigger
+                          value="billing"
+                          className="flex items-center gap-2"
+                        >
+                          <CreditCard className="h-4 w-4" />
+                          <span>Billing</span>
+                        </TabsTrigger>
+                      )}
                   </TabsList>
                 </div>
 
@@ -270,7 +293,7 @@ const SettingsSidebar = () => {
                   </h3>
                   <div className="space-y-0 border px-4 py-2 bg-black/5 dark:glass-dark rounded-lg">
                     <div className="flex items-center justify-between py-3">
-                      <div className="flex items-center space-x-2 text-black dark:text-white">
+                      <div className="flex items-center space-x-2 text-black/70 dark:text-white">
                         <StickyNote className="h-4 w-4" />
                         <span>Notes</span>
                       </div>
@@ -280,9 +303,9 @@ const SettingsSidebar = () => {
                       />
                     </div>
                     <Separator className="bg-black/10 dark:bg-white/10" />
-                    
+
                     <div className="flex items-center justify-between py-3">
-                      <div className="flex items-center space-x-2 text-black dark:text-white">
+                      <div className="flex items-center space-x-2 text-black/70 dark:text-white">
                         <CheckSquare className="h-4 w-4" />
                         <span>Todo List</span>
                       </div>
@@ -294,7 +317,7 @@ const SettingsSidebar = () => {
                     <Separator className="bg-black/10 dark:bg-white/10" />
 
                     <div className="flex items-center justify-between py-3">
-                      <div className="flex items-center space-x-2 text-black dark:text-white">
+                      <div className="flex items-center space-x-2 text-black/70 dark:text-white">
                         <Timer className="h-4 w-4" />
                         <span>Pomodoro Timer</span>
                       </div>
@@ -306,7 +329,7 @@ const SettingsSidebar = () => {
                     <Separator className="bg-black/10 dark:bg-white/10" />
 
                     <div className="flex items-center justify-between py-3">
-                      <div className="flex items-center space-x-2 text-black dark:text-white">
+                      <div className="flex items-center space-x-2 text-black/70 dark:text-white">
                         <CalendarDays className="h-4 w-4" />
                         <span>Events</span>
                       </div>
@@ -328,31 +351,39 @@ const SettingsSidebar = () => {
                     {isAuthenticated ? (
                       <div className="flex flex-col space-y-2">
                         <div className="border px-4 py-2 bg-black/5 dark:glass-dark rounded-lg mb-2">
-                        <div className="flex items-center justify-between py-2">
-                          <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
-                            <span>Email</span>
+                          <div className="flex items-center justify-between py-2">
+                            <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
+                              <span>Email</span>
+                            </div>
+                            <span className="text-sm font-semibold text-black dark:text-white">
+                              {userEmail}
+                            </span>
                           </div>
-                          <span className="text-sm font-semibold text-black dark:text-white">
-                            {userEmail}
-                          </span>
-                        </div>
-                        <Separator className="bg-black/10 dark:bg-white/10" />
+                          <Separator className="bg-black/10 dark:bg-white/10" />
 
-                        <div className="flex items-center justify-between py-2">
-                          <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
-                            <span>Account Type</span>
+                          <div className="flex items-center justify-between py-2">
+                            <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
+                              <span>Account Type</span>
+                            </div>
+                            <span
+                              className={`text-sm ${
+                                isPremium
+                                  ? "text-indigo-600 dark:text-indigo-400"
+                                  : "text-indigo-600 dark:text-indigo-400"
+                              } flex items-center gap-1`}
+                            >
+                              {isPremium ? (
+                                "Premium"
+                              ) : (
+                                <>
+                                  <Lock className="h-3 w-3" />
+                                  Free
+                                </>
+                              )}
+                            </span>
                           </div>
-                          <span className={`text-sm ${isPremium ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"} flex items-center gap-1`}>
-                            {isPremium ? "Premium" : (
-                              <>
-                                <Lock className="h-3 w-3" />
-                                Free
-                              </>
-                            )}
-                          </span>
                         </div>
-                        </div>
-                        
+
                         <Button
                           className="w-full mt-2"
                           variant="outline"
@@ -362,30 +393,29 @@ const SettingsSidebar = () => {
                           <LogOut className="h-4 w-4" />
                           Sign Out
                         </Button>
-                        
-                        <Button
-                          className="w-full mt-2"
-                          variant="outline"
-                          onClick={handleExportData}
-                        >
-                          <FileDown className="h-4 w-4" />
-                          Export Data
-                        </Button>
-                        
-                        <Button
-                          className="w-full mt-2 border-none bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-red-800 shadow-sm hover:shadow-md dark:shadow-red-900/20 dark:hover:shadow-red-900/30 transition-all duration-300"
-                          variant="outline"
-                          onClick={() => setShowDeleteAccountDialog(true)}
-                          disabled={isSyncing || isDeletingAccount}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Delete Account
-                        </Button>
+
+                        <div className="mt-4 pt-4">
+                          <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                            <AlertTriangle className="h-4 w-4" />
+                            <span>Danger Area</span>
+                          </h3>
+
+                          <Button
+                            className="w-full border-none bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-red-800 shadow-sm hover:shadow-md dark:shadow-red-900/20 dark:hover:shadow-red-900/30 transition-all duration-300"
+                            variant="ghost"
+                            onClick={() => setShowDeleteAccountDialog(true)}
+                            disabled={isSyncing || isDeletingAccount}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete Account
+                          </Button>
+                        </div>
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center gap-3 py-4">
-                        <p className="text-sm text-black/50 dark:text-white/50 text-center">
-                          Sign in to access your profile and sync your data across devices
+                      <div className="flex flex-col items-center gap-3 py-4 bg-black/5 dark:glass-dark rounded-lg px-4">
+                        <p className="text-sm text-black/80 dark:text-white/50 text-center">
+                          Sign in to access your profile and sync your data
+                          across devices
                         </p>
                         <Button
                           variant="outline"
@@ -401,7 +431,6 @@ const SettingsSidebar = () => {
                       </div>
                     )}
                   </div>
-
                 </TabsContent>
 
                 <TabsContent value="sync" className="p-6">
@@ -411,12 +440,12 @@ const SettingsSidebar = () => {
                   </h3>
 
                   <div className="space-y-3 flex flex-col gap-2">
-                    <div className="flex flex-col space-y-2">
+                    <div className="flex flex-col space-y-2 border px-4 py-2 bg-black/5 dark:glass-dark rounded-lg">
                       <div className="flex items-center justify-between py-2">
                         <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
                           <span>Cloud Sync</span>
                           {!isAuthenticated || !isPremium ? (
-                            <span className="text-xs bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 px-2 py-0.5 rounded">
+                            <span className="text-xs bg-indigo-500/10 text-indigo-600 dark:text-indigo-500 px-2 py-0.5 rounded">
                               Premium
                             </span>
                           ) : null}
@@ -436,7 +465,7 @@ const SettingsSidebar = () => {
                         <span
                           className={`text-sm ${
                             !userProfile?.last_synced
-                              ? "text-amber-600 dark:text-amber-400"
+                              ? "text-indigo-600 dark:text-indigo-400"
                               : "text-black/50 dark:text-white/50"
                           }`}
                         >
@@ -452,70 +481,91 @@ const SettingsSidebar = () => {
                       </div>
                     )}
 
-                    {isAuthenticated && isPremium && !userProfile?.cloud_sync_enabled && (
-                      <div className="flex items-start gap-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-500/10 p-2 rounded-lg">
-                        <Cloud className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                        <span className="leading-tight">
-                          Cloud sync is currently disabled. Enable it to keep
-                          your data backed up and synchronized across devices.
-                        </span>
+                    {isAuthenticated &&
+                      isPremium &&
+                      !userProfile?.cloud_sync_enabled && (
+                        <div className="flex items-start gap-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-500/10 p-2 rounded-lg">
+                          <Cloud className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                          <span className="leading-tight">
+                            Cloud sync is currently disabled. Enable it to keep
+                            your data backed up and synchronized across devices.
+                          </span>
+                        </div>
+                      )}
+
+                    {isAuthenticated && (
+                      <div className="mt-4 border-black/10 dark:border-white/10 pt-4">
+                        <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                          <FileDown className="h-4 w-4" />
+                          <span>Data Export</span>
+                        </h3>
+
+                        <Button
+                          className="w-full"
+                          variant="outline"
+                          onClick={handleExportData}
+                        >
+                          <FileDown className="h-4 w-4" />
+                          Export Data
+                        </Button>
                       </div>
                     )}
                   </div>
                 </TabsContent>
 
-                {isAuthenticated && (!isPremium || userProfile?.polar_customer_id) && (
-                  <TabsContent value="billing" className="p-6">
-                    <h3 className="mb-4 text-base font-medium text-black dark:text-white flex items-center gap-2">
-                      <CreditCard className="h-4 w-4" />
-                      <span>Billing</span>
-                    </h3>
+                {isAuthenticated &&
+                  (!isPremium || userProfile?.polar_customer_id) && (
+                    <TabsContent value="billing" className="p-6">
+                      <h3 className="mb-4 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                        <CreditCard className="h-4 w-4" />
+                        <span>Billing</span>
+                      </h3>
 
-                    <div className="space-y-4">
-                      {isAuthenticated && !isPremium && (
-                        <Button
-                          className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 dark:shadow-amber-500/20 shadow-amber-500/20 dark:hover:shadow-amber-500/30 text-white animate-shimmer relative"
-                          onClick={handleUpgradeClick}
-                        >
-                          <CreditCard className="h-4 w-4 relative z-10" />
-                          <span className="relative z-10">
-                            Upgrade to Premium
-                          </span>
-                        </Button>
-                      )}
+                      <div className="space-y-4">
+                        {isAuthenticated && !isPremium && (
+                          <Button
+                            className="w-full bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-600 hover:to-purple-600 dark:shadow-indigo-500/20 shadow-indigo-500/20 dark:hover:shadow-indigo-500/30 text-white animate-shimmer relative"
+                            onClick={handleUpgradeClick}
+                          >
+                            <CreditCard className="h-4 w-4 relative z-10" />
+                            <span className="relative z-10">
+                              Upgrade to Premium
+                            </span>
+                          </Button>
+                        )}
 
-                      {isAuthenticated && userProfile?.polar_customer_id && (
-                        <Button
-                          onClick={async () => {
-                            try {
-                              const { data, error } =
-                                await supabase.functions.invoke(
-                                  "create-billing-session"
+                        {isAuthenticated && userProfile?.polar_customer_id && (
+                          <Button
+                            onClick={async () => {
+                              try {
+                                const { data, error } =
+                                  await supabase.functions.invoke(
+                                    "create-billing-session"
+                                  );
+                                if (error) throw error;
+                                window.location.href = data.url;
+                              } catch (error) {
+                                console.error(
+                                  "Error creating billing session:",
+                                  error
                                 );
-                              if (error) throw error;
-                              window.location.href = data.url;
-                            } catch (error) {
-                              console.error(
-                                "Error creating billing session:",
-                                error
-                              );
-                            }
-                          }}
-                          variant="outline"
-                          className="w-full"
-                        >
-                          <CreditCard className="h-4 w-4" />
-                          Manage Billing
-                        </Button>
-                      )}
-                    </div>
-                  </TabsContent>
-                )}
+                              }
+                            }}
+                            variant="outline"
+                            className="w-full"
+                          >
+                            <CreditCard className="h-4 w-4" />
+                            Manage Billing
+                          </Button>
+                        )}
+                      </div>
+                    </TabsContent>
+                  )}
               </Tabs>
 
               <div className="p-6 border-t border-black/10 dark:border-white/10">
                 <div className="flex flex-col items-center gap-4">
-                  <div 
+                  <div
                     onClick={() => setShowFeedbackDialog(true)}
                     className="w-full p-6 rounded-xl cursor-pointer transition-all duration-300
                       bg-gradient-to-br from-purple-900/80 via-indigo-900/80 to-black 
@@ -529,25 +579,31 @@ const SettingsSidebar = () => {
                       <div className="absolute top-1/4 left-1/4 h-2 w-2 bg-white/80 rounded-full animate-[sparkle_3s_ease-in-out_infinite]" />
                       <div className="absolute top-3/4 right-1/4 h-2 w-2 bg-purple-300/80 rounded-full animate-[sparkle_4s_ease-in-out_infinite_1s]" />
                       <div className="absolute bottom-1/3 left-1/2 h-2 w-2 bg-indigo-300/80 rounded-full animate-[sparkle_3.5s_ease-in-out_infinite_0.5s]" />
-                      
+
                       {/* Medium sparkles */}
                       <div className="absolute top-1/2 right-1/3 h-1.5 w-1.5 bg-white/70 rounded-full animate-[sparkle_4s_ease-in-out_infinite_1.5s]" />
                       <div className="absolute bottom-1/4 left-1/3 h-1.5 w-1.5 bg-purple-200/70 rounded-full animate-[sparkle_3s_ease-in-out_infinite_2s]" />
-                      
+
                       {/* Small sparkles */}
                       <div className="absolute top-2/3 right-1/2 h-1 w-1 bg-indigo-200/60 rounded-full animate-[sparkle_3s_ease-in-out_infinite_0.7s]" />
                       <div className="absolute bottom-1/2 right-1/4 h-1 w-1 bg-white/60 rounded-full animate-[sparkle_3.5s_ease-in-out_infinite_1.2s]" />
-                      
+
                       {/* Shooting star effect */}
-                      <div className="absolute h-px w-16 bg-gradient-to-r from-transparent via-white to-transparent 
+                      <div
+                        className="absolute h-px w-16 bg-gradient-to-r from-transparent via-white to-transparent 
                         -rotate-45 animate-[shooting_4s_linear_infinite]
-                        top-1/4 -left-8" />
+                        top-1/4 -left-8"
+                      />
                     </div>
-                    
+
                     <div className="relative z-10 flex flex-col items-center gap-3 text-center">
                       <Sparkles className="h-6 w-6 text-purple-300 group-hover:text-purple-200 transition-colors" />
-                      <h4 className="text-lg font-medium text-white group-hover:text-purple-100 transition-colors">What do you think about Evolve?</h4>
-                      <p className="text-sm text-purple-200/80 group-hover:text-purple-100/90 transition-colors">Share your thoughts and help us make Evolve even better!</p>
+                      <h4 className="text-lg font-medium text-white group-hover:text-purple-100 transition-colors">
+                        What do you think about Evolve?
+                      </h4>
+                      <p className="text-sm text-purple-200/80 group-hover:text-purple-100/90 transition-colors">
+                        Share your thoughts and help us make Evolve even better!
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -580,8 +636,11 @@ const SettingsSidebar = () => {
         open={showFeedbackDialog}
         onOpenChange={setShowFeedbackDialog}
       />
-      
-      <AlertDialog open={showDeleteAccountDialog} onOpenChange={setShowDeleteAccountDialog}>
+
+      <AlertDialog
+        open={showDeleteAccountDialog}
+        onOpenChange={setShowDeleteAccountDialog}
+      >
         <AlertDialogContent className="">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
@@ -589,17 +648,24 @@ const SettingsSidebar = () => {
               <span>Delete Account</span>
             </AlertDialogTitle>
             <AlertDialogDescription className="text-black/70 dark:text-white/70">
-              <p className="mb-2">This action is <strong>irreversible</strong>. All your data will be permanently deleted.</p>
-              
+              <p className="mb-2">
+                This action is <strong>irreversible</strong>. All your data will
+                be permanently deleted.
+              </p>
+
               {isPremium && (
                 <div className="p-3 mb-3 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded-md">
                   <p className="font-medium">⚠️ Active Subscription Warning</p>
-                  <p className="text-sm">You have an active subscription. Please cancel your subscription before deleting your account, otherwise you will continue to be billed.</p>
+                  <p className="text-sm">
+                    You have an active subscription. Please cancel your
+                    subscription before deleting your account, otherwise you
+                    will continue to be billed.
+                  </p>
                 </div>
               )}
-              
+
               <p>Are you sure you want to proceed?</p>
-              
+
               {deleteAccountError && (
                 <div className="mt-3 p-3 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 rounded-md">
                   <p className="text-sm">{deleteAccountError}</p>
@@ -611,7 +677,7 @@ const SettingsSidebar = () => {
             <AlertDialogCancel className="bg-gray-100 dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-700">
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-red-800 shadow-sm hover:shadow-md dark:shadow-red-900/20 dark:hover:shadow-red-900/30 transition-all duration-300"
               onClick={handleDeleteAccount}
               disabled={isDeletingAccount}

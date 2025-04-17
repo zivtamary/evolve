@@ -649,7 +649,7 @@ const Auth = () => {
     <>
       <BackgroundImage blurLevel={blurLevel}>
         <div className="flex justify-center items-center min-h-screen p-4">
-          <Card className="w-full max-w-md overflow-hidden border-0 dark:bg-gray-900/60 dark:backdrop-blur-md">
+          <Card className="w-full max-w-md overflow-hidden border-0 dark:bg-black/0 dark:backdrop-blur-md">
             <CardHeader className="dark:text-gray-100">
               {renderHeader()}
             </CardHeader>
