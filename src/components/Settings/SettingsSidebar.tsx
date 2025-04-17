@@ -33,11 +33,24 @@ import {
   Layout,
   MessageCircle,
   User,
+  Trash2,
+  AlertTriangle,
+  FileDown,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import SubscriptionModal from "./SubscriptionModal";
 import FeedbackDialog from "./FeedbackDialog";
 import Logo from "../Logo/Logo";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SettingsButtonProps {
   onClick: () => void;
@@ -77,6 +90,9 @@ const SettingsSidebar = () => {
   const [showSubscriptionModal, setShowSubscriptionModal] =
     React.useState(false);
   const [showFeedbackDialog, setShowFeedbackDialog] = React.useState(false);
+  const [showDeleteAccountDialog, setShowDeleteAccountDialog] = React.useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = React.useState(false);
+  const [deleteAccountError, setDeleteAccountError] = React.useState<string | null>(null);
   const [userEmail, setUserEmail] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -142,6 +158,70 @@ const SettingsSidebar = () => {
       document.head.removeChild(style);
     };
   }, []);
+
+  const handleDeleteAccount = async () => {
+    setIsDeletingAccount(true);
+    setDeleteAccountError(null);
+    
+    try {
+      // @ts-expect-error - The RPC function exists but might not be in the type definition
+      const { error } = await supabase.rpc('delete_user');
+      
+      if (error) {
+        setDeleteAccountError(error.message || "Failed to delete account. Please try again.");
+        setIsDeletingAccount(false);
+        return;
+      }
+      
+      // Clear local storage
+      localStorage.clear();
+      
+      // Sign out the user
+      await signOut();
+      
+      // Refresh the page
+      window.location.reload();
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      setDeleteAccountError("An unexpected error occurred. Please try again.");
+      setIsDeletingAccount(false);
+    }
+  };
+
+  const handleExportData = () => {
+    try {
+      // Get data from localStorage
+      const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+      
+      // Extract the relevant data
+      const exportData = {
+        todos: evolveData.todos?.value || [],
+        notes: evolveData.notes?.value || [],
+        events: evolveData['dashboard-events']?.value || [],
+        pomodoro: evolveData['pomodoro-settings']?.value || {},
+        exportDate: new Date().toISOString()
+      };
+      
+      // Create a blob and download link
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      
+      // Create a temporary link element and trigger download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `evolve-data-export-${format(new Date(), 'yyyy-MM-dd')}.json`;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      // You could add a toast notification here if you have one
+    }
+  };
 
   return (
     <>
@@ -226,7 +306,7 @@ const SettingsSidebar = () => {
                         <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
                           <span>Email</span>
                         </div>
-                        <span className="text-sm text-black/50 dark:text-white/50">
+                        <span className="text-sm font-semibold text-black dark:text-white">
                           {userEmail}
                         </span>
                       </div>
@@ -254,6 +334,25 @@ const SettingsSidebar = () => {
                       >
                         <LogOut className="h-4 w-4" />
                         Sign Out
+                      </Button>
+                      
+                      <Button
+                        className="w-full mt-2"
+                        variant="outline"
+                        onClick={handleExportData}
+                      >
+                        <FileDown className="h-4 w-4" />
+                        Export Data
+                      </Button>
+                      
+                      <Button
+                        className="w-full mt-2 border-none bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-red-800 shadow-sm hover:shadow-md dark:shadow-red-900/20 dark:hover:shadow-red-900/30 transition-all duration-300"
+                        variant="outline"
+                        onClick={() => setShowDeleteAccountDialog(true)}
+                        disabled={isSyncing || isDeletingAccount}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Delete Account
                       </Button>
                     </div>
                   ) : (
@@ -385,10 +484,8 @@ const SettingsSidebar = () => {
                     </div>
                   </div>
                 )}
-            </div>
-
-            <div className="p-6 border-t border-black/10 dark:border-white/10">
-              <div className="flex flex-col items-center gap-4">
+                <div className="p-6 border-t border-black/10 dark:border-white/10">
+                <div className="flex flex-col items-center gap-4">
                 <div 
                   onClick={() => setShowFeedbackDialog(true)}
                   className="w-full p-6 rounded-xl cursor-pointer transition-all duration-300
@@ -424,6 +521,12 @@ const SettingsSidebar = () => {
                     <p className="text-sm text-purple-200/80 group-hover:text-purple-100/90 transition-colors">Share your thoughts and help us make Evolve even better!</p>
                   </div>
                 </div>
+                    </div>
+                    </div>
+            </div>
+
+            <div className="p-6 border-t border-black/10 dark:border-white/10">
+              <div className="flex flex-col items-center gap-4">
                 <Logo className="h-8 w-8 flex justify-center items-center" />
                 <div className="flex items-center gap-2 text-xs text-black/50 dark:text-white/50">
                   <Info className="h-3 w-3" />
@@ -448,6 +551,57 @@ const SettingsSidebar = () => {
         open={showFeedbackDialog}
         onOpenChange={setShowFeedbackDialog}
       />
+      
+      <AlertDialog open={showDeleteAccountDialog} onOpenChange={setShowDeleteAccountDialog}>
+        <AlertDialogContent className="">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
+              <AlertTriangle className="h-5 w-5" />
+              <span>Delete Account</span>
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-black/70 dark:text-white/70">
+              <p className="mb-2">This action is <strong>irreversible</strong>. All your data will be permanently deleted.</p>
+              
+              {isPremium && (
+                <div className="p-3 mb-3 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded-md">
+                  <p className="font-medium">⚠️ Active Subscription Warning</p>
+                  <p className="text-sm">You have an active subscription. Please cancel your subscription before deleting your account, otherwise you will continue to be billed.</p>
+                </div>
+              )}
+              
+              <p>Are you sure you want to proceed?</p>
+              
+              {deleteAccountError && (
+                <div className="mt-3 p-3 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 rounded-md">
+                  <p className="text-sm">{deleteAccountError}</p>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-gray-100 dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-700">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-red-800 shadow-sm hover:shadow-md dark:shadow-red-900/20 dark:hover:shadow-red-900/30 transition-all duration-300"
+              onClick={handleDeleteAccount}
+              disabled={isDeletingAccount}
+            >
+              {isDeletingAccount ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4" />
+                  Delete Account
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
