@@ -86,10 +86,7 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({
       />
       
       {/* Overlay for better text readability */}
-      <div className="absolute inset-0 bg-black/20 dark:bg-black/70" />
-      
-      {/* Gradient overlay for galaxy effect */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/80 dark:from-transparent dark:via-black/50 dark:to-black/90" />
+      <div className="absolute inset-0 bg-black/20 dark:bg-black/50" />
       
       {/* Content */}
       <div className="relative z-10 min-h-screen">
@@ -98,7 +95,7 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({
         {/* Refresh button */}
         <button 
           onClick={handleRefreshBackground}
-          className={`absolute bottom-4 right-4 rounded-full bg-black/40 p-2 text-white backdrop-blur-md hover:bg-black/60 ${isSpinning ? 'animate-spin' : ''}`}
+          className={`absolute bottom-4 right-4 rounded-full bg-black/20 p-2 text-white backdrop-blur-md hover:bg-black/30 ${isSpinning ? 'animate-spin' : ''}`}
           title="Refresh Background"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
