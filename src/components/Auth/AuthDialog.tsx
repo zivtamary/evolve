@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useTransition, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -16,7 +19,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useSettings } from "@/context/SettingsContext";
-import BackgroundImage from "@/components/Background/BackgroundImage";
 import {
   ArrowLeft,
   ArrowRight,
@@ -31,7 +33,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { FcGoogle } from "react-icons/fc";
 import { motion, AnimatePresence } from "framer-motion";
-import ParticlesAnimation from "@/components/Background/ParticlesAnimation";
 import TermsDialog from "@/components/Dialogs/TermsDialog";
 import PrivacyDialog from "@/components/Dialogs/PrivacyDialog";
 
@@ -42,7 +43,12 @@ const slideAnimation = {
   transition: { type: "spring", duration: 0.4, bounce: 0.1 },
 };
 
-const Auth = () => {
+interface AuthDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [resetEmail, setResetEmail] = useState("");
@@ -53,27 +59,17 @@ const Auth = () => {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
-  const [showParticles, setShowParticles] = useState(true);
   const [termsDialogOpen, setTermsDialogOpen] = useState(false);
   const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
   const isSigningIn = useRef(false);
   const navigate = useNavigate();
   const { isAuthenticated } = useSettings();
-  const [blurLevel, setBlurLevel] = useState(0);
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/");
+      onOpenChange(false);
     }
-  }, [isAuthenticated, navigate]);
-
-  // Hide particles after initial animation
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowParticles(false);
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, []);
+  }, [isAuthenticated, onOpenChange]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,7 +156,7 @@ const Auth = () => {
           action: <Sparkles className="size-5" />,
         });
 
-        navigate("/");
+        onOpenChange(false);
       }
     } catch (error) {
       const errorMessage =
@@ -253,7 +249,7 @@ const Auth = () => {
           <CardTitle className="text-xl font-semibold">
             Reset Password
           </CardTitle>
-          <CardDescription className="text-sm text-gray-500 dark:text-gray-400">
+          <CardDescription className="text-sm text-gray-500">
             Enter your email to receive a password reset link
           </CardDescription>
         </>
@@ -262,14 +258,14 @@ const Auth = () => {
           <CardTitle className="text-xl font-semibold">
             Create Account
           </CardTitle>
-          <CardDescription className="text-sm text-gray-500 dark:text-gray-400">
+          <CardDescription className="text-sm text-gray-500">
             Join us to unlock premium features and sync across devices
           </CardDescription>
         </>
       ) : (
         <>
           <CardTitle className="text-xl font-semibold">Welcome Back</CardTitle>
-          <CardDescription className="text-sm text-gray-500 dark:text-gray-400">
+          <CardDescription className="text-sm text-gray-500">
             Sign in to continue to your dashboard
           </CardDescription>
         </>
@@ -277,21 +273,24 @@ const Auth = () => {
 
     return (
       <div className="relative">
-        <Button
+        {
+            
+            view === "reset_password" ?
+        (<Button
           variant="ghost"
           size="icon"
           onClick={() => {
             if (view === "reset_password") {
               setView("signin");
             } else {
-              navigate("/");
+              onOpenChange(false);
             }
           }}
-          className="absolute -left-3 top-0 h-8 w-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+          className="absolute -left-3 top-0 h-8 w-8 rounded-full"
         >
           <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div className="pl-7">{headerContent}</div>
+        </Button>) : null}
+        <div className={view === "reset_password" ? "pl-7" : ""}>{headerContent}</div>
       </div>
     );
   };
@@ -337,12 +336,12 @@ const Auth = () => {
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
                   required
-                  className="pl-10 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700 dark:placeholder-gray-400"
+                  className="pl-10"
                 />
               </div>
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full" disabled={loading} variant="link">
               {loading ? "Sending reset email..." : "Send Reset Link"}
             </Button>
           </form>
@@ -356,16 +355,16 @@ const Auth = () => {
           defaultValue={view}
           onValueChange={(value) => setView(value as "signin" | "signup")}
         >
-          <TabsList className="grid w-full grid-cols-2 mt-4 mb-6 dark:bg-gray-800">
+          <TabsList className="grid w-full grid-cols-2 mt-4 mb-6 bg-background dark:bg-black/40 dark:border dark:border-white/10 border">
             <TabsTrigger
               value="signin"
-              className="dark:data-[state=active]:bg-gray-700 dark:text-gray-100"
+              className="dark:data-[state=active]:bg-black/60 dark:data-[state=active]:text-white dark:text-gray-300 dark:hover:text-white dark:border-white/10 data-[state=active]:text-black text-black/50"
             >
               Sign In
             </TabsTrigger>
             <TabsTrigger
               value="signup"
-              className="dark:data-[state=active]:bg-gray-700 dark:text-gray-100"
+              className="dark:data-[state=active]:bg-black/60 dark:data-[state=active]:text-white dark:text-gray-300 dark:hover:text-white dark:border-white/10 data-[state=active]:text-black text-black/50"
             >
               Create Account
             </TabsTrigger>
@@ -397,7 +396,7 @@ const Auth = () => {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           required
-                          className="pl-10 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700 dark:placeholder-gray-400"
+                          className="pl-10"
                         />
                       </div>
                     </div>
@@ -424,9 +423,10 @@ const Auth = () => {
                           id="signin-password"
                           type={showPassword ? "text" : "password"}
                           value={password}
+                          placeholder="********"
                           onChange={(e) => setPassword(e.target.value)}
                           required
-                          className="pl-10 pr-10 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
+                          className="pl-10 pr-10"
                         />
                         <Button
                           type="button"
@@ -446,7 +446,7 @@ const Auth = () => {
 
                     <Button
                       type="submit"
-                      className="w-full transition-colors"
+                      className="w-full transition-colors dark:bg-black/60 dark:hover:bg-black/80 dark:text-white dark:border dark:border-white/10"
                       disabled={loading}
                     >
                       {loading ? "Signing in..." : "Sign In"}
@@ -454,10 +454,10 @@ const Auth = () => {
 
                     <div className="relative">
                       <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t dark:border-gray-700" />
+                        <span className="w-full border-t dark:border-gray-700/50" />
                       </div>
                       <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-background px-2 text-muted-foreground dark:bg-gray-900/60 dark:text-gray-400">
+                        <span className="bg-background px-2 text-muted-foreground dark:bg-black/40 dark:text-gray-400 dark:border dark:border-white/10 rounded-md">
                           Or continue with
                         </span>
                       </div>
@@ -466,7 +466,7 @@ const Auth = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100 dark:border-gray-700"
+                      className="w-full dark:bg-black/40 dark:hover:bg-black/60 dark:text-white dark:border-white/10 active:dark:bg-black/80"
                       onClick={handleGoogleSignIn}
                       disabled={loading || isPending}
                     >
@@ -505,7 +505,7 @@ const Auth = () => {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           required
-                          className="pl-10 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700 dark:placeholder-gray-400"
+                          className="pl-10"
                         />
                       </div>
                     </div>
@@ -525,7 +525,7 @@ const Auth = () => {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           required
-                          className="pl-10 pr-10 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
+                          className="pl-10 pr-10"
                         />
                         <Button
                           type="button"
@@ -580,7 +580,7 @@ const Auth = () => {
 
                     <Button
                       type="submit"
-                      className="w-full transition-colors"
+                      className="w-full transition-colors dark:bg-black/60 dark:hover:bg-black/80 dark:text-white dark:border dark:border-white/10"
                       disabled={loading || !agreedToTerms}
                     >
                       {loading ? "Creating account..." : "Create Account"}
@@ -646,31 +646,31 @@ const Auth = () => {
   };
 
   return (
-    <>
-      <BackgroundImage blurLevel={blurLevel}>
-        <div className="flex justify-center items-center min-h-screen p-4">
-          <Card className="w-full max-w-md overflow-hidden border-0 dark:bg-black/0 dark:backdrop-blur-md">
-            <CardHeader className="dark:text-gray-100">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px] p-0">
+        <div className="light">
+          <Card className="w-full overflow-hidden border-0 bg-white/95 backdrop-blur-md shadow-lg shadow-black/10 dark:shadow-black/20 dark:bg-black/40">
+            <CardHeader className="text-gray-900 dark:text-white">
               {renderHeader()}
             </CardHeader>
 
-            <CardContent className="dark:text-gray-200">
+            <CardContent className="text-gray-800 dark:text-gray-200">
               <AnimatePresence mode="wait" initial={false}>
                 {renderAuthContent()}
               </AnimatePresence>
             </CardContent>
           </Card>
         </div>
-      </BackgroundImage>
 
-      {/* Terms and Privacy Dialogs */}
-      <TermsDialog open={termsDialogOpen} onOpenChange={setTermsDialogOpen} />
-      <PrivacyDialog
-        open={privacyDialogOpen}
-        onOpenChange={setPrivacyDialogOpen}
-      />
-    </>
+        {/* Terms and Privacy Dialogs */}
+        <TermsDialog open={termsDialogOpen} onOpenChange={setTermsDialogOpen} />
+        <PrivacyDialog
+          open={privacyDialogOpen}
+          onOpenChange={setPrivacyDialogOpen}
+        />
+      </DialogContent>
+    </Dialog>
   );
 };
 
-export default Auth;
+export default AuthDialog; 

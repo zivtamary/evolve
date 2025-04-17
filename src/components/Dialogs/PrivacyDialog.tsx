@@ -91,7 +91,7 @@ const PrivacyDialog: React.FC<PrivacyDialogProps> = ({ open, onOpenChange }) => 
           </p>
 
           <h2 className="text-lg font-semibold">11. Contact Us</h2>
-          <p>If you have any questions or concerns, email us at <a href="mailto:privacy@evolve.com" className="text-blue-500 hover:underline">privacy@evolve-app.com</a>.</p>
+          <p>If you have any questions or concerns, email us at <a href="mailto:privacy@evolve-app.com" className="text-blue-500 hover:underline">privacy@evolve-app.com</a>.</p>
 
           <p className="text-xs text-muted-foreground mt-4">
             Last Updated: {new Date().toLocaleDateString()}

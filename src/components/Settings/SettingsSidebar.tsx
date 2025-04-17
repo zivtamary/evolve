@@ -53,6 +53,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import AuthDialog from "@/components/Auth/AuthDialog";
 
 interface SettingsButtonProps {
   onClick: () => void;
@@ -94,6 +95,7 @@ const SettingsSidebar = () => {
   const [showFeedbackDialog, setShowFeedbackDialog] = React.useState(false);
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] =
     React.useState(false);
+  const [showAuthModal, setShowAuthModal] = React.useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = React.useState(false);
   const [deleteAccountError, setDeleteAccountError] = React.useState<
     string | null
@@ -118,7 +120,7 @@ const SettingsSidebar = () => {
     if (isAuthenticated) {
       signOut();
     } else {
-      navigate("/auth");
+      setShowAuthModal(true);
       setIsSettingsOpen(false);
     }
   };
@@ -369,7 +371,7 @@ const SettingsSidebar = () => {
                               className={`text-sm ${
                                 isPremium
                                   ? "text-indigo-600 dark:text-indigo-400"
-                                  : "text-indigo-600 dark:text-indigo-400"
+                                  : "text-black"
                               } flex items-center gap-1`}
                             >
                               {isPremium ? (
@@ -420,7 +422,7 @@ const SettingsSidebar = () => {
                         <Button
                           variant="outline"
                           onClick={() => {
-                            navigate("/auth");
+                            setShowAuthModal(true);
                             setIsSettingsOpen(false);
                           }}
                           className="w-full"
@@ -524,10 +526,10 @@ const SettingsSidebar = () => {
                       <div className="space-y-4">
                         {isAuthenticated && !isPremium && (
                           <Button
-                            className="w-full bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-600 hover:to-purple-600 dark:shadow-indigo-500/20 shadow-indigo-500/20 dark:hover:shadow-indigo-500/30 text-white animate-shimmer relative"
+                            className="w-full bg-gradient-to-r from-black via-white/10 to-black dark:shadow-indigo-500/20 shadow-indigo-500/20 dark:hover:shadow-indigo-500/30 text-white animate-shimmer relative dark:border-2 border-white/5"
                             onClick={handleUpgradeClick}
                           >
-                            <CreditCard className="h-4 w-4 relative z-10" />
+                            <Sparkles className="h-4 w-4 relative z-10" />
                             <span className="relative z-10">
                               Upgrade to Premium
                             </span>
@@ -697,6 +699,8 @@ const SettingsSidebar = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AuthDialog open={showAuthModal} onOpenChange={setShowAuthModal} />
     </>
   );
 };

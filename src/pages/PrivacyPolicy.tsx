@@ -14,7 +14,7 @@ const PrivacyPolicy = () => {
         <CardHeader>
           {!isDialog ? (
             <div className="flex items-center gap-2">
-              <Link to="/auth" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
                 <ArrowLeft className="h-5 w-5" />
               </Link>
               <CardTitle className="text-2xl font-bold">Privacy Policy</CardTitle>
@@ -143,7 +143,7 @@ const PrivacyPolicy = () => {
         <CardFooter>
           {!isDialog ? (
             <Button asChild className="w-full">
-              <Link to="/auth?tab=signup">Return to Sign Up</Link>
+              <Link to="https://evolve-app.com">Go to evolve-app.com</Link>
             </Button>
           ) : (
             <Button asChild variant="outline" className="w-full gap-2">

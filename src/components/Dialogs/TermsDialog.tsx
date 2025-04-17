@@ -104,7 +104,7 @@ const TermsDialog: React.FC<TermsDialogProps> = ({ open, onOpenChange }) => {
 
           <h2 className="text-lg font-semibold">11. Contact</h2>
           <p>
-            Questions? Reach us at <a href="mailto:support@evolve.com" className="underline">support@evolve.com</a>.
+            Questions? Reach us at <a href="mailto:support@evolve-app.com" className="underline">support@evolve-app.com</a>.
           </p>
 
           <p className="text-xs text-muted-foreground mt-4">

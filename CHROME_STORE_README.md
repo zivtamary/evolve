@@ -27,10 +27,10 @@
 ## Store Listing Information
 
 ### Title
-Evolve - Aesthetic Startpage
+Evolve - Productivity Startpage
 
 ### Description
-Transform your new tab into a beautiful and productive dashboard with Focus Dashboard. This elegantly designed startpage combines aesthetics with functionality to help you stay organized and focused throughout your day.
+Transform your new tab into a beautiful and productive dashboard with Focus Dashboard. This elegantly designed startpage combines Productivitys with functionality to help you stay organized and focused throughout your day.
 
 Features:
 

@@ -14,7 +14,7 @@ const TermsOfService = () => {
         <CardHeader>
           {!isDialog ? (
             <div className="flex items-center gap-2">
-              <Link to="/auth" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
                 <ArrowLeft className="h-5 w-5" />
               </Link>
               <CardTitle className="text-2xl font-bold">Terms of Service</CardTitle>
@@ -111,7 +111,7 @@ const TermsOfService = () => {
 
           <h2 className="text-lg font-semibold">11. Contact</h2>
           <p>
-            Questions? Reach us at <a href="mailto:support@evolve.com" className="underline">support@evolve-app.com</a>.
+            Questions? Reach us at <a href="mailto:support@evolve-app.com" className="underline">support@evolve-app.com</a>.
           </p>
 
           <p className="text-xs text-muted-foreground mt-4">
@@ -121,12 +121,12 @@ const TermsOfService = () => {
         <CardFooter>
           {!isDialog ? (
             <Button asChild className="w-full">
-              <Link to="/auth?tab=signup">Return to Sign Up</Link>
+              <Link to="https://evolve-app.com">Go to evolve-app.com</Link>
             </Button>
           ) : (
             <Button asChild variant="outline" className="w-full gap-2">
-              <Link to="/terms-of-service" target="_blank" rel="noopener noreferrer">
-                Open in new page
+              <Link to="https://evolve-app.com">
+                Go to evolve-app.com
                 <ExternalLink className="h-4 w-4" />
               </Link>
             </Button>
