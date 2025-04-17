@@ -124,11 +124,10 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   };
 
   const benefits = [
-    "Cloud synchronization across devices",
-    "Unlimited notes and todos",
-    "Priority support",
+    "Cloud synchronization",
     "Early access to new features",
     "No ads or interruptions",
+    "Priority support",
   ];
 
   if (isLoading) {
@@ -223,7 +222,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           </Button>
           <Button
             onClick={handleSubscribe}
-            className="sm:w-auto w-full bg-gradient-to-r from-amber-500 to-yellow-500 dark:shadow-amber-500/20 shadow-amber-500/20 dark:hover:shadow-amber-500/30 hover:from-amber-600 hover:to-yellow-600"
+            className="sm:w-auto w-full bg-gradient-to-r from-indigo-500 to-purple-500 dark:shadow-indigo-500/20 shadow-indigo-500/20 dark:hover:shadow-indigo-500/30 hover:from-indigo-600 hover:to-purple-600"
             disabled={isProcessing || !selectedPlan}
           >
             {isProcessing ? (

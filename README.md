@@ -1,5 +1,5 @@
 
-# Evolve - Aesthetic Productivity Dashboard
+# Evolve - Productivity Productivity Dashboard
 
 <div align="center">
   <img src="public/icons/icon-128.png" alt="Evolve Logo" width="128" height="128">
@@ -41,7 +41,7 @@ You can install Evolve directly from the Chrome Web Store:
 
 1. Visit the [Chrome Web Store](https://chrome.google.com/webstore/category/extensions) (once published)
 2. Click "Add to Chrome"
-3. Enjoy your new aesthetic productivity dashboard!
+3. Enjoy your new Productivity productivity dashboard!
 
 ### For Developers
 

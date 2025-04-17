@@ -646,13 +646,20 @@ const Events = () => {
     );
   };
 
+  const getHeightByScreenSize = () => {
+    if (window.innerHeight >= 1080) {
+      return isExpanded ? '800px' : '400px';
+    };
+    return '100%';
+  };
+
   return (
     <motion.div
       ref={eventsRef}
       layout
       initial={false}
       animate={{
-        height: isExpanded ? "800px" : "400px",
+        height: getHeightByScreenSize(),
         zIndex: isExpanded ? 50 : 0,
       }}
       transition={{

@@ -6,7 +6,6 @@ import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import { SettingsProvider, useSettings } from "./context/SettingsContext";
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
 import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Settings from "./pages/Settings";
@@ -85,7 +84,6 @@ console.log(window.location)
                 </motion.div>
                 </>
                 } />
-          <Route path="/auth" element={<Auth />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           {/* Redirect all unmatched routes to home page */}

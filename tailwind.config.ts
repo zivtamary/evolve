@@ -97,6 +97,15 @@ export default {
         "slide-down": "slide-down 0.3s ease-out",
         "pulse-slow": "pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
+      screens: {
+        // Height breakpoints (min-height)
+        'h-xs': { 'raw': '(min-height: 400px)' },   // Very small devices
+        'h-sm': { 'raw': '(min-height: 600px)' },   // Phones
+        'h-md': { 'raw': '(min-height: 768px)' },   // Tablets / small laptops
+        'h-lg': { 'raw': '(min-height: 900px)' },   // Standard laptops
+        'h-xl': { 'raw': '(min-height: 1080px)' },  // Full HD screens
+        'h-2xl': { 'raw': '(min-height: 1440px)' }, // Large displays
+      }
     },
   },
   plugins: [require("tailwindcss-animate")],
