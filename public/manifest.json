@@ -4,7 +4,7 @@
   "name": "Evolve: Productivity Startpage",
   "short_name": "Evolve",
   "version": "1.0.0",
-  "description": "Transform your new tab into an elegant productivity dashboard with customizable widgets, weather, tasks, calendar, notes, and focus timer - all seamlessly synced to the cloud.",
+  "description": "A beautifully crafted start page with smart widgets — tasks, notes, weather & more — synced seamlessly across your devices.",
   "icons": {
     "16": "icons/icon-16.png",
     "32": "icons/icon-32.png",
