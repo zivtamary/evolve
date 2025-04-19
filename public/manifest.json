@@ -3,7 +3,7 @@
   "manifest_version": 3,
   "name": "Evolve · Productivity Startpage",
   "short_name": "Evolve",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "A beautifully crafted start page with smart widgets — tasks, notes, weather & more — synced seamlessly across your devices.",
   "icons": {
     "16": "icons/icon-16.png",
