@@ -349,6 +349,9 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
       );
     }
 
+    // const disableGoogleSignIn = loading || isPending;
+    const disableGoogleSignIn = true // TODO: Remove this
+
     return (
       <motion.div {...slideAnimation}>
         <Tabs
@@ -468,7 +471,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                       variant="outline"
                       className="w-full dark:bg-black/40 dark:hover:bg-black/60 dark:text-white dark:border-white/10 active:dark:bg-black/80"
                       onClick={handleGoogleSignIn}
-                      disabled={loading || isPending}
+                      disabled={disableGoogleSignIn}
                     >
                       <FcGoogle className="mr-2 h-4 w-4" />
                       {loading || isPending
