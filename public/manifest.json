@@ -1,7 +1,7 @@
 
 {
   "manifest_version": 3,
-  "name": "Evolve: Productivity Startpage",
+  "name": "Evolve · Productivity Startpage",
   "short_name": "Evolve",
   "version": "1.0.0",
   "description": "A beautifully crafted start page with smart widgets — tasks, notes, weather & more — synced seamlessly across your devices.",
@@ -30,6 +30,6 @@
     "service_worker": "background.js"
   },
   "host_permissions": ["https://www.google.com/"],
-  "author": "Ziv Tamary",
-  "homepage_url": "https://evolve-app.com"
+  "author": "Evolve",
+  "homepage_url": "https://chromewebstore.google.com/detail/iechlebeinlhbeicpalkemnminnacfik"
 }
