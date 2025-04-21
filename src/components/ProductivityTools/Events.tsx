@@ -38,7 +38,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useClickOutside } from "../../hooks/use-click-outside";
-
+import useWindowSize from "@/hooks/use-window-size";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";   
 interface Event {
   id: string;
   title: string;
@@ -231,8 +232,18 @@ const Events = () => {
       } else {
         // For events beyond this month, show the month and year
         const monthNames = [
-          "January", "February", "March", "April", "May", "June",
-          "July", "August", "September", "October", "November", "December"
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
         ];
         return `${monthNames[eventDate.getMonth()]} ${eventDate.getFullYear()}`;
       }
@@ -401,80 +412,90 @@ const Events = () => {
   // Function to fetch events from cloud
   const fetchCloudEvents = async () => {
     if (!isAuthenticated || !userProfile?.cloud_sync_enabled) return;
-    
+
     try {
-      console.log('Fetching events from cloud...');
+      console.log("Fetching events from cloud...");
       const { data: cloudEvents, error } = await supabase
-        .from('events')
-        .select('*')
-        .eq('user_id', userProfile.id);
-        
+        .from("events")
+        .select("*")
+        .eq("user_id", userProfile.id);
+
       if (error) throw error;
-      
+
       if (cloudEvents) {
         // Convert cloud events to local format
-        const cloudEventsFormatted = (cloudEvents as CloudEvent[]).map(event => ({
-          id: event.id,
-          title: event.title,
-          date: event.date,
-          time: event.time,
-          description: event.description,
-          createdAt: new Date(event.created_at).getTime(),
-          updatedAt: new Date(event.updated_at).getTime()
-        }));
-        
-        console.log('Cloud events fetched:', cloudEventsFormatted.length);
-        console.log('Local events:', events.length);
-        
+        const cloudEventsFormatted = (cloudEvents as CloudEvent[]).map(
+          (event) => ({
+            id: event.id,
+            title: event.title,
+            date: event.date,
+            time: event.time,
+            description: event.description,
+            createdAt: new Date(event.created_at).getTime(),
+            updatedAt: new Date(event.updated_at).getTime(),
+          })
+        );
+
+        console.log("Cloud events fetched:", cloudEventsFormatted.length);
+        console.log("Local events:", events.length);
+
         // Create a map of local events for easy lookup
         const localEventsMap = new Map<string, Event>();
-        events.forEach(event => {
+        events.forEach((event) => {
           localEventsMap.set(event.id, event);
         });
-        
+
         // Create a map of cloud events for easy lookup
         const cloudEventsMap = new Map<string, Event>();
-        cloudEventsFormatted.forEach(event => {
+        cloudEventsFormatted.forEach((event) => {
           cloudEventsMap.set(event.id, event);
         });
-        
+
         // Create sets of IDs for comparison
-        const localEventIds = new Set(events.map(event => event.id));
-        const cloudEventIds = new Set(cloudEventsFormatted.map(event => event.id));
-        
+        const localEventIds = new Set(events.map((event) => event.id));
+        const cloudEventIds = new Set(
+          cloudEventsFormatted.map((event) => event.id)
+        );
+
         // Find events to delete (in cloud but not in local)
-        const eventsToDelete = Array.from(cloudEventIds).filter(id => !localEventIds.has(id));
-        
+        const eventsToDelete = Array.from(cloudEventIds).filter(
+          (id) => !localEventIds.has(id)
+        );
+
         // Find events to add (in local but not in cloud)
-        const eventsToAdd = Array.from(localEventIds).filter(id => !cloudEventIds.has(id));
-        
+        const eventsToAdd = Array.from(localEventIds).filter(
+          (id) => !cloudEventIds.has(id)
+        );
+
         // Find events that exist in both local and cloud
-        const commonEventIds = Array.from(localEventIds).filter(id => cloudEventIds.has(id));
-        
+        const commonEventIds = Array.from(localEventIds).filter((id) =>
+          cloudEventIds.has(id)
+        );
+
         // Merge events, keeping the most recent version
         const mergedEvents: Event[] = [];
-        
+
         // Add events that only exist locally
-        eventsToAdd.forEach(id => {
+        eventsToAdd.forEach((id) => {
           const localEvent = localEventsMap.get(id);
           if (localEvent) {
             mergedEvents.push(localEvent);
           }
         });
-        
+
         // Add events that only exist in cloud
-        eventsToDelete.forEach(id => {
+        eventsToDelete.forEach((id) => {
           const cloudEvent = cloudEventsMap.get(id);
           if (cloudEvent) {
             mergedEvents.push(cloudEvent);
           }
         });
-        
+
         // Compare and merge common events
-        commonEventIds.forEach(id => {
+        commonEventIds.forEach((id) => {
           const localEvent = localEventsMap.get(id);
           const cloudEvent = cloudEventsMap.get(id);
-          
+
           if (localEvent && cloudEvent) {
             // Keep the event with the newer updatedAt timestamp
             if (localEvent.updatedAt >= cloudEvent.updatedAt) {
@@ -484,59 +505,70 @@ const Events = () => {
             }
           }
         });
-        
+
         // Sort events by updatedAt (most recent first)
-        const sortedEvents = mergedEvents.sort((a, b) => b.updatedAt - a.updatedAt);
-        
+        const sortedEvents = mergedEvents.sort(
+          (a, b) => b.updatedAt - a.updatedAt
+        );
+
         // Update local state with merged events
         setEvents(sortedEvents);
-        
+
         // Update database with any changes
-        const eventsToSync = sortedEvents.map(event => {
-          const cloudEvent = cloudEventsMap.get(event.id);
-          
-          // If event doesn't exist in cloud or local version is newer, sync to cloud
-          if (!cloudEvent || event.updatedAt > new Date(cloudEvent.updatedAt).getTime()) {
-            return {
-              id: event.id,
-              user_id: userProfile.id,
-              title: event.title,
-              date: event.date,
-              time: event.time,
-              description: event.description,
-              created_at: new Date(event.createdAt).toISOString(),
-              updated_at: new Date(event.updatedAt).toISOString()
-            };
-          }
-          return null;
-        }).filter(Boolean) as CloudEvent[];
-        
+        const eventsToSync = sortedEvents
+          .map((event) => {
+            const cloudEvent = cloudEventsMap.get(event.id);
+
+            // If event doesn't exist in cloud or local version is newer, sync to cloud
+            if (
+              !cloudEvent ||
+              event.updatedAt > new Date(cloudEvent.updatedAt).getTime()
+            ) {
+              return {
+                id: event.id,
+                user_id: userProfile.id,
+                title: event.title,
+                date: event.date,
+                time: event.time,
+                description: event.description,
+                created_at: new Date(event.createdAt).toISOString(),
+                updated_at: new Date(event.updatedAt).toISOString(),
+              };
+            }
+            return null;
+          })
+          .filter(Boolean) as CloudEvent[];
+
         if (eventsToSync.length > 0) {
-          console.log('Syncing', eventsToSync.length, 'events to cloud...');
+          console.log("Syncing", eventsToSync.length, "events to cloud...");
           const { error: syncError } = await supabase
-            .from('events')
+            .from("events")
             .upsert(eventsToSync);
-            
+
           if (syncError) throw syncError;
-          console.log('Events synced to cloud successfully');
+          console.log("Events synced to cloud successfully");
         }
-        
+
         // Delete events from cloud that don't exist locally
         if (eventsToDelete.length > 0) {
-          console.log('Deleting', eventsToDelete.length, 'events from cloud...');
+          console.log(
+            "Deleting",
+            eventsToDelete.length,
+            "events from cloud..."
+          );
           const { error: deleteError } = await supabase
-            .from('events')
+            .from("events")
             .delete()
-            .in('id', eventsToDelete);
-            
+            .in("id", eventsToDelete);
+
           if (deleteError) throw deleteError;
-          console.log('Events deleted from cloud successfully');
+          console.log("Events deleted from cloud successfully");
         }
-        
-        console.log('Events sync completed successfully');
+
+        console.log("Events sync completed successfully");
       }
     } catch (error) {
-      console.error('Error fetching events from cloud:', error);
+      console.error("Error fetching events from cloud:", error);
     }
   };
 
@@ -646,26 +678,27 @@ const Events = () => {
     );
   };
 
-  const screenHeight = window.innerHeight;
+  const { height, width } = useWindowSize();
+
   const getHeightByScreenSize = () => {
-    if (window.innerHeight >= 1080) {
-      return isExpanded ? '800px' : '400px';
-    };
-    if (window.innerHeight >= 768) {
-        // screen height / 2
-      return isExpanded ? screenHeight - 40 : screenHeight / 2 - 30;
-    };
-    if (window.innerHeight >= 480) {
-      return isExpanded ? '400px' : '200px';
-    };
-    return isExpanded ? '300px' : '150px';
+    if (height >= 1080) {
+      return isExpanded ? "800px" : "400px";
+    }
+    if (height >= 768) {
+      // screen height / 2
+      return isExpanded ? height - 40 : height / 2 - 30;
+    }
+    if (height >= 480) {
+      return isExpanded ? height - 80 : height / 2 - 30;
+    }
+    return isExpanded ? "300px" : "150px";
   };
 
   const getWidthByScreenSize = () => {
-    if (window.innerHeight >= 1080) {
-      return isExpanded ? '800px' : '100%';
-    };
-    return isExpanded ? '100%' : '100%';
+    if (height >= 1080) {
+      return isExpanded ? "800px" : "100%";
+    }
+    return isExpanded ? "100%" : "100%";
   };
 
   return (
@@ -686,7 +719,7 @@ const Events = () => {
         mass: 1,
       }}
       className={cn(
-        "glass dark:glass-dark rounded-xl text-white overflow-hidden flex flex-col relative",
+        "glass dark:glass-dark rounded-xl text-white flex flex-col relative",
         isExpanded ? "mx-auto" : "w-full"
       )}
       style={{
@@ -718,26 +751,38 @@ const Events = () => {
           <span>Events</span>
         </h2>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setDialogState("create")}
-            className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10"
-            title="New event"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M5 12h14" />
-              <path d="M12 5v14" />
-            </svg>
-          </button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setDialogState("create")}
+                  className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M5 12h14" />
+                    <path d="M12 5v14" />
+                  </svg>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent 
+                side="top" 
+                sideOffset={5} 
+                className="z-[9999]"
+              >
+                <p>New event</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </motion.div>
 
@@ -956,7 +1001,7 @@ const Events = () => {
 
       <motion.div
         layout="position"
-        className="p-4 flex-1 overflow-hidden"
+        className="p-4 flex-1 overflow-y-auto"
         transition={{
           duration: 0.2,
           layout: {
@@ -1004,7 +1049,7 @@ const Events = () => {
               <div className="space-y-4 h-full overflow-y-auto pr-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-white/20">
                 {Object.entries(groupedEvents).map(([category, events]) => (
                   <div key={category} className="space-y-2">
-                    <h3 className="text-sm font-medium text-white/70 px-2">
+                    <h3 className="text-sm font-medium text-white/70 px-2 select-none">
                       {category}
                     </h3>
                     {events.map((event) => (

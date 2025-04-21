@@ -6,6 +6,8 @@ import { StickyNote, X, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useClickOutside } from '../../hooks/use-click-outside';
+import useWindowSize from '@/hooks/use-window-size';
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 
 // Maximum character limit for note content
 const MAX_CONTENT_LENGTH = 5000;
@@ -556,24 +558,24 @@ const Notes: React.FC = () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isExpanded, setExpandedWidget]);
-  const screenHeight = window.innerHeight;
+  const { width, height } = useWindowSize();
 
   const getHeightByScreenSize = () => {
-    if (window.innerHeight >= 1080) {
+    if (height >= 1080) {
       return isExpanded ? '800px' : '400px';
     };
-    if (window.innerHeight >= 768) {
+    if (height >= 768) {
         // screen height / 2
-      return isExpanded ? screenHeight - 40 : screenHeight / 2 - 30;
+      return isExpanded ? height - 40 : height / 2 - 30;
     };
-    if (window.innerHeight >= 480) {
-      return isExpanded ? '400px' : '200px';
+    if (height >= 480) {
+      return isExpanded ? height - 80 : height / 2 - 30;
     };
     return isExpanded ? '300px' : '150px';
   };
 
   const getWidthByScreenSize = () => {
-    if (window.innerHeight >= 1080) {
+    if (height >= 1080) {
       return isExpanded ? '800px' : '100%';
     };
     return isExpanded ? '100%' : '100%';
@@ -587,7 +589,7 @@ const Notes: React.FC = () => {
       initial={false}
       animate={{
         height: getHeightByScreenSize(),
-        zIndex: isExpanded ? 50 : 0,
+        zIndex: isExpanded ? 50 : 1
       }}
       transition={{
         type: "spring",
@@ -598,7 +600,7 @@ const Notes: React.FC = () => {
         mass: 1
       }}
       className={cn(
-        "glass dark:glass-dark rounded-xl text-white overflow-hidden flex flex-col relative notes-component",
+        "glass dark:glass-dark rounded-xl text-white flex flex-col relative notes-component",
         isExpanded ? "mx-auto" : "w-full"
       )}
       style={{
@@ -630,15 +632,24 @@ const Notes: React.FC = () => {
           <span>Notes</span>
         </h2>
         <div className="flex items-center gap-2">
-          <button
-            onClick={createNewNote}
-            className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10"
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={createNewNote}
+                  className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
           </button>
+          </TooltipTrigger>
+          <TooltipContent>
+            Create a new note
+          </TooltipContent>
+        </Tooltip>
+        </TooltipProvider>
         </div>
       </motion.div>
       

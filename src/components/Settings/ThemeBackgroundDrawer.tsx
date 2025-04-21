@@ -224,17 +224,24 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
 
   return (
     <Drawer>
-      <DrawerTrigger asChild>
+      <DrawerTrigger>
+        <TooltipProvider>
+        <Tooltip>
+        <TooltipTrigger asChild>
         <button
           className="p-2 top-14 right-3 transition-all z-10 flex items-center justify-center
              dark:hover:bg-black/30 dark:active:bg-black/40 active:bg-black/40
             text-white/90 hover:text-white
             border-white/10 hover:border-white/20
             shadow-sm hover:shadow-md absolute rounded-full  text-white backdrop-blur-md hover:bg-black/30"
-          title="Theme & Background Settings"
         >
           <PaletteIcon className="h-4 w-4" />
         </button>
+        </TooltipTrigger>
+        <TooltipContent side="left" children="Theme & Background Settings" />
+        </Tooltip>
+        </TooltipProvider>
+
       </DrawerTrigger>
       <DrawerContent className="bg-transparent backdrop-blur-xl border-t border-white/5">
         <div className="max-w-md mx-auto px-6 py-4">
@@ -256,7 +263,7 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                           "flex-1 flex flex-col items-center justify-center p-3 rounded-lg transition-all",
                           storedTheme === option.value
                             ? "bg-zinc-700 text-white"
-                            : "bg-zinc-800/50 text-white/70 hover:bg-zinc-700/50"
+                            : "bg-zinc-800 text-white/70 hover:bg-zinc-800/50"
                         )}
                       >
                         {option.icon}
@@ -509,13 +516,13 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                     <div className="flex justify-between">
                       <label className="text-sm text-white/70">Blur</label>
                       <span className="text-sm text-white/70">
-                        {storedBlurLevel === 0 ? "None" : storedBlurLevel === 1 ? "Low" : "High"}
+                        {storedBlurLevel === 0 ? "None" : storedBlurLevel === 1 ? "Low" : storedBlurLevel === 2 ? "Medium" : "High"}
                       </span>
                     </div>
                     <Slider
                       value={[storedBlurLevel]}
                       onValueChange={handleBlurLevelChange}
-                      max={2}
+                      max={3}
                       step={1}
                       className="w-full"
                     />
@@ -527,6 +534,7 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
         </div>
       </DrawerContent>
     </Drawer>
+
   );
 };
 

@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { TooltipProvider } from '../ui/tooltip';
+import { TooltipContent } from '../ui/tooltip';
+import { Tooltip } from '../ui/tooltip';
+import { TooltipTrigger } from '../ui/tooltip';
 
 interface BackgroundImageProps {
   children: React.ReactNode;
@@ -66,7 +70,8 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({
     switch (blurLevel) {
       case 0: return '0px'; // None
       case 1: return '4px'; // Low
-      case 2: return '8px'; // High
+      case 2: return '8px'; // Medium
+      case 3: return '12px'; // High
       default: return '8px';
     }
   };
@@ -93,10 +98,12 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({
         {children}
         
         {/* Refresh button */}
+        <TooltipProvider>
+        <Tooltip>
+        <TooltipTrigger asChild>
         <button 
           onClick={handleRefreshBackground}
           className={`absolute bottom-4 right-4 rounded-full bg-black/20 p-2 text-white backdrop-blur-md hover:bg-black/30 ${isSpinning ? 'animate-spin' : ''}`}
-          title="Refresh Background"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
@@ -105,6 +112,10 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({
             <path d="M3 21v-5h5" />
           </svg>
         </button>
+        </TooltipTrigger>
+        <TooltipContent children="Refresh Background" />
+        </Tooltip>
+        </TooltipProvider>
       </div>
     </div>
   );

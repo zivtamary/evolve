@@ -5,6 +5,7 @@ import { MessageSquare, Loader2, MessageCircle, MessageCircleHeart } from 'lucid
 import { supabase } from '@/integrations/supabase/client';
 import { useSettings } from '@/context/SettingsContext';
 import { PostgrestError } from '@supabase/supabase-js';
+import { Textarea } from '../ui/textarea';
 
 interface FeedbackDialogProps {
   open: boolean;
@@ -81,13 +82,13 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ open, onOpenChange }) =
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass dark:glass-dark border-white/10 backdrop-blur-md shadow-xl">
+      <DialogContent closeButtonClassName='text-black dark:text-white' className="bg-white dark:bg-black border-white/10 shadow-xl">
         <DialogHeader className="border-b border-white/10 pb-3">
-          <DialogTitle className="text-white text-xl font-semibold flex items-center gap-2">
+          <DialogTitle className="dark:text-white text-xl font-semibold flex items-center gap-2">
             <MessageCircleHeart className="h-5 w-5" />
             Leave Feedback
           </DialogTitle>
-          <DialogDescription className="text-white/70 text-sm mt-1">
+          <DialogDescription className="mt-1">
             Your feedback is invaluable to us! It helps us understand your needs, improve our features, and create a better experience for everyone. We read every submission and use your insights to shape the future of Evolve.
           </DialogDescription>
         </DialogHeader>
@@ -106,12 +107,12 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ open, onOpenChange }) =
             )}
             
             <div className="space-y-2">
-              <label htmlFor="feedback" className="text-sm text-white/80 font-medium">Your Feedback</label>
-              <textarea
+              <label htmlFor="feedback" className="text-sm dark:text-white/80 font-medium">Your Feedback</label>
+              <Textarea
                 id="feedback"
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
-                className="w-full h-32 bg-black/10 dark:bg-black/20 px-4 py-2.5 rounded-lg outline-none border border-white/10 focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all duration-200 text-white placeholder-white/40 resize-none"
+                className="w-full h-32 dark:bg-black/20 dark:border-white/10"
                 placeholder="Share your thoughts, suggestions, or report issues..."
                 required
               />
@@ -121,7 +122,7 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ open, onOpenChange }) =
               <div className="flex justify-end space-x-3">
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => onOpenChange(false)}
                   disabled={isSubmitting}
                 >

@@ -124,11 +124,11 @@
 
 @layer components {
   .glass {
-    @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-sm transition-colors duration-300;
+    @apply bg-white/20 backdrop-blur-2xl border border-white/5 shadow-sm transition-colors duration-300;
   }
   
   .glass-dark {
-    @apply bg-black/40 backdrop-blur-lg border border-white/10 shadow-lg transition-colors duration-300;
+    @apply bg-black/45 backdrop-blur-2xl border border-white/5 shadow-lg transition-colors duration-300;
   }
   
   .icon-button {

@@ -112,7 +112,9 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         }
       );
 
-      if (error) throw error;
+      if (error) return alert(JSON.stringify(error));
+
+      alert(JSON.stringify(data));
 
       // Redirect to Polar checkout
       window.location.href = data.checkout_url;

@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useTransition, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Dialog,
-  DialogContent,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   Card,
   CardContent,
@@ -188,7 +185,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
       }
 
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: "https://evolve-app.com/reset-password"
+        redirectTo: "https://evolve-app.com/reset-password",
       });
 
       if (error) {
@@ -221,7 +218,42 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
 
     setLoading(true);
 
-    supabase.auth
+    const manifest = chrome.runtime.getManifest();
+    const url = new URL("https://accounts.google.com/o/oauth2/auth");
+    url.searchParams.set("client_id", manifest.oauth2.client_id);
+    url.searchParams.set("response_type", "id_token");
+    url.searchParams.set("access_type", "offline");
+    url.searchParams.set(
+      "redirect_uri",
+      `https://f9e7-46-117-62-155.ngrok-free.app`
+    );
+    url.searchParams.set("scope", manifest.oauth2.scopes.join(" "));
+    chrome.identity.launchWebAuthFlow(
+      {
+        url: url.href,
+        interactive: true,
+      },
+      async (redirectedTo) => {
+        if (chrome.runtime.lastError) {
+          toast({
+            title: "Error",
+            description: "Google sign in failed",
+            variant: "destructive",
+          });
+          // auth was not successful
+        } else {
+          // auth was successful, extract the ID token from the redirectedTo URL
+          const url = new URL(redirectedTo);
+          const params = new URLSearchParams(url.hash);
+          const { data, error } = await supabase.auth.signInWithIdToken({
+            provider: "google",
+            token: params.get("id_token"),
+          });
+        }
+      }
+    );
+
+    /*     supabase.auth
       .signInWithOAuth({
         provider: "google",
         options: {
@@ -239,7 +271,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           variant: "destructive",
         });
         setLoading(false);
-      });
+      }); */
   };
 
   const renderHeader = () => {
@@ -273,24 +305,25 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
 
     return (
       <div className="relative">
-        {
-            
-            view === "reset_password" ?
-        (<Button
-          variant="ghost"
-          size="icon"
-          onClick={() => {
-            if (view === "reset_password") {
-              setView("signin");
-            } else {
-              onOpenChange(false);
-            }
-          }}
-          className="absolute -left-3 top-0 h-8 w-8 rounded-full"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>) : null}
-        <div className={view === "reset_password" ? "pl-7" : ""}>{headerContent}</div>
+        {view === "reset_password" ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              if (view === "reset_password") {
+                setView("signin");
+              } else {
+                onOpenChange(false);
+              }
+            }}
+            className="absolute -left-3 top-0 h-8 w-8 rounded-full"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        ) : null}
+        <div className={view === "reset_password" ? "pl-7" : ""}>
+          {headerContent}
+        </div>
       </div>
     );
   };
@@ -341,7 +374,12 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
               </div>
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading} variant="link">
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading}
+              variant="link"
+            >
               {loading ? "Sending reset email..." : "Send Reset Link"}
             </Button>
           </form>
@@ -349,8 +387,8 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
       );
     }
 
-    // const disableGoogleSignIn = loading || isPending;
-    const disableGoogleSignIn = true // TODO: Remove this
+    const disableGoogleSignIn = loading || isPending;
+    // const disableGoogleSignIn = true // TODO: Remove this
 
     return (
       <motion.div {...slideAnimation}>
@@ -358,16 +396,16 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           defaultValue={view}
           onValueChange={(value) => setView(value as "signin" | "signup")}
         >
-          <TabsList className="grid w-full grid-cols-2 mt-4 mb-6 bg-background dark:bg-black/40 dark:border dark:border-white/10 border">
+          <TabsList className="grid w-full grid-cols-2 mt-4 mb-6 p-0 bg-background dark:bg-black/40 dark:border dark:border-white/10 border">
             <TabsTrigger
               value="signin"
-              className="dark:data-[state=active]:bg-black/60 dark:data-[state=active]:text-white dark:text-gray-300 dark:hover:text-white dark:border-white/10 data-[state=active]:text-black text-black/50"
+              className="dark:data-[state=active]:bg-white/10 h-full rounded-r-none dark:data-[state=active]:text-white dark:text-gray-300 dark:hover:text-white dark:border-white/10 data-[state=active]:text-black data-[state=active]:bg-black/10 text-black/50"
             >
               Sign In
             </TabsTrigger>
             <TabsTrigger
               value="signup"
-              className="dark:data-[state=active]:bg-black/60 dark:data-[state=active]:text-white dark:text-gray-300 dark:hover:text-white dark:border-white/10 data-[state=active]:text-black text-black/50"
+              className="dark:data-[state=active]:bg-white/10 h-full rounded-l-none dark:data-[state=active]:text-white dark:text-gray-300 dark:hover:text-white dark:border-white/10 data-[state=active]:text-black data-[state=active]:bg-black/10 text-black/50"
             >
               Create Account
             </TabsTrigger>
@@ -449,7 +487,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
 
                     <Button
                       type="submit"
-                      className="w-full transition-colors dark:bg-black/60 dark:hover:bg-black/80 dark:text-white dark:border dark:border-white/10"
+                      className="w-full transition-colors dark:border dark:border-white/10 dark:hover:border-white dark:hover:bg-black/60 dark:text-white dark:hover:text-white"
                       disabled={loading}
                     >
                       {loading ? "Signing in..." : "Sign In"}
@@ -469,7 +507,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full dark:bg-black/40 dark:hover:bg-black/60 dark:text-white dark:border-white/10 active:dark:bg-black/80"
+                      className="w-full dark:bg-black/40 dark:hover:border-white dark:hover:bg-black/60 dark:text-white dark:border-white/10 active:dark:bg-black/80"
                       onClick={handleGoogleSignIn}
                       disabled={disableGoogleSignIn}
                     >
@@ -652,7 +690,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] p-0">
         <div className="light">
-          <Card className="w-full overflow-hidden border-0 bg-white/95 backdrop-blur-md shadow-lg shadow-black/10 dark:shadow-black/20 dark:bg-black/40">
+          <Card className="w-full overflow-hidden border-0 bg-white/95 backdrop-blur-md shadow-lg shadow-black/10 dark:shadow-black/20 dark:bg-black/90">
             <CardHeader className="text-gray-900 dark:text-white">
               {renderHeader()}
             </CardHeader>
@@ -676,4 +714,4 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
   );
 };
 
-export default AuthDialog; 
+export default AuthDialog;

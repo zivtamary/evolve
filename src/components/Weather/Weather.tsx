@@ -15,6 +15,7 @@ import {
   MoonStar,
   RefreshCw
 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 interface WeatherData {
   temperature: number;
@@ -183,15 +184,23 @@ const Weather: React.FC = () => {
   return (
     <div className="glass dark:glass-dark rounded-xl p-4 text-white">
       <div className="flex items-center justify-between">
-        <div>
+        <div className='select-none'>
           <div className="flex items-center gap-2">
-            <button 
+          <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                    <button 
               onClick={toggleTempUnit}
               className="text-2xl font-bold hover:text-white/80 transition-colors"
-              title={`Click to toggle between °C and °F`}
+            //   title={`Click to toggle between °C and °F`}
             >
               {weather ? `${convertTemp(weather.temperature, tempUnit)}°${tempUnit}` : ''}
             </button>
+                    </TooltipTrigger>
+                    <TooltipContent children={`Click to toggle temperature unit`} />
+                  </Tooltip>
+                </TooltipProvider>
+
             <div className="text-white/80">
               {getWeatherIcon(weather.icon)}
             </div>
@@ -199,13 +208,19 @@ const Weather: React.FC = () => {
           <p className="text-sm text-white/80 capitalize">{weather.description}</p>
           <p className="text-xs text-white/70">{weather.city}</p>
         </div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
         <button 
           onClick={refreshWeather}
           className="rounded-full p-1 text-white/70 hover:bg-white/10 hover:text-white"
-          title="Refresh weather"
         >
           <RefreshCw size={16} />
         </button>
+            </TooltipTrigger>
+            <TooltipContent children={`Click to refresh weather`} />
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </div>
   );

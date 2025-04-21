@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useClickOutside } from '../../hooks/use-click-outside';
+import useWindowSize from '@/hooks/use-window-size';
 
 // Maximum character limit for todo items
 const TODO_CHAR_LIMIT = 100;
@@ -416,24 +417,24 @@ const TodoList: React.FC = () => {
     we need to create a function that returns the height based on the screen size
   */
 
-  const screenHeight = window.innerHeight;
+  const { width,height } = useWindowSize();
 
   const getHeightByScreenSize = () => {
-    if (window.innerHeight >= 1080) {
+    if (height >= 1080) {
       return isExpanded ? '800px' : '400px';
     };
-    if (window.innerHeight >= 768) {
+    if (height >= 768) {
         // screen height / 2
-      return isExpanded ? screenHeight - 40 : screenHeight / 2 - 30;
+      return isExpanded ? height - 40 : height / 2 - 30;
     };
-    if (window.innerHeight >= 480) {
-      return isExpanded ? '400px' : '200px';
+    if (height >= 480) {
+      return isExpanded ? height - 80 : height / 2 - 30;
     };
     return isExpanded ? '300px' : '150px';
   };
 
   const getWidthByScreenSize = () => {
-    if (window.innerHeight >= 1080) {
+    if (height >= 1080) {
       return isExpanded ? '800px' : '100%';
     };
     return isExpanded ? '100%' : '100%';
@@ -457,7 +458,7 @@ const TodoList: React.FC = () => {
         mass: 1
       }}
       className={cn(
-        "glass dark:glass-dark rounded-xl text-white overflow-hidden flex flex-col relative",
+        "glass dark:glass-dark rounded-xl text-white flex flex-col relative",
         isExpanded ? "mx-auto" : "w-full"
       )}
       style={{

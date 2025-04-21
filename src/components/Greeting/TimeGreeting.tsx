@@ -13,6 +13,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { TooltipContent } from '../ui/tooltip';
+import { Tooltip, TooltipTrigger } from '../ui/tooltip';
+import { TooltipProvider } from '../ui/tooltip';
 
 
 const FloatingStar = ({ delay, size, x, y }) => (
@@ -125,7 +128,7 @@ const TimeGreeting = () => {
         icon: (
           <div className="relative">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{
-              filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.3)) drop-shadow(0 0 12px rgba(0, 0, 0, 0.5))'
+              filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.3)) drop-shadow(0 0 12px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 15px rgba(255, 255, 255, 0.2))'
             }}>
               <defs>
                 <linearGradient id="moonGradientEvening" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -152,7 +155,7 @@ const TimeGreeting = () => {
         icon: (
           <div className="relative">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{
-              filter: 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.2)) drop-shadow(0 0 10px rgba(0, 0, 0, 0.6))'
+              filter: 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.2)) drop-shadow(0 0 10px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 12px rgba(255, 255, 255, 0.15))'
             }}>
               <defs>
                 <linearGradient id="moonGradientNight" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -205,13 +208,18 @@ const TimeGreeting = () => {
         <div className="text-white/90">
           {icon}
         </div>
-        <div className="flex items-center whitespace-nowrap select-none">
+        <div style={{
+            // textShadow: '0 0 10px rgba(255, 255, 255, 0.3)'
+            textShadow: "1px 1px 10px rgba(0,0,0, 0.2), 0 0 10px rgba(0,0,0, 0.2)",
+        }} className="flex items-center whitespace-nowrap select-none">
           <span>{greeting}</span>
           {displayName && (
             <>
               <span className="ml-2">{/* Add space after comma */}</span>
+              <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
               <motion.span
-                title='Click to edit your name'
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleNameClick}
@@ -221,6 +229,10 @@ const TimeGreeting = () => {
                   {displayName}
                 </span>
               </motion.span>
+              </TooltipTrigger>
+              <TooltipContent children={`Click to edit your name`} />
+              </Tooltip>
+              </TooltipProvider>
               <span className="ml-0">.</span>
             </>
           )}

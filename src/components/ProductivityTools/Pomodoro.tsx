@@ -269,7 +269,7 @@ const Pomodoro: React.FC = () => {
       <div className="flex items-center justify-between p-4 border-b border-white/10">
         <div className="flex items-center gap-2">
           <Timer className="h-5 w-5" />
-          <h2 className="text-xl font-semibold">Focus Timer</h2>
+          <h2 className="text-xl font-semibold select-none">Focus Timer</h2>
         </div>
         <div className="text-xs text-white/70">
           Session {sessionCount + 1}
@@ -286,29 +286,29 @@ const Pomodoro: React.FC = () => {
           }} 
           className="h-full flex flex-col"
         >
-          <TabsList className="grid grid-cols-3 bg-black/20 p-1 gap-1 rounded-lg">
+          <TabsList className="grid grid-cols-3 bg-black/20 p-1 gap-1">
             <TabsTrigger 
               value="work" 
-              className="rounded data-[state=active]:bg-white/20 data-[state=active]:text-white hover:text-white hover:bg-white/10 text-white/70"
+              className="data-[state=active]:bg-white/20 data-[state=active]:text-white hover:text-white hover:bg-white/10 text-white/70"
             >
               Focus
             </TabsTrigger>
             <TabsTrigger 
               value="shortBreak"
-              className="rounded data-[state=active]:bg-white/20 data-[state=active]:text-white hover:text-white hover:bg-white/10 text-white/70"
+              className="data-[state=active]:bg-white/20 data-[state=active]:text-white hover:text-white hover:bg-white/10 text-white/70"
             >
               Short Break
             </TabsTrigger>
             <TabsTrigger 
               value="longBreak"
-              className="rounded data-[state=active]:bg-white/20 data-[state=active]:text-white hover:text-white hover:bg-white/10 text-white/70"
+              className="data-[state=active]:bg-white/20 data-[state=active]:text-white hover:text-white hover:bg-white/10 text-white/70"
             >
               Long Break
             </TabsTrigger>
           </TabsList>
           
           <div className="flex-1 flex flex-col items-center justify-center">
-            <div className="text-6xl font-light mb-8 font-['Space_Grotesk']" style={{ textShadow: '0 0 20px rgba(255, 255, 255, 0.2)' }}>
+            <div className="select-none text-6xl font-light mb-8 font-['Space_Grotesk']" style={{ textShadow: '0 0 20px rgba(255, 255, 255, 0.2)' }}>
               {formatTime(timeLeft)}
             </div>
             <div className="flex gap-3">

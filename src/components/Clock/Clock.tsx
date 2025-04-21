@@ -4,6 +4,10 @@ import { cn } from "@/lib/utils";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Baseline, Edit, Pen, Settings2 } from "lucide-react";
+import { TooltipProvider } from "../ui/tooltip";
+import { Tooltip } from "../ui/tooltip";
+import { TooltipContent } from "../ui/tooltip";
+import { TooltipTrigger } from "../ui/tooltip";
 
 interface ClockProps {
   className?: string;
@@ -118,7 +122,7 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
     return (
       <div className="relative w-48 h-48 mx-auto">
         {/* Clock face with subtle gradient */}
-        <div className="absolute inset-0 rounded-full border-2 border-white/20 bg-gradient-to-br from-white/10 to-transparent backdrop-blur-sm"></div>
+        <div className="absolute inset-0 rounded-full border-2 border-white/20 bg-gradient-to-br from-white/10 to-transparent backdrop-blur-sm dark:from-black/10 dark:to-black/10"></div>
 
         {/* Hour markers - positioned around the clock */}
         {[...Array(12)].map((_, i) => {
@@ -260,11 +264,11 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
               className={cn(
                 clockStyle.font,
                 clockStyle.color,
-                "font-light tracking-tight cursor-pointer text-5xl sm:text-7xl lg:text-8xl transition-all hover:opacity-90"
+                "font-light tracking-tight cursor-pointer text-5xl sm:text-7xl lg:text-8xl transition-all hover:opacity-90 select-none"
               )}
               style={{
                 textShadow:
-                  "2px 2px 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.2)",
+                  "2px 2px 20px rgba(0,0,0, 0.1), 0 0 40px rgba(0,0,0, 0.1)",
                 fontVariantNumeric: "tabular-nums",
                 letterSpacing: "-0.02em",
               }}
@@ -273,10 +277,12 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
               {formatTime(time)}
             </h1>
             <div className="absolute -right-8 sm:-right-10 top-2 sm:top-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
                   <button
                     onClick={toggleClockType}
                     className="text-white/70 hover:text-white text-sm p-1.5 sm:p-0"
-                    title={getClockTypeTitle()}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -293,16 +299,26 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
                       <path d="M12 6v6l4 2" />
                     </svg>
                   </button>
+                  </TooltipTrigger>
+                  <TooltipContent children={getClockTypeTitle()} />
+                  </Tooltip>
+                  </TooltipProvider>
                 </div>
             <Drawer>
               <DrawerTrigger asChild>
                 <div className="absolute -right-8 sm:-right-10 top-9 sm:top-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
                   <button
-                    title="Clock and date settings"
                     className="text-white/70 hover:text-white text-sm p-1.5 sm:p-0"
                   >
                    <Settings2 className="w-4 h-4" />
                   </button>
+                  </TooltipTrigger>
+                  <TooltipContent children={`Font and color settings`} />
+                  </Tooltip>
+                  </TooltipProvider>
                 </div>
               </DrawerTrigger>
               {renderStyleOptions()}
@@ -314,11 +330,11 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
         className={cn(
           clockStyle.font,
           clockStyle.color,
-          "mt-3 sm:mt-4 text-lg sm:text-2xl font-light tracking-wide opacity-70"
+          "mt-3 sm:mt-4 text-lg sm:text-2xl font-light tracking-wide opacity-70 select-none"
         )}
         style={{
           textShadow:
-            "1px 1px 10px rgba(255, 255, 255, 0.2), 0 0 20px rgba(255, 255, 255, 0.1)",
+            "1px 1px 10px rgba(0,0,0, 0.1), 0 0 10px rgba(0,0,0, 0.1)",
           letterSpacing: "0.02em",
         }}
       >

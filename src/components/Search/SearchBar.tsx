@@ -1,6 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TooltipContent, TooltipProvider } from '../ui/tooltip';
+import { Tooltip } from '../ui/tooltip';
+import { TooltipTrigger } from '../ui/tooltip';
 
 // Add a custom hook to detect if we're on mobile
 const useIsMobile = () => {
@@ -199,7 +202,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '', onFocusChange }) 
           initial={false}
           animate={{ 
             position: 'fixed',
-            top: isFocused ? '20vh' : (isMobile ? '70vh' : '63vh'),
+            top: isFocused ? '20vh' : (isMobile ? '' : ''),
             left: '50%',
             x: '-50%',
             y: '-50%',
@@ -227,15 +230,21 @@ const SearchBar: React.FC<SearchBarProps> = ({ className = '', onFocusChange }) 
                 ease: "easeInOut"
               }}
             >
-              <button
-                type="button"
+              <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                <button
+                  type="button"
                 className="relative mr-2 sm:mr-3 shrink-0 transition-opacity duration-300"
                 onClick={changeSearchEngine}
-                title={`Search with ${searchEngine.charAt(0).toUpperCase() + searchEngine.slice(1)}`}
               >
                 <div className="absolute -top-0.5 right-0 w-1 h-1 bg-white/60 rounded-full animate-pulse" />
                 {getSearchEngineLogo()}
               </button>
+              </TooltipTrigger>
+              <TooltipContent children={`Search with ${searchEngine.charAt(0).toUpperCase() + searchEngine.slice(1)}`} />
+              </Tooltip>
+              </TooltipProvider>
               <input
                 ref={inputRef}
                 type="text"

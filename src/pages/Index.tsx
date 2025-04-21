@@ -358,6 +358,9 @@ const Index = () => {
                             transition={{ duration: 0.8, delay: 1.8 }}
                           >
                             <Clock />
+                            <div className="mt-4 w-60">
+                              <Weather />
+                            </div>
                           </motion.div>
                         </div>
 
@@ -378,7 +381,7 @@ const Index = () => {
                           >
                             <TimeGreeting />
                           </motion.div>
-                          <motion.div
+{/*                           <motion.div
                             className="w-full max-w-xs mb-8 pt-4 h-xl:pt-0"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{
@@ -393,7 +396,7 @@ const Index = () => {
                             }}
                           >
                             <Weather />
-                          </motion.div>
+                          </motion.div> */}
                           <SearchBar className="mt-0 h-sm:mt-10 h-md:mt-12 h-xl:mt-0" onFocusChange={setIsSearchFocused} />
                         </div>
                       </div>
@@ -526,17 +529,17 @@ const Index = () => {
                             transition={{ duration: 0.8, delay: 1.8 }}
                           >
                             <Clock />
+                            <div className="mt-4 w-60">
+                              <Weather />
+                            </div>
                           </motion.div>
                         </div>
 
                         <div className="flex flex-col items-center justify-center flex-1">
                           <motion.div
-                            className="mb-12 h-sm:mb-0 h-xl:mb-12"
                             initial={{ opacity: 0, y: -20 }}
                             animate={{
                               opacity: isSearchFocused ? 0.6 : 1,
-                              y: isSearchFocused ? 40 : 0,
-                              scale: isSearchFocused ? 0.9 : 1,
                             }}
                             transition={{
                               type: "spring",
@@ -545,8 +548,9 @@ const Index = () => {
                             }}
                           >
                             <TimeGreeting />
+                            {/* <SearchBar onFocusChange={setIsSearchFocused} /> */}
                           </motion.div>
-                          <motion.div
+{/*                           <motion.div
                             className="w-full max-w-xs mb-8 pt-4 h-xl:pt-0"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{
@@ -561,8 +565,8 @@ const Index = () => {
                             }}
                           >
                             <Weather />
-                          </motion.div>
-                          <SearchBar className="mt-0 h-sm:mt-10 h-md:mt-12 h-xl:mt-0" onFocusChange={setIsSearchFocused} />
+                          </motion.div> */}
+                          <SearchBar className="mt-10" onFocusChange={setIsSearchFocused} />
                         </div>
                       </div>
 
@@ -689,6 +693,9 @@ const Index = () => {
                           transition={{ duration: 0.8, delay: 1.8 }}
                         >
                           <Clock />
+                          <div className="mt-4 w-60">
+                            <Weather />
+                          </div>
                         </motion.div>
                       </div>
 
@@ -709,7 +716,7 @@ const Index = () => {
                         >
                           <TimeGreeting />
                         </motion.div>
-                        <motion.div
+{/*                         <motion.div
                            className="w-full max-w-xs mb-8 pt-4 h-xl:pt-0"
                           initial={{ opacity: 0, y: 20 }}
                           animate={{
@@ -724,7 +731,7 @@ const Index = () => {
                           }}
                         >
                           <Weather />
-                        </motion.div>
+                        </motion.div> */}
                         <SearchBar className="mt-0 h-sm:mt-10 h-md:mt-12 h-xl:mt-0" onFocusChange={setIsSearchFocused} />
                       </div>
                     </div>
