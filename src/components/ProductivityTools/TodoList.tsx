@@ -458,12 +458,13 @@ const TodoList: React.FC = () => {
         mass: 1
       }}
       className={cn(
-        "glass dark:glass-dark rounded-xl text-white flex flex-col relative",
+        "glass dark:glass-dark transition-all rounded-xl text-white overflow-hidden flex flex-col relative",
         isExpanded ? "mx-auto" : "w-full"
       )}
       style={{
         width: getWidthByScreenSize(),
-        boxShadow: isExpanded ? '0 0 0 100vw rgba(0, 0, 0, 0.5)' : '',
+        boxShadow: isExpanded ? '0 0 0 100vw rgba(0, 0, 0, 0.3)' : '',
+        transition: 'box-shadow 0.3s linear',
         transformOrigin: getTransformOrigin()
       }}
     >
@@ -484,7 +485,7 @@ const TodoList: React.FC = () => {
       >
         <h2 
           onClick={toggleExpand}
-          className="text-xl font-semibold flex items-center gap-2 cursor-pointer hover:text-white/80 transition-colors"
+          className="text-xl select-none font-semibold flex items-center gap-2 cursor-pointer hover:text-white/80 transition-colors"
         >
           <CheckSquare className="h-5 w-5" />
           <span>Todo List</span>

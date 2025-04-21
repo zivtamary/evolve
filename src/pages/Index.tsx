@@ -358,9 +358,9 @@ const Index = () => {
                             transition={{ duration: 0.8, delay: 1.8 }}
                           >
                             <Clock />
-                            <div className="mt-4 w-60">
+                       {/*      <div className="mt-4 w-60">
                               <Weather />
-                            </div>
+                            </div> */}
                           </motion.div>
                         </div>
 
@@ -530,7 +530,7 @@ const Index = () => {
                           >
                             <Clock />
                             <div className="mt-4 w-60">
-                              <Weather />
+                              {/* <Weather /> */}
                             </div>
                           </motion.div>
                         </div>
@@ -693,9 +693,9 @@ const Index = () => {
                           transition={{ duration: 0.8, delay: 1.8 }}
                         >
                           <Clock />
-                          <div className="mt-4 w-60">
+                       {/*    <div className="mt-4 w-60">
                             <Weather />
-                          </div>
+                          </div> */}
                         </motion.div>
                       </div>
 

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Sun, Moon, Coffee, Bed, MoonStarIcon, SunDim, Star, Cloud, Pencil, User } from 'lucide-react';
 import type { Variants } from 'framer-motion';
 import { motion, useAnimation } from 'framer-motion';
 import type { HTMLAttributes } from 'react';
-import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useImperativeHandle, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import {
@@ -17,6 +17,24 @@ import { TooltipContent } from '../ui/tooltip';
 import { Tooltip, TooltipTrigger } from '../ui/tooltip';
 import { TooltipProvider } from '../ui/tooltip';
 
+// Add weather icons
+import { 
+  CloudSun, 
+  Cloudy, 
+  CloudRain, 
+  CloudSunRain, 
+  CloudLightning, 
+  CloudSnow, 
+  CloudFog,
+  MoonStar,
+} from 'lucide-react';
+
+interface WeatherData {
+  temperature: number;
+  description: string;
+  city: string;
+  icon: string;
+}
 
 const FloatingStar = ({ delay, size, x, y }) => (
   <motion.div
@@ -92,6 +110,8 @@ const TimeGreeting = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(displayName);
   const [nameError, setNameError] = useState('');
+  const [weather] = useLocalStorage<WeatherData | null>('weather-data', null);
+  const [tempUnit, setTempUnit] = useLocalStorage<'C' | 'F'>('temp-unit', 'C');
   
   const getGreetingAndIcon = () => {
     const hour = new Date().getHours();
@@ -195,6 +215,77 @@ const TimeGreeting = () => {
     setNameError('');
   };
 
+  const getWeatherIcon = (iconCode: string) => {
+    // Map icon codes to Lucide icons
+    const iconMap: Record<string, React.ReactNode> = {
+      '01d': <Sun className="size-5" />,
+      '02d': <CloudSun className="size-5" />,
+      '03d': <Cloud className="size-5" />,
+      '04d': <Cloudy className="size-5" />,
+      '09d': <CloudRain className="size-5" />,
+      '10d': <CloudSunRain className="size-5" />,
+      '11d': <CloudLightning className="size-5" />,
+      '13d': <CloudSnow className="size-5" />,
+      '50d': <CloudFog className="size-5" />,
+      '01n': <Moon className="size-5" />,
+      '02n': <MoonStar className="size-5" />,
+      '03n': <Cloud className="size-5" />,
+      '04n': <Cloudy className="size-5" />,
+      '09n': <CloudRain className="size-5" />,
+      '10n': <CloudRain className="size-5" />,
+      '11n': <CloudLightning className="size-5" />,
+      '13n': <CloudSnow className="size-5" />,
+      '50n': <CloudFog className="size-5" />
+    };
+    
+    return iconMap[iconCode] || <Cloud className="size-5" />; // Default to cloudy if icon not found
+  };
+
+  const toggleTempUnit = useCallback(() => {
+    setTempUnit(prev => prev === 'C' ? 'F' : 'C');
+  }, [setTempUnit]);
+
+  const convertTemp = useCallback((temp: number, unit: 'C' | 'F') => {
+    if (unit === 'F') {
+      return Math.round((temp * 9/5) + 32);
+    }
+    return temp;
+  }, []);
+
+  const formatWeatherInfo = () => {
+    if (!weather) return null;
+    
+    const temp = convertTemp(weather.temperature, tempUnit);
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="flex items-center justify-center gap-2 text-lg md:text-xl lg:text-2xl text-white/70"
+        style={{
+          textShadow: "1px 1px 10px rgba(0,0,0, 0.2), 0 0 10px rgba(0,0,0, 0.2)",
+        }}
+      >
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button 
+                onClick={toggleTempUnit}
+                className="hover:text-white/90 transition-colors"
+              >
+                <span>{`${temp}°${tempUnit}`}</span>
+              </button>
+            </TooltipTrigger>
+            <TooltipContent children={`Click to toggle temperature unit`} />
+          </Tooltip>
+        </TooltipProvider>
+        <span className="opacity-80">{getWeatherIcon(weather.icon)}</span>
+        <span className="capitalize opacity-80 select-none">{weather.description}</span>
+      </motion.div>
+    );
+  };
+
   const { greeting, icon } = getGreetingAndIcon();
 
   return (
@@ -209,7 +300,6 @@ const TimeGreeting = () => {
           {icon}
         </div>
         <div style={{
-            // textShadow: '0 0 10px rgba(255, 255, 255, 0.3)'
             textShadow: "1px 1px 10px rgba(0,0,0, 0.2), 0 0 10px rgba(0,0,0, 0.2)",
         }} className="flex items-center whitespace-nowrap select-none">
           <span>{greeting}</span>
@@ -237,6 +327,7 @@ const TimeGreeting = () => {
             </>
           )}
         </div>
+        {formatWeatherInfo()}
       </motion.div>
 
       <Dialog open={isEditing} onOpenChange={setIsEditing}>

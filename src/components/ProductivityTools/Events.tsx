@@ -696,7 +696,7 @@ const Events = () => {
 
   const getWidthByScreenSize = () => {
     if (height >= 1080) {
-      return isExpanded ? "800px" : "100%";
+      return isExpanded ? "100%" : "100%";
     }
     return isExpanded ? "100%" : "100%";
   };
@@ -719,12 +719,13 @@ const Events = () => {
         mass: 1,
       }}
       className={cn(
-        "glass dark:glass-dark rounded-xl text-white flex flex-col relative",
+        "glass dark:glass-dark rounded-xl overflow-hidden text-white flex flex-col relative",
         isExpanded ? "mx-auto" : "w-full"
       )}
       style={{
         width: getWidthByScreenSize(),
-        boxShadow: isExpanded ? "0 0 0 100vw rgba(0, 0, 0, 0.5)" : "",
+        boxShadow: isExpanded ? "0 0 0 100vw rgba(0, 0, 0, 0.3)" : "",
+        transition: 'box-shadow 0.1s linear',
         transformOrigin: getTransformOrigin(),
       }}
     >
@@ -745,7 +746,7 @@ const Events = () => {
       >
         <h2
           onClick={toggleExpand}
-          className="text-xl font-semibold flex items-center gap-2 cursor-pointer hover:text-white/80 transition-colors"
+          className="text-xl select-none font-semibold flex items-center gap-2 cursor-pointer hover:text-white/80 transition-colors"
         >
           <CalendarDays className="h-5 w-5" />
           <span>Events</span>

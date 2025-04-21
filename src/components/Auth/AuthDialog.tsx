@@ -291,7 +291,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             Create Account
           </CardTitle>
           <CardDescription className="text-sm text-gray-500">
-            Join us to unlock premium features and sync across devices
+            Sign up to sync your data across all your devices, and more!
           </CardDescription>
         </>
       ) : (
@@ -399,7 +399,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           <TabsList className="grid w-full grid-cols-2 mt-4 mb-6 p-0 bg-background dark:bg-black/40 dark:border dark:border-white/10 border">
             <TabsTrigger
               value="signin"
-              className="dark:data-[state=active]:bg-white/10 h-full rounded-r-none dark:data-[state=active]:text-white dark:text-gray-300 dark:hover:text-white dark:border-white/10 data-[state=active]:text-black data-[state=active]:bg-black/10 text-black/50"
+              className="dark:data-[state=active]:bg-white/10 h-full rounded-r-none dark:data-[state=active]:text-white dark:text-gray-300 dark:hover:text-white dark:border-white/10 data-[state=active]:text-black/80 data-[state=active]:bg-black/10 text-black/50"
             >
               Sign In
             </TabsTrigger>
@@ -688,9 +688,9 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] p-0">
+      <DialogContent className="max-h-[90vh] border-0 p-0">
         <div className="light">
-          <Card className="w-full overflow-hidden border-0 bg-white/95 backdrop-blur-md shadow-lg shadow-black/10 dark:shadow-black/20 dark:bg-black/90">
+          <Card className="w-full h-full overflow-hidden border-0 bg-white/95 backdrop-blur-md shadow-lg shadow-black/10 dark:shadow-black/20 dark:bg-black/90">
             <CardHeader className="text-gray-900 dark:text-white">
               {renderHeader()}
             </CardHeader>

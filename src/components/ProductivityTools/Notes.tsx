@@ -600,12 +600,13 @@ const Notes: React.FC = () => {
         mass: 1
       }}
       className={cn(
-        "glass dark:glass-dark rounded-xl text-white flex flex-col relative notes-component",
+        "glass dark:glass-dark rounded-xl overflow-hidden text-white flex flex-col relative notes-component",
         isExpanded ? "mx-auto" : "w-full"
       )}
       style={{
         width: getWidthByScreenSize(),
-        boxShadow: isExpanded ? '0 0 0 100vw rgba(0, 0, 0, 0.5)' : '',
+        boxShadow: isExpanded ? '0 0 0 100vw rgba(0, 0, 0, 0.3)' : '',
+        transition: 'box-shadow 0.3s linear',
         transformOrigin: getTransformOrigin()
       }}
     >
@@ -626,7 +627,7 @@ const Notes: React.FC = () => {
       >
         <h2 
           onClick={toggleExpand}
-          className="text-xl font-semibold flex items-center gap-2 cursor-pointer hover:text-white/80 transition-colors"
+          className="text-xl select-none font-semibold flex items-center gap-2 cursor-pointer hover:text-white/80 transition-colors"
         >
           <StickyNote className="h-5 w-5" />
           <span>Notes</span>

@@ -61,7 +61,7 @@ const MotivationPhrase = () => {
       className="relative group"
     >
       <motion.div
-        className="text-center text-white/90 text-base md:text-lg lg:text-xl font-medium italic max-w-2xl mx-auto py-2"
+        className="text-center text-white/90 text-base md:text-lg lg:text-xl font-medium italic max-w-2xl mx-auto py-2 select-none"
       >
         <p className="mb-2">{quote.text}</p>
         <p className="text-white/60 text-sm md:text-base font-normal not-italic">— {quote.author}</p>

@@ -8,16 +8,37 @@ import { TooltipProvider } from "../ui/tooltip";
 import { Tooltip } from "../ui/tooltip";
 import { TooltipContent } from "../ui/tooltip";
 import { TooltipTrigger } from "../ui/tooltip";
+import { 
+  Sun, 
+  CloudSun, 
+  Cloud, 
+  Cloudy, 
+  CloudRain, 
+  CloudSunRain, 
+  CloudLightning, 
+  CloudSnow, 
+  CloudFog,
+  Moon,
+  MoonStar,
+} from 'lucide-react';
 
 interface ClockProps {
   className?: string;
 }
 
 type ClockType = "digital-12h" | "digital-24h" | "analog";
+type DateFormat = "default" | "long" | "short" | "numeric" | "compact";
 
 interface ClockStyle {
   font: string;
   color: string;
+}
+
+interface WeatherData {
+  temperature: number;
+  description: string;
+  city: string;
+  icon: string;
 }
 
 const FONT_OPTIONS = [
@@ -46,6 +67,10 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
     "clock-type",
     "digital-24h"
   );
+  const [dateFormat, setDateFormat] = useLocalStorage<DateFormat>(
+    "date-format",
+    "default"
+  );
   const [clockStyle, setClockStyle] = useLocalStorage<ClockStyle>(
     "clock-style",
     {
@@ -53,6 +78,8 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
       color: COLOR_OPTIONS[1].value,
     }
   );
+  const [weather] = useLocalStorage<WeatherData | null>('weather-data', null);
+  const [tempUnit] = useLocalStorage<'C' | 'F'>('temp-unit', 'C');
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -81,12 +108,65 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
   };
 
   const formatDate = (date: Date): string => {
-    return date.toLocaleDateString([], {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
+    switch (dateFormat) {
+      case "default":
+        return date.toLocaleDateString([], {
+          weekday: "long",
+          month: "long",
+          day: "numeric",
+        });
+      case "long":
+        return date.toLocaleDateString([], {
+          weekday: "long",
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        });
+      case "short":
+        return date.toLocaleDateString([], {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+      case "numeric":
+        return date.toLocaleDateString([], {
+          month: "numeric",
+          day: "numeric",
+          year: "numeric",
+        });
+      case "compact":
+        return date.toLocaleDateString([], {
+          month: "short",
+          day: "numeric",
+        });
+      default:
+        return date.toLocaleDateString();
+    }
+  };
+
+  const toggleDateFormat = () => {
+    const formats: DateFormat[] = ["default", "long", "short", "numeric", "compact"];
+    const currentIndex = formats.indexOf(dateFormat);
+    const nextIndex = (currentIndex + 1) % formats.length;
+    setDateFormat(formats[nextIndex]);
+  };
+
+  const getDateFormatTitle = (): string => {
+    switch (dateFormat) {
+      case "default":
+        return "Switch to full format";
+      case "long":
+        return "Switch to short format";
+      case "short":
+        return "Switch to numeric format";
+      case "numeric":
+        return "Switch to compact format";
+      case "compact":
+        return "Switch to default format";
+      default:
+        return "";
+    }
   };
 
   const toggleClockType = () => {
@@ -120,7 +200,7 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
     const minuteDegrees = minutes * 6; // 6 degrees per minute
 
     return (
-      <div className="relative w-48 h-48 mx-auto">
+      <div className="relative size-32 sm:size-40 lg:size-48 mx-auto">
         {/* Clock face with subtle gradient */}
         <div className="absolute inset-0 rounded-full border-2 border-white/20 bg-gradient-to-br from-white/10 to-transparent backdrop-blur-sm dark:from-black/10 dark:to-black/10"></div>
 
@@ -148,7 +228,7 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
 
         {/* Hour hand - thicker and more elegant */}
         <div
-          className="absolute w-1.5 h-12 bg-white rounded-full"
+          className="absolute w-1.5 h-10 lg:h-12 bg-white rounded-full"
           style={{
             left: "50%",
             bottom: "50%",
@@ -160,7 +240,7 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
 
         {/* Minute hand - thinner and more elegant */}
         <div
-          className="absolute w-1 h-16 bg-white/90 rounded-full"
+          className="absolute w-1 h-12 sm:h-12 lg:h-16 bg-white/90 rounded-full"
           style={{
             left: "50%",
             bottom: "50%",
@@ -248,6 +328,32 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
     </DrawerContent>
   );
 
+  const getWeatherIcon = (iconCode: string) => {
+    // Map icon codes to Lucide icons
+    const iconMap: Record<string, React.ReactNode> = {
+      '01d': <Sun size={20} />,
+      '02d': <CloudSun size={20} />,
+      '03d': <Cloud size={20} />,
+      '04d': <Cloudy size={20} />,
+      '09d': <CloudRain size={20} />,
+      '10d': <CloudSunRain size={20} />,
+      '11d': <CloudLightning size={20} />,
+      '13d': <CloudSnow size={20} />,
+      '50d': <CloudFog size={20} />,
+      '01n': <Moon size={20} />,
+      '02n': <MoonStar size={20} />,
+      '03n': <Cloud size={20} />,
+      '04n': <Cloudy size={20} />,
+      '09n': <CloudRain size={20} />,
+      '10n': <CloudRain size={20} />,
+      '11n': <CloudLightning size={20} />,
+      '13n': <CloudSnow size={20} />,
+      '50n': <CloudFog size={20} />
+    };
+    
+    return iconMap[iconCode] || <Cloud size={20} />; // Default to cloudy if icon not found
+  };
+
   return (
     <div className={cn("text-center", className)}>
       <div className="group relative">
@@ -277,11 +383,74 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
               {formatTime(time)}
             </h1>
             <div className="absolute -right-8 sm:-right-10 top-2 sm:top-3 opacity-0 group-hover:opacity-100 transition-opacity">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={toggleClockType}
+                      className="text-white/70 hover:text-white text-sm p-1.5 sm:p-0"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2" />
+                        <path d="M12 6v6l4 2" />
+                      </svg>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent children={getClockTypeTitle()} />
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <Drawer>
+              <DrawerTrigger asChild>
+                <div className="absolute -right-8 sm:-right-10 top-9 sm:top-10 opacity-0 group-hover:opacity-100 transition-opacity">
                   <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button className="text-white/70 hover:text-white text-sm p-1.5 sm:p-0">
+                          <Settings2 className="w-4 h-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent children={`Font and color settings`} />
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              </DrawerTrigger>
+              {renderStyleOptions()}
+            </Drawer>
+          </div>
+        )}
+      </div>
+      <div className="flex flex-col gap-1 items-center">
+        <p
+          className={cn(
+            clockStyle.font,
+            clockStyle.color,
+            "mt-3 sm:mt-4 text-lg sm:text-2xl font-light tracking-wide opacity-70 select-none cursor-pointer hover:opacity-100 transition-opacity"
+          )}
+          style={{
+            textShadow:
+              "1px 1px 10px rgba(0,0,0, 0.1), 0 0 10px rgba(0,0,0, 0.1)",
+            letterSpacing: "0.02em",
+          }}
+          onClick={toggleDateFormat}
+        >
+          {formatDate(time)}
+          <div className="absolute -right-8 sm:-right-10 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
                   <button
-                    onClick={toggleClockType}
+                    onClick={toggleDateFormat}
                     className="text-white/70 hover:text-white text-sm p-1.5 sm:p-0"
                   >
                     <svg
@@ -295,51 +464,39 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     >
-                      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2" />
-                      <path d="M12 6v6l4 2" />
+                      <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                      <line x1="16" x2="16" y1="2" y2="6" />
+                      <line x1="8" x2="8" y1="2" y2="6" />
+                      <line x1="3" x2="21" y1="10" y2="10" />
                     </svg>
                   </button>
-                  </TooltipTrigger>
-                  <TooltipContent children={getClockTypeTitle()} />
-                  </Tooltip>
-                  </TooltipProvider>
-                </div>
-            <Drawer>
-              <DrawerTrigger asChild>
-                <div className="absolute -right-8 sm:-right-10 top-9 sm:top-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                  <button
-                    className="text-white/70 hover:text-white text-sm p-1.5 sm:p-0"
-                  >
-                   <Settings2 className="w-4 h-4" />
-                  </button>
-                  </TooltipTrigger>
-                  <TooltipContent children={`Font and color settings`} />
-                  </Tooltip>
-                  </TooltipProvider>
-                </div>
-              </DrawerTrigger>
-              {renderStyleOptions()}
-            </Drawer>
+                </TooltipTrigger>
+                <TooltipContent children={getDateFormatTitle()} />
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </p>
+        {weather && (
+          <div
+            className={cn(
+              clockStyle.font,
+              clockStyle.color,
+              "text-base sm:text-xl font-light tracking-wide opacity-60 select-none"
+            )}
+            style={{
+              textShadow:
+                "1px 1px 10px rgba(0,0,0, 0.1), 0 0 10px rgba(0,0,0, 0.1)",
+              letterSpacing: "0.02em",
+            }}
+          >
+           {/*  <div className="flex items-center justify-center gap-2">
+              <span>{`${tempUnit === 'F' ? Math.round((weather.temperature * 9/5) + 32) : Math.round(weather.temperature)}°${tempUnit}`}</span>
+              <span className="opacity-80">{getWeatherIcon(weather.icon)}</span>
+              <span className="capitalize opacity-80">{weather.description}</span>
+            </div> */}
           </div>
         )}
       </div>
-      <p
-        className={cn(
-          clockStyle.font,
-          clockStyle.color,
-          "mt-3 sm:mt-4 text-lg sm:text-2xl font-light tracking-wide opacity-70 select-none"
-        )}
-        style={{
-          textShadow:
-            "1px 1px 10px rgba(0,0,0, 0.1), 0 0 10px rgba(0,0,0, 0.1)",
-          letterSpacing: "0.02em",
-        }}
-      >
-        {formatDate(time)}
-      </p>
     </div>
   );
 };
