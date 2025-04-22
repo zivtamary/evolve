@@ -64,18 +64,18 @@ const GRADIENT_OPTIONS = [
     value: "bg-gradient-to-br from-blue-700/60 via-cyan-700/60 to-teal-700/60",
   },
   {
-    name: "Peach like color and Strong sky blue",
+    name: "Peachy Sky",
     value: "bg-gradient-to-tl from-[#ffafcc] to-[#a2d2ff]",
   }
 ];
 
 const SOLID_COLOR_OPTIONS = [
-  { name: "Nastia's Choice 1", value: "bg-[#ffafcc]" },
+  { name: "Pink", value: "bg-[#ffafcc]" },
 //   { name: "Nastia's Choice 2", value: "bg-[#a2d2ff]" },
-  { name: "Nastia's Choice 3", value: "bg-[#d5bdaf]" },
-  { name: "Nastia's Choice 4", value: "bg-[#b0c4b1]" },
+  { name: "Brown", value: "bg-[#d5bdaf]" },
+  { name: "Pistachio", value: "bg-[#b0c4b1]" },
 //   { name: "Nastia's Choice 5", value: "bg-[#adc178]" },
-  { name: "Nastia's Choice 6", value: "bg-[#9b72cf]" },
+  { name: "Lavender", value: "bg-[#9b72cf]" },
 //   { name: "Nastia's Choice 7", value: "bg-[#8ecae6]" },
 //   { name: "Nastia's Choice 8", value: "bg-[#ef8354]" },
   { name: "Black", value: "bg-gray-950" },

@@ -828,7 +828,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
           : {};
       
       if (typeof localSettings !== 'object' || localSettings === null) {
-        console.warn('Local pomodoro settings is not an object, resetting to default');
+        // console.warn('Local pomodoro settings is not an object, resetting to default');
         const defaultSettings = {
           workDuration: 25,
           breakDuration: 5,

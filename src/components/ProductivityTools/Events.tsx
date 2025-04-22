@@ -552,10 +552,10 @@ const Events = () => {
         // Delete events from cloud that don't exist locally
         if (eventsToDelete.length > 0) {
           // console.log(
-            "Deleting",
-            eventsToDelete.length,
-            "events from cloud..."
-          );
+          //   "Deleting",
+          //   eventsToDelete.length,
+          //   "events from cloud..."
+          // );
           const { error: deleteError } = await supabase
             .from("events")
             .delete()

@@ -173,9 +173,9 @@ const Pomodoro: React.FC = () => {
     }
 
     try {
-      // console.log('Timer completed, attempting to sync...');
+    //   console.log('Timer completed, attempting to sync...');
       await syncPomodoroOnBlur();
-      // console.log('Pomodoro sync completed');
+    //   console.log('Pomodoro sync completed');
     } catch (error) {
       console.error('Error syncing pomodoro:', error);
     }

@@ -179,7 +179,7 @@ const TodoList: React.FC = () => {
         // console.log('Todos sync completed successfully');
       }
     } catch (error) {
-      console.error('Error fetching todos from cloud:', error);
+      // console.error('Error fetching todos from cloud:', error);
     }
   };
 
@@ -263,7 +263,7 @@ const TodoList: React.FC = () => {
       
       // console.log('Todos sync completed');
     } catch (error) {
-      console.error('Error syncing todos:', error);
+      // console.error('Error syncing todos:', error);
     }
   };
   
@@ -303,7 +303,7 @@ const TodoList: React.FC = () => {
       
       // console.log('Todos sync completed');
     } catch (error) {
-      console.error('Error syncing todos:', error);
+      // console.error('Error syncing todos:', error);
     }
   };
   
@@ -351,7 +351,7 @@ const TodoList: React.FC = () => {
         // console.log('Todo deleted from local storage only');
       }
     } catch (error) {
-      console.error('Error deleting todo:', error);
+      // console.error('Error deleting todo:', error);
     }
   };
   
@@ -369,7 +369,7 @@ const TodoList: React.FC = () => {
       if (error) throw error;
       // console.log('Last synced timestamp updated successfully');
     } catch (error) {
-      console.error('Error updating last_synced timestamp:', error);
+      // console.error('Error updating last_synced timestamp:', error);
     }
   };
   
