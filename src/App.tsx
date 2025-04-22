@@ -50,7 +50,7 @@ const AppRoutes = () => {
 
     return () => clearTimeout(backgroundTimer);
   }, []);
-console.log(window.location)
+// console.log(window.location)
   return (
     <div className="relative">
       {/* Background fade-in */}

@@ -36,8 +36,8 @@ const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete, onStartFadeOut 
       if (step === 0) {
         // Set splash screen to seen if user has name in local storage
         if (displayName) {
-            console.log('Now setting splash screen to seen');
-            console.log('User has name: ', displayName);
+            // console.log('Now setting splash screen to seen');
+            // console.log('User has name: ', displayName);
             onComplete();
             return;
         }

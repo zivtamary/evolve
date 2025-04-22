@@ -280,7 +280,7 @@ const Events = () => {
 
     try {
       if (isAuthenticated && userProfile?.cloud_sync_enabled) {
-        console.log("Deleting event from Supabase...");
+        // console.log("Deleting event from Supabase...");
         const { error } = await supabase
           .from("events")
           .delete()
@@ -288,7 +288,7 @@ const Events = () => {
           .eq("user_id", userProfile.id);
 
         if (error) throw error;
-        console.log("Event deleted from Supabase successfully");
+        // console.log("Event deleted from Supabase successfully");
       }
     } catch (error) {
       console.error("Error deleting event from Supabase:", error);
@@ -320,7 +320,7 @@ const Events = () => {
 
     try {
       if (isAuthenticated && userProfile?.cloud_sync_enabled) {
-        console.log("Adding event to Supabase...");
+        // console.log("Adding event to Supabase...");
         const { error } = await supabase.from("events").insert([
           {
             id: event.id,
@@ -336,7 +336,7 @@ const Events = () => {
         ]);
 
         if (error) throw error;
-        console.log("Event added to Supabase successfully");
+        // console.log("Event added to Supabase successfully");
       }
     } catch (error) {
       console.error("Error adding event to Supabase:", error);
@@ -357,9 +357,9 @@ const Events = () => {
 
   const handleEventBlur = async () => {
     try {
-      console.log("Event blur event triggered");
+      // console.log("Event blur event triggered");
       await syncEventsOnBlur();
-      console.log("Events sync completed");
+      // console.log("Events sync completed");
     } catch (error) {
       console.error("Error syncing events:", error);
     }
@@ -387,7 +387,7 @@ const Events = () => {
 
     try {
       if (isAuthenticated && userProfile?.cloud_sync_enabled) {
-        console.log("Updating event in Supabase...");
+        // console.log("Updating event in Supabase...");
         const { error } = await supabase
           .from("events")
           .update({
@@ -402,7 +402,7 @@ const Events = () => {
           .eq("user_id", userProfile.id);
 
         if (error) throw error;
-        console.log("Event updated in Supabase successfully");
+        // console.log("Event updated in Supabase successfully");
       }
     } catch (error) {
       console.error("Error updating event in Supabase:", error);
@@ -414,7 +414,7 @@ const Events = () => {
     if (!isAuthenticated || !userProfile?.cloud_sync_enabled) return;
 
     try {
-      console.log("Fetching events from cloud...");
+      // console.log("Fetching events from cloud...");
       const { data: cloudEvents, error } = await supabase
         .from("events")
         .select("*")
@@ -436,8 +436,8 @@ const Events = () => {
           })
         );
 
-        console.log("Cloud events fetched:", cloudEventsFormatted.length);
-        console.log("Local events:", events.length);
+        // console.log("Cloud events fetched:", cloudEventsFormatted.length);
+        // console.log("Local events:", events.length);
 
         // Create a map of local events for easy lookup
         const localEventsMap = new Map<string, Event>();
@@ -540,18 +540,18 @@ const Events = () => {
           .filter(Boolean) as CloudEvent[];
 
         if (eventsToSync.length > 0) {
-          console.log("Syncing", eventsToSync.length, "events to cloud...");
+          // console.log("Syncing", eventsToSync.length, "events to cloud...");
           const { error: syncError } = await supabase
             .from("events")
             .upsert(eventsToSync);
 
           if (syncError) throw syncError;
-          console.log("Events synced to cloud successfully");
+          // console.log("Events synced to cloud successfully");
         }
 
         // Delete events from cloud that don't exist locally
         if (eventsToDelete.length > 0) {
-          console.log(
+          // console.log(
             "Deleting",
             eventsToDelete.length,
             "events from cloud..."
@@ -562,10 +562,10 @@ const Events = () => {
             .in("id", eventsToDelete);
 
           if (deleteError) throw deleteError;
-          console.log("Events deleted from cloud successfully");
+          // console.log("Events deleted from cloud successfully");
         }
 
-        console.log("Events sync completed successfully");
+        // console.log("Events sync completed successfully");
       }
     } catch (error) {
       console.error("Error fetching events from cloud:", error);

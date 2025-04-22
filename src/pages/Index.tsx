@@ -270,7 +270,7 @@ const Index = () => {
   const handleShuffleImage = () => {
     // This function will be called when the user clicks the "Shuffle" button
     // You can implement your image shuffling logic here
-    console.log("Shuffling background image");
+    // console.log("Shuffling background image");
     // For example, you might want to trigger a new image load from your BackgroundImage component
   };
 
@@ -569,7 +569,7 @@ const Index = () => {
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 [&>*:only-child]:md:col-span-2 [&>*:last-child:nth-child(2n-1)]:md:col-span-2 w-full h-screen h-xl:h-max py-4">
                                 {getOrderedWidgets().map(
                                   ({ type, component: Component }) => {
-                                    console.log(type, widgetVisibility[type], widgetVisibility);
+                                    // console.log(type, widgetVisibility[type], widgetVisibility);
                                     if (!widgetVisibility[type]) return null;
                                     return <Component key={type} />;
                                   }

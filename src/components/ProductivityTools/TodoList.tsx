@@ -50,7 +50,7 @@ const TodoList: React.FC = () => {
     if (!isAuthenticated || !userProfile?.cloud_sync_enabled) return;
     
     try {
-      console.log('Fetching todos from cloud...');
+      // console.log('Fetching todos from cloud...');
       const { data: cloudTodos, error } = await supabase
         .from('todos')
         .select('*')
@@ -68,8 +68,8 @@ const TodoList: React.FC = () => {
           updatedAt: new Date(todo.updated_at).getTime()
         }));
         
-        console.log('Cloud todos fetched:', cloudTodosFormatted.length);
-        console.log('Local todos:', todos.length);
+        // console.log('Cloud todos fetched:', cloudTodosFormatted.length);
+        // console.log('Local todos:', todos.length);
         
         // Create a map of local todos for easy lookup
         const localTodosMap = new Map<string, TodoItem>();
@@ -155,28 +155,28 @@ const TodoList: React.FC = () => {
         }).filter(Boolean) as CloudTodo[];
         
         if (todosToSync.length > 0) {
-          console.log('Syncing', todosToSync.length, 'todos to cloud...');
+          // console.log('Syncing', todosToSync.length, 'todos to cloud...');
           const { error: syncError } = await supabase
             .from('todos')
             .upsert(todosToSync);
             
           if (syncError) throw syncError;
-          console.log('Todos synced to cloud successfully');
+          // console.log('Todos synced to cloud successfully');
         }
         
         // Delete todos from cloud that don't exist locally
         if (todosToDelete.length > 0) {
-          console.log('Deleting', todosToDelete.length, 'todos from cloud...');
+          // console.log('Deleting', todosToDelete.length, 'todos from cloud...');
           const { error: deleteError } = await supabase
             .from('todos')
             .delete()
             .in('id', todosToDelete);
             
           if (deleteError) throw deleteError;
-          console.log('Todos deleted from cloud successfully');
+          // console.log('Todos deleted from cloud successfully');
         }
         
-        console.log('Todos sync completed successfully');
+        // console.log('Todos sync completed successfully');
       }
     } catch (error) {
       console.error('Error fetching todos from cloud:', error);
@@ -235,11 +235,11 @@ const TodoList: React.FC = () => {
     setNewTodo('');
 
     try {
-      console.log('Todo added, attempting to sync...');
+      // console.log('Todo added, attempting to sync...');
       
       // Directly insert into database if authenticated and sync is enabled
       if (isAuthenticated && userProfile?.cloud_sync_enabled) {
-        console.log('Inserting todo into database:', todo.id);
+        // console.log('Inserting todo into database:', todo.id);
         const { error } = await supabase
           .from('todos')
           .insert({
@@ -252,7 +252,7 @@ const TodoList: React.FC = () => {
           });
           
         if (error) throw error;
-        console.log('Todo inserted into database successfully');
+        // console.log('Todo inserted into database successfully');
         
         // Update last_synced timestamp in profile
         await updateLastSynced();
@@ -261,7 +261,7 @@ const TodoList: React.FC = () => {
         await syncTodosOnBlur();
       }
       
-      console.log('Todos sync completed');
+      // console.log('Todos sync completed');
     } catch (error) {
       console.error('Error syncing todos:', error);
     }
@@ -274,13 +274,13 @@ const TodoList: React.FC = () => {
     setTodos(updatedTodos);
 
     try {
-      console.log('Todo toggled, attempting to sync...');
+      // console.log('Todo toggled, attempting to sync...');
       
       // Directly update in database if authenticated and sync is enabled
       if (isAuthenticated && userProfile?.cloud_sync_enabled) {
         const todo = updatedTodos.find(t => t.id === id);
         if (todo) {
-          console.log('Updating todo in database:', id);
+          // console.log('Updating todo in database:', id);
           const { error } = await supabase
             .from('todos')
             .update({
@@ -291,7 +291,7 @@ const TodoList: React.FC = () => {
             .eq('user_id', userProfile.id);
             
           if (error) throw error;
-          console.log('Todo updated in database successfully');
+          // console.log('Todo updated in database successfully');
           
           // Update last_synced timestamp in profile
           await updateLastSynced();
@@ -301,7 +301,7 @@ const TodoList: React.FC = () => {
         await syncTodosOnBlur();
       }
       
-      console.log('Todos sync completed');
+      // console.log('Todos sync completed');
     } catch (error) {
       console.error('Error syncing todos:', error);
     }
@@ -311,17 +311,17 @@ const TodoList: React.FC = () => {
     try {
       // First delete from Supabase if authenticated and sync is enabled
       if (isAuthenticated && userProfile?.cloud_sync_enabled) {
-        console.log('Deleting todo from cloud:', id);
+        // console.log('Deleting todo from cloud:', id);
         const { error } = await supabase
           .from('todos')
           .delete()
           .eq('id', id);
           
         if (error) throw error;
-        console.log('Todo deleted from cloud successfully');
+        // console.log('Todo deleted from cloud successfully');
 
         // After successful delete, fetch updated todos
-        console.log('Fetching updated todos...');
+        // console.log('Fetching updated todos...');
         const { data: updatedTodos, error: fetchError } = await supabase
           .from('todos')
           .select('*')
@@ -339,7 +339,7 @@ const TodoList: React.FC = () => {
             updatedAt: new Date(todo.updated_at).getTime()
           }));
           setTodos(localTodos);
-          console.log('Local todos updated with cloud data');
+          // console.log('Local todos updated with cloud data');
           
           // Update last_synced timestamp in profile
           await updateLastSynced();
@@ -348,7 +348,7 @@ const TodoList: React.FC = () => {
         // If not authenticated or sync disabled, just update local storage
         const updatedTodos = todos.filter(todo => todo.id !== id);
         setTodos(updatedTodos);
-        console.log('Todo deleted from local storage only');
+        // console.log('Todo deleted from local storage only');
       }
     } catch (error) {
       console.error('Error deleting todo:', error);
@@ -360,14 +360,14 @@ const TodoList: React.FC = () => {
     if (!isAuthenticated || !userProfile?.id) return;
     
     try {
-      console.log('Updating last_synced timestamp in profile');
+      // console.log('Updating last_synced timestamp in profile');
       const { error } = await supabase
         .from('profiles')
         .update({ last_synced: new Date().toISOString() })
         .eq('id', userProfile.id);
         
       if (error) throw error;
-      console.log('Last synced timestamp updated successfully');
+      // console.log('Last synced timestamp updated successfully');
     } catch (error) {
       console.error('Error updating last_synced timestamp:', error);
     }

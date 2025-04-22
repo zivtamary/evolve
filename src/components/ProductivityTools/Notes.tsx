@@ -54,7 +54,7 @@ const Notes: React.FC = () => {
     if (!isAuthenticated || !userProfile?.cloud_sync_enabled) return;
     
     try {
-      console.log('Fetching notes from cloud...');
+      // console.log('Fetching notes from cloud...');
       const { data: cloudNotes, error } = await supabase
         .from('notes')
         .select('*')
@@ -72,8 +72,8 @@ const Notes: React.FC = () => {
           updatedAt: new Date(note.updated_at).getTime()
         }));
         
-        console.log('Cloud notes fetched:', cloudNotesFormatted.length);
-        console.log('Local notes:', notes.length);
+        // console.log('Cloud notes fetched:', cloudNotesFormatted.length);
+        // console.log('Local notes:', notes.length);
         
         // Create a map of local notes for easy lookup
         const localNotesMap = new Map<string, Note>();
@@ -159,28 +159,28 @@ const Notes: React.FC = () => {
         }).filter(Boolean) as CloudNote[];
         
         if (notesToSync.length > 0) {
-          console.log('Syncing', notesToSync.length, 'notes to cloud...');
+          // console.log('Syncing', notesToSync.length, 'notes to cloud...');
           const { error: syncError } = await supabase
             .from('notes')
             .upsert(notesToSync);
             
           if (syncError) throw syncError;
-          console.log('Notes synced to cloud successfully');
+          // console.log('Notes synced to cloud successfully');
         }
         
         // Delete notes from cloud that don't exist locally
         if (notesToDelete.length > 0) {
-          console.log('Deleting', notesToDelete.length, 'notes from cloud...');
+          // console.log('Deleting', notesToDelete.length, 'notes from cloud...');
           const { error: deleteError } = await supabase
             .from('notes')
             .delete()
             .in('id', notesToDelete);
             
           if (deleteError) throw deleteError;
-          console.log('Notes deleted from cloud successfully');
+          // console.log('Notes deleted from cloud successfully');
         }
         
-        console.log('Notes sync completed successfully');
+        // console.log('Notes sync completed successfully');
       }
     } catch (error) {
       console.error('Error fetching notes from cloud:', error);
@@ -259,7 +259,7 @@ const Notes: React.FC = () => {
     // Immediately create the note in the database if authenticated and sync is enabled
     if (isAuthenticated && userProfile?.cloud_sync_enabled) {
       try {
-        console.log('Creating new note in database:', newNote.id);
+        // console.log('Creating new note in database:', newNote.id);
         const { error } = await supabase
           .from('notes')
           .insert({
@@ -272,7 +272,7 @@ const Notes: React.FC = () => {
           });
           
         if (error) throw error;
-        console.log('Note created in database successfully');
+        // console.log('Note created in database successfully');
       } catch (error) {
         console.error('Error creating note in database:', error);
       }
@@ -301,11 +301,11 @@ const Notes: React.FC = () => {
     }
 
     try {
-      console.log('Note deleted, attempting to sync...');
+      // console.log('Note deleted, attempting to sync...');
       
       // Directly delete from database if authenticated and sync is enabled
       if (isAuthenticated && userProfile?.cloud_sync_enabled) {
-        console.log('Deleting note from database:', id);
+        // console.log('Deleting note from database:', id);
         const { error } = await supabase
           .from('notes')
           .delete()
@@ -313,13 +313,13 @@ const Notes: React.FC = () => {
           .eq('user_id', userProfile.id);
           
         if (error) throw error;
-        console.log('Note deleted from database successfully');
+        // console.log('Note deleted from database successfully');
       } else {
         // If not authenticated or sync disabled, just sync normally
         await syncNotesOnBlur();
       }
       
-      console.log('Notes sync completed');
+      // console.log('Notes sync completed');
     } catch (error) {
       console.error('Error syncing notes:', error);
     }
@@ -364,9 +364,9 @@ const Notes: React.FC = () => {
   // Add a new function to handle title blur
   const handleTitleBlur = async () => {
     try {
-      console.log('Note title blur event triggered');
-      console.log('Initial title:', initialTitle);
-      console.log('Current title:', noteTitle);
+      // console.log('Note title blur event triggered');
+      // console.log('Initial title:', initialTitle);
+      // console.log('Current title:', noteTitle);
       
       // If we have an active note and are authenticated with sync enabled, update it directly
       if (activeNoteId && isAuthenticated && userProfile?.cloud_sync_enabled) {
@@ -374,7 +374,7 @@ const Notes: React.FC = () => {
         if (activeNote) {
           // Check if the title has actually changed
           if (initialTitle !== noteTitle) {
-            console.log('Title changed, updating note title in database:', activeNoteId);
+            // console.log('Title changed, updating note title in database:', activeNoteId);
             const { error } = await supabase
               .from('notes')
               .update({
@@ -385,12 +385,12 @@ const Notes: React.FC = () => {
               .eq('user_id', userProfile.id);
               
             if (error) throw error;
-            console.log('Note title updated in database successfully');
+            // console.log('Note title updated in database successfully');
             
             // Update last_synced timestamp in profile
             await updateLastSynced();
           } else {
-            console.log('No title changes detected, skipping database update');
+            // console.log('No title changes detected, skipping database update');
           }
         }
       } else {
@@ -401,7 +401,7 @@ const Notes: React.FC = () => {
       // Clear the initial title value
       setInitialTitle('');
       
-      console.log('Notes sync completed');
+      // console.log('Notes sync completed');
     } catch (error) {
       console.error('Error syncing notes:', error);
     }
@@ -444,9 +444,9 @@ const Notes: React.FC = () => {
 
   const handleBlur = async () => {
     try {
-      console.log('Note blur event triggered');
-      console.log('Initial content:', initialContent);
-      console.log('Current content:', noteContent);
+      // console.log('Note blur event triggered');
+      // console.log('Initial content:', initialContent);
+      // console.log('Current content:', noteContent);
       
       // If we have an active note and are authenticated with sync enabled, update it directly
       if (activeNoteId && isAuthenticated && userProfile?.cloud_sync_enabled) {
@@ -454,7 +454,7 @@ const Notes: React.FC = () => {
         if (activeNote) {
           // Check if the content has actually changed
           if (initialContent !== noteContent) {
-            console.log('Content changed, updating note in database:', activeNoteId);
+            // console.log('Content changed, updating note in database:', activeNoteId);
             const { error } = await supabase
               .from('notes')
               .update({
@@ -465,12 +465,12 @@ const Notes: React.FC = () => {
               .eq('user_id', userProfile.id);
               
             if (error) throw error;
-            console.log('Note content updated in database successfully');
+            // console.log('Note content updated in database successfully');
             
             // Update last_synced timestamp in profile
             await updateLastSynced();
           } else {
-            console.log('No content changes detected, skipping database update');
+            // console.log('No content changes detected, skipping database update');
           }
         }
       } else {
@@ -481,7 +481,7 @@ const Notes: React.FC = () => {
       // Clear the initial content value
       setInitialContent('');
       
-      console.log('Notes sync completed');
+      // console.log('Notes sync completed');
     } catch (error) {
       console.error('Error syncing notes:', error);
     }
@@ -492,14 +492,14 @@ const Notes: React.FC = () => {
     if (!isAuthenticated || !userProfile?.id) return;
     
     try {
-      console.log('Updating last_synced timestamp in profile');
+      // console.log('Updating last_synced timestamp in profile');
       const { error } = await supabase
         .from('profiles')
         .update({ last_synced: new Date().toISOString() })
         .eq('id', userProfile.id);
         
       if (error) throw error;
-      console.log('Last synced timestamp updated successfully');
+      // console.log('Last synced timestamp updated successfully');
     } catch (error) {
       console.error('Error updating last_synced timestamp:', error);
     }

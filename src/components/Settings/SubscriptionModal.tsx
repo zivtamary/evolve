@@ -64,7 +64,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     const fetchPlans = async () => {
       try {
         setError(null);
-        console.log("Fetching subscription plans...");
+        // console.log("Fetching subscription plans...");
         const { data: plansData, error } = await supabase
           .from('subscription_plans')
           .select('*')
@@ -73,7 +73,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
         if (error) throw error;
         if (isMounted) {
-          console.log("Setting subscription plans:", plansData);
+          // console.log("Setting subscription plans:", plansData);
           setPlans(plansData);
 
           // Select the yearly plan by default
@@ -117,7 +117,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         }
       );
 
-      console.log("Data:", data);
+      // console.log("Data:", data);
 
       if (error) {
         setError("Failed to create checkout session. Please try again later.");

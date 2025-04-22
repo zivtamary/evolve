@@ -155,7 +155,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       try {
         // 1. Check if there's a session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        console.log('[SettingsContext] Session check result:', { hasSession: !!session, error: sessionError });
+        // console.log('[SettingsContext] Session check result:', { hasSession: !!session, error: sessionError });
 
         if (sessionError) {
           console.error('[SettingsContext] Session error:', sessionError);
@@ -164,7 +164,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
         // 2. Get user from session
         const { data: { user }, error: userError } = await supabase.auth.getUser();
-        console.log('[SettingsContext] User check result:', { hasUser: !!user, error: userError });
+        // console.log('[SettingsContext] User check result:', { hasUser: !!user, error: userError });
 
         if (userError) {
           console.error('[SettingsContext] User error:', userError);
@@ -172,7 +172,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (!user) {
-          console.log('[SettingsContext] No user found, setting isAuthenticated to false');
+          // console.log('[SettingsContext] No user found, setting isAuthenticated to false');
           setIsAuthenticated(false);
           setUserProfile(null);
           setSubscription(null);
@@ -183,18 +183,18 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
         try {
           // 3. Fetch profile
-          console.log('[SettingsContext] Fetching profile for user:', user.id);
+          // console.log('[SettingsContext] Fetching profile for user:', user.id);
           const { data: profileData, error: profileError } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', user.id)
             .single();
-          console.log('[SettingsContext] Profile fetch result:', { data: !!profileData, error: profileError });
+          // console.log('[SettingsContext] Profile fetch result:', { data: !!profileData, error: profileError });
 
           if (profileError) {
             console.error('[SettingsContext] Profile error:', profileError);
             if (profileError.code === 'PGRST116') {
-              console.log('[SettingsContext] Profile not found, creating new profile');
+              // console.log('[SettingsContext] Profile not found, creating new profile');
               const { data: newProfile, error: createError } = await supabase
                 .from('profiles')
                 .insert([{ 
@@ -215,24 +215,24 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
                 console.error('[SettingsContext] Error creating profile:', createError);
                 throw createError;
               }
-              console.log('[SettingsContext] New profile created:', newProfile);
+              // console.log('[SettingsContext] New profile created:', newProfile);
               setUserProfile(newProfile);
             } else {
               throw profileError;
             }
           } else {
-            console.log('[SettingsContext] Existing profile found:', profileData);
+            // console.log('[SettingsContext] Existing profile found:', profileData);
             setUserProfile(profileData);
           }
 
           // 4. Fetch subscription
-          console.log('[SettingsContext] Fetching subscription');
+          // console.log('[SettingsContext] Fetching subscription');
           const { data: subscriptionData, error: subscriptionError } = await supabase
             .from('subscriptions')
             .select('*')
             .eq('user_id', user.id)
             .single();
-          console.log('[SettingsContext] Subscription fetch result:', { data: !!subscriptionData, error: subscriptionError });
+          // console.log('[SettingsContext] Subscription fetch result:', { data: !!subscriptionData, error: subscriptionError });
 
           if (subscriptionError && subscriptionError.code !== 'PGRST116') {
             console.error('[SettingsContext] Subscription error:', subscriptionError);
@@ -241,7 +241,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
           setSubscription(subscriptionData);
 
           // 5. Fetch notes, todos, and events
-          console.log('[SettingsContext] Fetching notes, todos, and events');
+          // console.log('[SettingsContext] Fetching notes, todos, and events');
           await Promise.all([
             syncNotes(user.id),
             syncTodos(user.id),
@@ -249,7 +249,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
           ]);
 
           // 6. Update last_synced timestamp after all data is fetched
-          console.log('[SettingsContext] Updating last_synced timestamp');
+          // console.log('[SettingsContext] Updating last_synced timestamp');
           const { error: updateError } = await supabase
             .from('profiles')
             .update({ last_synced: new Date().toISOString() })
@@ -266,7 +266,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
             last_synced: new Date().toISOString()
           } : null);
           
-          console.log('[SettingsContext] Last synced timestamp updated successfully');
+          // console.log('[SettingsContext] Last synced timestamp updated successfully');
         } catch (error) {
           console.error('[SettingsContext] Error in data fetching:', error);
           // Don't throw here, we want to keep the user logged in even if data fetching fails
@@ -283,7 +283,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     };
 
     // Initial check
-    console.log('[SettingsContext] Starting initial session check');
+    // console.log('[SettingsContext] Starting initial session check');
     checkSession().catch(error => {
       console.error('[SettingsContext] Unhandled error in initial check:', error);
       setIsLoading(false);
@@ -293,7 +293,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     // Set up auth state change listener
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('[SettingsContext] Auth state changed:', { event, sessionExists: !!session });
+        // console.log('[SettingsContext] Auth state changed:', { event, sessionExists: !!session });
         
         if (event === 'SIGNED_OUT') {
           setIsAuthenticated(false);
@@ -316,7 +316,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
     // Cleanup
     return () => {
-      console.log('[SettingsContext] Cleaning up...');
+      // console.log('[SettingsContext] Cleaning up...');
       authSubscription.unsubscribe();
     };
   }, []);
@@ -465,13 +465,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   // Add specific sync triggers
   const syncNotesOnBlur = async () => {
     if (!isAuthenticated || !userProfile?.cloud_sync_enabled) {
-      console.log('Sync skipped - not authenticated or cloud sync disabled');
+      // console.log('Sync skipped - not authenticated or cloud sync disabled');
       return;
     }
     try {
-      console.log('Starting notes sync...');
+      // console.log('Starting notes sync...');
       await syncNotes(userProfile.id);
-      console.log('Notes sync completed successfully');
+      // console.log('Notes sync completed successfully');
     } catch (error) {
       console.error('Error in syncNotesOnBlur:', error);
     }
@@ -479,13 +479,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   const syncTodosOnBlur = async () => {
     if (!isAuthenticated || !userProfile?.cloud_sync_enabled) {
-      console.log('Sync skipped - not authenticated or cloud sync disabled');
+      // console.log('Sync skipped - not authenticated or cloud sync disabled');
       return;
     }
     try {
-      console.log('Starting todos sync...');
+      // console.log('Starting todos sync...');
       await syncTodos(userProfile.id);
-      console.log('Todos sync completed successfully');
+      // console.log('Todos sync completed successfully');
     } catch (error) {
       console.error('Error in syncTodosOnBlur:', error);
     }
@@ -493,13 +493,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   const syncEventsOnBlur = async () => {
     if (!isAuthenticated || !userProfile?.cloud_sync_enabled) {
-      console.log('Sync skipped - not authenticated or cloud sync disabled');
+      // console.log('Sync skipped - not authenticated or cloud sync disabled');
       return;
     }
     try {
-      console.log('Starting events sync...');
+      // console.log('Starting events sync...');
       await syncEvents(userProfile.id);
-      console.log('Events sync completed successfully');
+      // console.log('Events sync completed successfully');
     } catch (error) {
       console.error('Error in syncEventsOnBlur:', error);
     }
@@ -507,13 +507,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   const syncPomodoroOnBlur = async () => {
     if (!isAuthenticated || !userProfile?.cloud_sync_enabled) {
-      console.log('Sync skipped - not authenticated or cloud sync disabled');
+      // console.log('Sync skipped - not authenticated or cloud sync disabled');
       return;
     }
     try {
-      console.log('Starting pomodoro settings sync...');
+      // console.log('Starting pomodoro settings sync...');
       await syncPomodoroSettings(userProfile.id);
-      console.log('Pomodoro settings sync completed successfully');
+      // console.log('Pomodoro settings sync completed successfully');
     } catch (error) {
       console.error('Error in syncPomodoroOnBlur:', error);
     }
@@ -582,7 +582,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   const syncNotes = async (userId: string) => {
     try {
-      console.log('Fetching local notes...');
+      // console.log('Fetching local notes...');
       const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
       const localNotesData = evolveData.notes || null;
       
@@ -593,9 +593,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
           ? localNotesData
           : [];
           
-      console.log('Local notes found:', localNotes.length);
+      // console.log('Local notes found:', localNotes.length);
       
-      console.log('Fetching cloud notes...');
+      // console.log('Fetching cloud notes...');
       const { data: cloudNotes, error } = await supabase
         .from('notes')
         .select('*')
@@ -603,7 +603,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     
       if (error) throw error;
     
-      console.log('Cloud notes found:', cloudNotes?.length || 0);
+      // console.log('Cloud notes found:', cloudNotes?.length || 0);
       
       // Create sets of IDs for comparison
       const localNoteIds = new Set(localNotes.map(note => note.id));
@@ -613,14 +613,14 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       const notesToDelete = Array.from(cloudNoteIds).filter(id => !localNoteIds.has(id));
       
       if (notesToDelete.length > 0) {
-        console.log('Deleting', notesToDelete.length, 'notes from cloud...');
+        // console.log('Deleting', notesToDelete.length, 'notes from cloud...');
         const { error: deleteError } = await supabase
           .from('notes')
           .delete()
           .in('id', notesToDelete);
           
         if (deleteError) throw deleteError;
-        console.log('Notes deleted successfully');
+        // console.log('Notes deleted successfully');
       }
       
       // Merge and sync
@@ -633,15 +633,15 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       }));
       
       if (notesToSync.length > 0) {
-        console.log('Syncing', notesToSync.length, 'notes to cloud...');
+        // console.log('Syncing', notesToSync.length, 'notes to cloud...');
         const { error: syncError } = await supabase
           .from('notes')
           .upsert(notesToSync);
           
         if (syncError) throw syncError;
-        console.log('Notes synced successfully');
+        // console.log('Notes synced successfully');
       } else {
-        console.log('No notes to sync');
+        // console.log('No notes to sync');
       }
     } catch (error) {
       console.error('Error in syncNotes:', error);
@@ -651,7 +651,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   const syncTodos = async (userId: string) => {
     try {
-      console.log('Fetching local todos...');
+      // console.log('Fetching local todos...');
       const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
       const localTodosData = evolveData.todos || null;
       
@@ -662,9 +662,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
           ? localTodosData
           : [];
       
-      console.log('Local todos found:', localTodos.length);
+      // console.log('Local todos found:', localTodos.length);
       
-      console.log('Fetching cloud todos...');
+      // console.log('Fetching cloud todos...');
       const { data: cloudTodos, error } = await supabase
         .from('todos')
         .select('*')
@@ -672,7 +672,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       
       if (error) throw error;
       
-      console.log('Cloud todos found:', cloudTodos?.length || 0);
+      // console.log('Cloud todos found:', cloudTodos?.length || 0);
 
       // Create sets of IDs for comparison
       const localTodoIds = new Set(localTodos.map(todo => todo.id));
@@ -682,14 +682,14 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       const todosToDelete = Array.from(cloudTodoIds).filter(id => !localTodoIds.has(id));
       
       if (todosToDelete.length > 0) {
-        console.log('Deleting', todosToDelete.length, 'todos from cloud...');
+        // console.log('Deleting', todosToDelete.length, 'todos from cloud...');
         const { error: deleteError } = await supabase
           .from('todos')
           .delete()
           .in('id', todosToDelete);
           
         if (deleteError) throw deleteError;
-        console.log('Todos deleted successfully');
+        // console.log('Todos deleted successfully');
       }
 
       // Merge cloud and local todos
@@ -744,15 +744,15 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       });
       
       if (todosToSync.length > 0) {
-        console.log('Syncing', todosToSync.length, 'todos to cloud...');
+        // console.log('Syncing', todosToSync.length, 'todos to cloud...');
         const { error: syncError } = await supabase
           .from('todos')
           .upsert(todosToSync);
           
         if (syncError) throw syncError;
-        console.log('Todos synced successfully');
+        // console.log('Todos synced successfully');
       } else {
-        console.log('No todos to sync');
+        // console.log('No todos to sync');
       }
     } catch (error) {
       console.error('Error in syncTodos:', error);
@@ -762,7 +762,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   const syncEvents = async (userId: string) => {
     try {
-      console.log('Fetching local events...');
+      // console.log('Fetching local events...');
       const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
       const localEventsData = evolveData['dashboard-events'] || null;
       
@@ -773,9 +773,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
           ? localEventsData
           : [];
       
-      console.log('Local events found:', localEvents.length);
+      // console.log('Local events found:', localEvents.length);
       
-      console.log('Fetching cloud events...');
+      // console.log('Fetching cloud events...');
     const { data: cloudEvents, error } = await supabase
       .from('events')
       .select('*')
@@ -783,7 +783,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     
     if (error) throw error;
     
-      console.log('Cloud events found:', cloudEvents?.length || 0);
+      // console.log('Cloud events found:', cloudEvents?.length || 0);
       
       // Merge and sync
       const eventsToSync = localEvents.map((event: Event) => ({
@@ -798,15 +798,15 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       }));
       
       if (eventsToSync.length > 0) {
-        console.log('Syncing', eventsToSync.length, 'events to cloud...');
+        // console.log('Syncing', eventsToSync.length, 'events to cloud...');
         const { error: syncError } = await supabase
           .from('events')
           .upsert(eventsToSync);
           
         if (syncError) throw syncError;
-        console.log('Events synced successfully');
+        // console.log('Events synced successfully');
       } else {
-        console.log('No events to sync');
+        // console.log('No events to sync');
       }
     } catch (error) {
       console.error('Error in syncEvents:', error);
@@ -816,7 +816,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   const syncPomodoroSettings = async (userId: string) => {
     try {
-      console.log('Fetching local pomodoro settings...');
+      // console.log('Fetching local pomodoro settings...');
       const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
       const localSettingsData = evolveData['pomodoro-settings'] || null;
       
@@ -840,9 +840,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       
-      console.log('Local pomodoro settings:', localSettings);
+      // console.log('Local pomodoro settings:', localSettings);
       
-      console.log('Fetching cloud pomodoro settings...');
+      // console.log('Fetching cloud pomodoro settings...');
     const { data: cloudSettings, error } = await supabase
       .from('pomodoro_settings')
       .select('*')
@@ -851,7 +851,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       
       if (error && error.code !== 'PGRST116') throw error; // Ignore not found error
       
-      console.log('Cloud pomodoro settings:', cloudSettings);
+      // console.log('Cloud pomodoro settings:', cloudSettings);
       
       // Merge and sync
       const settingsToSync = {
@@ -863,13 +863,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         updated_at: new Date().toISOString()
       };
       
-      console.log('Syncing pomodoro settings to cloud...');
+      // console.log('Syncing pomodoro settings to cloud...');
       const { error: syncError } = await supabase
         .from('pomodoro_settings')
         .upsert(settingsToSync);
         
       if (syncError) throw syncError;
-      console.log('Pomodoro settings synced successfully');
+      // console.log('Pomodoro settings synced successfully');
     } catch (error) {
       console.error('Error in syncPomodoroSettings:', error);
       throw error;
