@@ -181,8 +181,9 @@ const SettingsSidebar = () => {
     setDeleteAccountError(null);
 
     try {
-      // @ts-expect-error - The RPC function exists but might not be in the type definition
-      const { error } = await supabase.rpc("delete_user");
+      const { error } = await supabase.functions.invoke("delete-user");
+
+    //    create supabase function to delete user and delete polar customer
 
       if (error) {
         setDeleteAccountError(
@@ -252,10 +253,10 @@ const SettingsSidebar = () => {
       <SettingsButton onClick={() => setIsSettingsOpen(true)} />
 
       <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <DialogContent className="bg-white dark:bg-black/90 border border-white/0 dark:border-white/5 backdrop-blur-xl p-0 max-w-4xl">
-          <div className="h-[60vh] flex">
+        <DialogContent className="bg-white dark:bg-black/90 border border-white/0 dark:border-white/5 backdrop-blur-xl p-0 max-w-4xl max-h-[90vh]">
+          <div className="h-[min(60vh,calc(100vh-8rem))] flex">
             <Tabs defaultValue="widgets" className="w-full flex">
-              <div className="w-64 border-r border-black/10 dark:border-white/10 p-4">
+              <div className="w-64 border-r border-black/10 dark:border-white/10 p-4 flex flex-col h-full">
                 <DialogHeader className="mb-4">
                   <DialogTitle className="flex items-center gap-2 text-black dark:text-white text-xl font-medium tracking-tight">
                     Settings
@@ -265,30 +266,30 @@ const SettingsSidebar = () => {
                 <TabsList className="flex flex-col h-auto bg-transparent space-y-1">
                   <TabsTrigger
                     value="widgets"
-                    className="flex items-center gap-3 justify-start w-full py-3 px-3 rounded-lg transition-all duration-200 data-[state=active]:bg-black/5 dark:data-[state=active]:bg-white/10 data-[state=active]:shadow-sm hover:bg-black/5 dark:hover:bg-white/10 relative overflow-hidden group"
+                    className="flex items-center gap-2 justify-start w-full py-3 px-3 rounded-lg transition-all duration-200 data-[state=active]:bg-black/5 dark:data-[state=active]:bg-white/10 data-[state=active]:shadow-sm hover:bg-black/5 dark:hover:bg-white/10 relative overflow-hidden group"
                   >
                     <div className="flex items-center justify-center w-8 h-8 rounded-md dark:group-hover:bg-white/20 transition-colors">
-                      <Monitor className="h-4 w-4 text-black/70 dark:text-white/70" />
+                      <Monitor className="h-4 w-4 " />
                     </div>
                     <span className="font-medium">Display</span>
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-black/0 dark:bg-white/0 data-[state=active]:bg-black/20 dark:data-[state=active]:bg-white/20 transition-colors rounded-tl-md rounded-bl-md"></div>
                   </TabsTrigger>
                   <TabsTrigger
                     value="profile"
-                    className="flex items-center gap-3 justify-start w-full py-3 px-3 rounded-lg transition-all duration-200 data-[state=active]:bg-black/5 dark:data-[state=active]:bg-white/10 data-[state=active]:shadow-sm hover:bg-black/5 dark:hover:bg-white/10 relative overflow-hidden group"
+                    className="flex items-center gap-2 justify-start w-full py-3 px-3 rounded-lg transition-all duration-200 data-[state=active]:bg-black/5 dark:data-[state=active]:bg-white/10 data-[state=active]:shadow-sm hover:bg-black/5 dark:hover:bg-white/10 relative overflow-hidden group"
                   >
                     <div className="flex items-center justify-center w-8 h-8 rounded-md dark:group-hover:bg-white/20 transition-colors">
-                      <User className="h-4 w-4 text-black/70 dark:text-white/70" />
+                      <User className="h-4 w-4 " />
                     </div>
                     <span className="font-medium">Profile</span>
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-black/0 dark:bg-white/0 data-[state=active]:bg-black/20 dark:data-[state=active]:bg-white/20 transition-colors rounded-tl-md rounded-bl-md"></div>
                   </TabsTrigger>
                   <TabsTrigger
                     value="sync"
-                    className="flex items-center gap-3 justify-start w-full py-3 px-3 rounded-lg transition-all duration-200 data-[state=active]:bg-black/5 dark:data-[state=active]:bg-white/10 data-[state=active]:shadow-sm hover:bg-black/5 dark:hover:bg-white/10 relative overflow-hidden group"
+                    className="flex items-center gap-2 justify-start w-full py-3 px-3 rounded-lg transition-all duration-200 data-[state=active]:bg-black/5 dark:data-[state=active]:bg-white/10 data-[state=active]:shadow-sm hover:bg-black/5 dark:hover:bg-white/10 relative overflow-hidden group"
                   >
                     <div className="flex items-center justify-center w-8 h-8 rounded-md dark:group-hover:bg-white/20 transition-colors">
-                      <Cloud className="h-4 w-4 text-black/70 dark:text-white/70" />
+                      <Cloud className="h-4 w-4 " />
                     </div>
                     <span className="font-medium">Data</span>
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-black/0 dark:bg-white/0 data-[state=active]:bg-black/20 dark:data-[state=active]:bg-white/20 transition-colors rounded-tl-md rounded-bl-md"></div>
@@ -297,28 +298,64 @@ const SettingsSidebar = () => {
                     (!isPremium || userProfile?.polar_customer_id) && (
                       <TabsTrigger
                         value="billing"
-                        className="flex items-center gap-3 justify-start w-full py-3 px-3 rounded-lg transition-all duration-200 data-[state=active]:bg-black/5 dark:data-[state=active]:bg-white/10 data-[state=active]:shadow-sm hover:bg-black/5 dark:hover:bg-white/10 relative overflow-hidden group"
+                        className="flex items-center gap-2 justify-start w-full py-3 px-3 rounded-lg transition-all duration-200 data-[state=active]:bg-black/5 dark:data-[state=active]:bg-white/10 data-[state=active]:shadow-sm hover:bg-black/5 dark:hover:bg-white/10 relative overflow-hidden group"
                       >
                         <div className="flex items-center justify-center w-8 h-8 rounded-md dark:group-hover:bg-white/20 transition-colors">
-                          <CreditCard className="h-4 w-4 text-black/70 dark:text-white/70" />
+                          <CreditCard className="h-4 w-4 " />
                         </div>
                         <span className="font-medium">Billing</span>
                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-black/0 dark:bg-white/0 data-[state=active]:bg-black/20 dark:data-[state=active]:bg-white/20 transition-colors rounded-tl-md rounded-bl-md"></div>
                       </TabsTrigger>
                     )}
                 </TabsList>
+                
+                {/* Spacer to push feedback button to bottom */}
+                <div className="flex-grow"></div>
+                
+                {/* Feedback button at the bottom */}
+                <div className="w-full mb-4">
+                  <div
+                    onClick={() => setShowFeedbackDialog(true)}
+                    className="w-full p-2 rounded-lg cursor-pointer transition-all duration-300
+                      bg-gradient-to-br from-black via-zinc-900 to-black
+                      hover:from-black hover:via-zinc-900 hover:to-black
+                      border border-white/10 dark:border-zinc-900 dark:hover:border-zinc-800 hover:border-white/20
+                      relative overflow-hidden group shadow-md hover:shadow-lg"
+                  >
+                    {/* Animated gradient background */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-white/10 animate-shimmer" />
+                    
+                    {/* Sparkle effects - only show on larger screens */}
+                    <div className="absolute inset-0 hidden sm:block">
+                      {/* Small sparkles */}
+                      <div className="absolute top-1/3 right-1/4 h-1 w-1 bg-white/60 rounded-full animate-[sparkle_3s_ease-in-out_infinite_0.7s]" />
+                      <div className="absolute bottom-1/3 left-1/4 h-1 w-1 bg-white/60 rounded-full animate-[sparkle_3.5s_ease-in-out_infinite_1.2s]" />
+                    </div>
+
+                    <div className="relative z-10 flex items-center gap-2">
+                      <div className="p-1 bg-white/10 rounded-full group-hover:bg-white/20 transition-colors">
+                        <MessageCircleHeart className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="flex flex-col">
+                        <h4 className="text-sm font-medium text-white">
+                          Feedback
+                        </h4>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="flex-1 flex flex-col">
                 <div className="flex-1 overflow-y-auto p-6">
                   <TabsContent value="widgets" className="mt-0">
-                    <h3 className="mb-4 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                    <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
                       <Layout className="h-4 w-4" />
                       <span>Widget Visibility</span>
                     </h3>
-                    <div className="space-y-0 border px-4 py-2 bg-black/5 dark:glass-dark dark:bg-white/5 rounded-lg">
+                    <div className="space-y-0 border px-4 py-2 bg-black/5 dark:glass-dark select-none dark:bg-white/5 rounded-lg border-black/10 dark:border-white/10">
                       <div className="flex items-center justify-between py-3">
-                        <div className="flex items-center space-x-2 text-black/70 dark:text-white">
+                        <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
                           <StickyNote className="h-4 w-4" />
                           <span>Notes</span>
                         </div>
@@ -330,7 +367,7 @@ const SettingsSidebar = () => {
                       <Separator className="bg-black/10 dark:bg-white/10" />
 
                       <div className="flex items-center justify-between py-3">
-                        <div className="flex items-center space-x-2 text-black/70 dark:text-white">
+                        <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
                           <CheckSquare className="h-4 w-4" />
                           <span>Todo List</span>
                         </div>
@@ -342,7 +379,7 @@ const SettingsSidebar = () => {
                       <Separator className="bg-black/10 dark:bg-white/10" />
 
                       <div className="flex items-center justify-between py-3">
-                        <div className="flex items-center space-x-2 text-black/70 dark:text-white">
+                        <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
                           <Timer className="h-4 w-4" />
                           <span>Pomodoro Timer</span>
                         </div>
@@ -354,7 +391,7 @@ const SettingsSidebar = () => {
                       <Separator className="bg-black/10 dark:bg-white/10" />
 
                       <div className="flex items-center justify-between py-3">
-                        <div className="flex items-center space-x-2 text-black/70 dark:text-white">
+                        <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
                           <CalendarDays className="h-4 w-4" />
                           <span>Events</span>
                         </div>
@@ -375,7 +412,7 @@ const SettingsSidebar = () => {
                     <div className="space-y-3 flex flex-col gap-2">
                       {isAuthenticated ? (
                         <div className="flex flex-col space-y-2">
-                          <div className="border px-4 py-2 bg-black/5 dark:glass-dark dark:bg-white/5 rounded-lg mb-2">
+                          <div className="border px-4 py-2 bg-black/5 border-black/10 dark:border-white/10 dark:glass-dark dark:bg-white/5 rounded-lg mb-2">
                             <div className="flex items-center justify-between py-2">
                               <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
                                 <span>Email</span>
@@ -391,17 +428,12 @@ const SettingsSidebar = () => {
                                 <span>Account Type</span>
                               </div>
                               <span
-                                className={`text-sm ${
-                                  isPremium
-                                    ? "text-indigo-600 dark:text-indigo-400"
-                                    : "text-black"
-                                } flex items-center gap-1`}
+                                className="text-sm text-black/70 dark:text-white/70 flex items-center gap-1"
                               >
                                 {isPremium ? (
                                   "Premium"
                                 ) : (
                                   <>
-                                    <Lock className="h-3 w-3" />
                                     Free
                                   </>
                                 )}
@@ -426,19 +458,19 @@ const SettingsSidebar = () => {
                             </h3>
 
                             <Button
-                              className="w-full border-none bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-red-800 shadow-sm hover:shadow-md dark:shadow-red-900/20 dark:hover:shadow-red-900/30 transition-all duration-300"
-                              variant="ghost"
+                              className="w-full transition-all duration-300 shadow-none"
+                              variant="destructive"
                               onClick={() => setShowDeleteAccountDialog(true)}
                               disabled={isSyncing || isDeletingAccount}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              {/* <Trash2 className="h-4 w-4" /> */}
                               Delete Account
                             </Button>
                           </div>
                         </div>
                       ) : (
                         <div className="flex flex-col gap-4">
-                          <div className="flex items-start gap-3 py-4 px-4 bg-black/5 dark:bg-white/5 rounded-lg border border-black/10 dark:border-white/10 shadow-sm">
+                          <div className="flex items-start gap-3 py-4 px-4 bg-black/5 dark:bg-white/5 rounded-lg dark:glass-dark border border-black/10 dark:border-white/10 shadow-sm">
                             <Info className="h-5 w-5 text-black/60 dark:text-white/60 mt-0.5 flex-shrink-0" />
                             <div className="flex flex-col gap-1">
                               <p className="text-sm font-medium text-black/80 dark:text-white/80">Sign in to your account</p>
@@ -468,12 +500,12 @@ const SettingsSidebar = () => {
                     </h3>
 
                     <div className="space-y-3 flex flex-col gap-2">
-                      <div className="flex flex-col space-y-2 border px-4 py-2 bg-black/5 dark:glass-dark rounded-lg dark:bg-white/5">
+                      <div className="flex flex-col space-y-2 border border-black/10 dark:border-white/10 px-4 py-2 bg-black/5 dark:glass-dark rounded-lg dark:bg-white/5">
                         <div className="flex items-center justify-between py-2">
                           <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
                             <span>Cloud Sync</span>
                             {!isAuthenticated || !isPremium ? (
-                              <span className="text-xs bg-black/10 text-black dark:text-white px-2 py-0.5 rounded">
+                              <span className="text-xs bg-black/10 text-black dark:text-white px-2 py-0.5 rounded select-none">
                                 Premium
                               </span>
                             ) : null}
@@ -591,53 +623,15 @@ const SettingsSidebar = () => {
                     )}
                 </div>
 
-                <div className="p-6 border-t border-black/10 dark:border-white/10">
-                  <div className="flex flex-col items-center gap-4">
-                    <div
-                      onClick={() => setShowFeedbackDialog(true)}
-                      className="w-full p-4 rounded-lg cursor-pointer transition-all duration-300
-                        bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600
-                        hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500
-                        border border-white/10 hover:border-white/20
-                        relative overflow-hidden group shadow-md hover:shadow-lg"
-                    >
-                      {/* Animated gradient background */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-white/10 animate-shimmer" />
-                      
-                      {/* Sparkle effects */}
-                      <div className="absolute inset-0">
-                        {/* Small sparkles */}
-                        <div className="absolute top-1/3 right-1/4 h-1 w-1 bg-white/60 rounded-full animate-[sparkle_3s_ease-in-out_infinite_0.7s]" />
-                        <div className="absolute bottom-1/3 left-1/4 h-1 w-1 bg-white/60 rounded-full animate-[sparkle_3.5s_ease-in-out_infinite_1.2s]" />
-                      </div>
-
-                      <div className="relative z-10 flex items-center gap-3">
-                        <div className="p-1.5 bg-white/10 rounded-full group-hover:bg-white/20 transition-colors">
-                          <MessageCircleHeart className="h-4 w-4 text-white" />
-                        </div>
-                        <div className="flex flex-col">
-                          <h4 className="text-sm font-medium text-white">
-                            Share Your Thoughts
-                          </h4>
-                          <p className="text-xs text-white/80">
-                            Help us improve Evolve
-                          </p>
-                        </div>
-                      </div>
+                <div className="p-3 sm:p-6 border-t border-black/10 dark:border-white/10">
+                  <div className="flex flex-col items-center gap-2 sm:gap-4">
+                    <Logo className="h-6 w-6 sm:h-8 sm:w-8 flex justify-center items-center" />
+                    <div className="flex items-center gap-1 text-xs text-black/40 dark:text-white/50">
+                      <span>Version 1.0.2</span>
                     </div>
-                  </div>
-                </div>
-
-                <div className="p-6 border-t border-black/10 dark:border-white/10">
-                  <div className="flex flex-col items-center gap-4">
-                    <Logo className="h-8 w-8 flex justify-center items-center" />
-                    <div className="flex items-center gap-2 text-xs text-black/50 dark:text-white/50">
-                      <Info className="h-3 w-3" />
-                      <span>Version 1.0.1-beta</span>
-                    </div>
-                    <div className="text-[10px] text-black/30 dark:text-white/30 text-center">
+                    <div className="text-xs text-black/40 dark:text-white/50 text-center">
                       <div>© {new Date().getFullYear()} Evolve</div>
-                      <div>Support: support@evolve-app.com</div>
+                      <div className="hidden sm:block">Inquiries: <a href="mailto:support@evolve-app.com" className="hover:underline">support@evolve-app.com</a></div>
                     </div>
                   </div>
                 </div>

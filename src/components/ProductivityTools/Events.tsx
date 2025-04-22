@@ -724,8 +724,6 @@ const Events = () => {
       )}
       style={{
         width: getWidthByScreenSize(),
-        boxShadow: isExpanded ? "0 0 0 100vw rgba(0, 0, 0, 0.3)" : "",
-        transition: 'box-shadow 0.1s linear',
         transformOrigin: getTransformOrigin(),
       }}
     >

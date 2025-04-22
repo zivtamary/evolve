@@ -14,11 +14,14 @@ import {
   Check,
   CreditCard,
   Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { useSettings } from "@/context/SettingsContext";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface SubscriptionModalProps {
   open: boolean;
@@ -36,6 +39,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { userProfile } = useSettings();
 
   const calculateSavings = (yearlyPrice: number, monthlyPrice: number) => {
@@ -59,6 +63,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
     const fetchPlans = async () => {
       try {
+        setError(null);
         console.log("Fetching subscription plans...");
         const { data: plansData, error } = await supabase
           .from('subscription_plans')
@@ -66,7 +71,6 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           .neq('price', 0)
           .order('price', { ascending: true });
 
-        console.log("hi");
         if (error) throw error;
         if (isMounted) {
           console.log("Setting subscription plans:", plansData);
@@ -82,7 +86,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       } catch (error) {
         console.error("Error fetching plans:", error);
         if (isMounted) {
-          toast.error("Failed to load subscription plans");
+          setError("Failed to load subscription plans. Please try again later.");
           setIsLoading(false);
         }
       }
@@ -99,11 +103,12 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
   const handleSubscribe = async () => {
     if (!selectedPlan) {
-      toast.error("Please select a plan");
+      setError("Please select a plan");
       return;
     }
 
     try {
+      setError(null);
       setIsProcessing(true);
       const { data, error } = await supabase.functions.invoke(
         "create-checkout",
@@ -112,15 +117,25 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         }
       );
 
-      if (error) return alert(JSON.stringify(error));
+      console.log("Data:", data);
 
-      alert(JSON.stringify(data));
+      if (error) {
+        setError("Failed to create checkout session. Please try again later.");
+        setIsProcessing(false);
+        return;
+      }
+
+      if (data.checkout_url) {
+          window.location.href = data.checkout_url;
+      } else {
+        setError("Failed to create checkout session. Please try again later.");
+        setIsProcessing(false);
+      }
 
       // Redirect to Polar checkout
-      window.location.href = data.checkout_url;
     } catch (error) {
       console.error("Error creating checkout:", error);
-      toast.error("Failed to create checkout session");
+      setError("An unexpected error occurred. Please try again later.");
       setIsProcessing(false);
     }
   };
@@ -141,10 +156,37 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               <Sparkles className="h-5 w-5 text-yellow-500" />
               Upgrade to Premium
             </DialogTitle>
+            <DialogDescription className="text-center pt-2">
+              <Skeleton className="h-4 w-3/4 mx-auto bg-gray-200 dark:bg-gray-700" />
+            </DialogDescription>
           </DialogHeader>
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin" />
+
+          <div className="grid grid-cols-2 gap-4 py-4">
+            {[1, 2].map((index) => (
+              <div key={index} className="border rounded-lg p-4">
+                <Skeleton className="h-5 w-24 mb-2 bg-gray-200 dark:bg-gray-700" />
+                <Skeleton className="h-8 w-16 mb-1 bg-gray-200 dark:bg-gray-700" />
+                <Skeleton className="h-4 w-20 bg-gray-200 dark:bg-gray-700" />
+              </div>
+            ))}
           </div>
+
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-32 bg-gray-200 dark:bg-gray-700" />
+            <div className="space-y-2">
+              {[1, 2, 3, 4].map((index) => (
+                <div key={index} className="flex items-start gap-2">
+                  <Skeleton className="h-4 w-4 rounded-full bg-gray-200 dark:bg-gray-700" />
+                  <Skeleton className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-col sm:flex-row sm:justify-between gap-2 mt-2">
+            <Skeleton className="h-10 w-full sm:w-24 bg-gray-200 dark:bg-gray-700" />
+            <Skeleton className="h-10 w-full sm:w-32 bg-gray-200 dark:bg-gray-700" />
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     );
@@ -162,6 +204,13 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             Unlock all features and sync your data across devices.
           </DialogDescription>
         </DialogHeader>
+
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
         <div className="grid grid-cols-2 gap-4 py-4">
           {plans.map((plan) => {

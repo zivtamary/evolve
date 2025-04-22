@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useClickOutside } from '../../hooks/use-click-outside';
 import useWindowSize from '@/hooks/use-window-size';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 // Maximum character limit for todo items
 const TODO_CHAR_LIMIT = 100;
@@ -459,12 +460,12 @@ const TodoList: React.FC = () => {
       }}
       className={cn(
         "glass dark:glass-dark transition-all rounded-xl text-white overflow-hidden flex flex-col relative",
-        isExpanded ? "mx-auto" : "w-full"
+        isExpanded ? "mx-auto z-50" : "w-full"
       )}
       style={{
         width: getWidthByScreenSize(),
-        boxShadow: isExpanded ? '0 0 0 100vw rgba(0, 0, 0, 0.3)' : '',
-        transition: 'box-shadow 0.3s linear',
+        boxShadow: isExpanded ? '0 0 0 100vw rgba(0, 0, 0, 0)' : '',
+        transition: 'box-shadow 50ms ease-in-out',
         transformOrigin: getTransformOrigin()
       }}
     >
@@ -634,13 +635,22 @@ const TodoList: React.FC = () => {
                         {todo.text}
                       </label>
                     </div>
-                    <button
-                      onClick={() => deleteTodo(todo.id)}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => deleteTodo(todo.id)}
                       className="opacity-0 group-hover:opacity-100 text-white/50 hover:text-white ml-2 p-1 rounded-md hover:bg-white/10 transition-all duration-200"
-                      title="Delete todo"
+                        
                     >
                       <X className="h-4 w-4" />
                     </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Delete todo
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </motion.li>
                 ))}
               </AnimatePresence>

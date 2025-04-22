@@ -605,8 +605,6 @@ const Notes: React.FC = () => {
       )}
       style={{
         width: getWidthByScreenSize(),
-        boxShadow: isExpanded ? '0 0 0 100vw rgba(0, 0, 0, 0.3)' : '',
-        transition: 'box-shadow 0.3s linear',
         transformOrigin: getTransformOrigin()
       }}
     >

@@ -121,9 +121,19 @@ const TimeGreeting = () => {
         greeting: `Good morning${displayName ? ',' : '.'}`,
         icon: (
           <div className="relative">
-            <SunDim className="size-12 fill-amber-300 text-amber-200 drop-shadow-lg" style={{
-              filter: 'drop-shadow(0 0 12px rgba(251, 191, 36, 0.4)) drop-shadow(0 0 20px rgba(251, 191, 36, 0.2))'
-            }} />
+            <motion.div
+              animate={{ rotate: 720 }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                repeatDelay: 8.5
+              }}
+            >
+              <SunDim className="size-12 fill-amber-300 text-amber-200 drop-shadow-lg" style={{
+                filter: 'drop-shadow(0 0 12px rgba(251, 191, 36, 0.4)) drop-shadow(0 0 20px rgba(251, 191, 36, 0.2))'
+              }} />
+            </motion.div>
             <FloatingCloud delay={0} size="size-6" x={-15} y={-10} />
             <FloatingCloud delay={1} size="size-4" x={20} y={-5} />
           </div>
@@ -134,9 +144,19 @@ const TimeGreeting = () => {
         greeting: `Good afternoon${displayName ? ',' : '.'}`,
         icon: (
           <div className="relative">
-            <Sun className="size-12 fill-yellow-400 text-yellow-400 drop-shadow-lg" style={{
-              filter: 'drop-shadow(0 0 12px rgba(251, 146, 60, 0.4)) drop-shadow(0 0 20px rgba(251, 146, 60, 0.2))'
-            }} />
+            <motion.div
+              animate={{ rotate: 720 }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                repeatDelay: 8.5
+              }}
+            >
+              <Sun className="size-12 fill-yellow-400 text-yellow-400 drop-shadow-lg" style={{
+                filter: 'drop-shadow(0 0 12px rgba(251, 146, 60, 0.4)) drop-shadow(0 0 20px rgba(251, 146, 60, 0.2))'
+              }} />
+            </motion.div>
             <FloatingCloud delay={0.5} size="size-5" x={-20} y={-8} />
             <FloatingCloud delay={1.5} size="size-3" x={15} y={-3} />
           </div>
@@ -274,7 +294,7 @@ const TimeGreeting = () => {
                 onClick={toggleTempUnit}
                 className="hover:text-white/90 transition-colors"
               >
-                <span>{`${temp}°${tempUnit}`}</span>
+                <span className="select-none">{`${temp}°${tempUnit}`}</span>
               </button>
             </TooltipTrigger>
             <TooltipContent children={`Click to toggle temperature unit`} />

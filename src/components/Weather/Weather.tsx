@@ -182,7 +182,7 @@ const Weather: React.FC = () => {
   };
   
   return (
-    <div className="glass dark:glass-dark rounded-xl p-4 text-white">
+    <div className="glass dark:glass-dark rounded-xl p-4 text-white hidden">
       <div className="flex items-center justify-between">
         <div className='select-none'>
           <div className="flex items-center gap-2">

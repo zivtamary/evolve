@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 
 const Index = () => {
   const { theme, setTheme } = useTheme();
-  const { widgetVisibility, expandedWidget, widgetPositions } = useSettings();
+  const { widgetVisibility, expandedWidget, widgetPositions, setExpandedWidget } = useSettings();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
   const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | null>(
@@ -358,9 +358,9 @@ const Index = () => {
                             transition={{ duration: 0.8, delay: 1.8 }}
                           >
                             <Clock />
-                       {/*      <div className="mt-4 w-60">
+                            <div className="mt-4 w-60">
                               <Weather />
-                            </div> */}
+                            </div>
                           </motion.div>
                         </div>
 
@@ -381,22 +381,6 @@ const Index = () => {
                           >
                             <TimeGreeting />
                           </motion.div>
-{/*                           <motion.div
-                            className="w-full max-w-xs mb-8 pt-4 h-xl:pt-0"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{
-                              opacity: isSearchFocused ? 0.6 : 1,
-                              y: isSearchFocused ? 60 : 0,
-                              scale: isSearchFocused ? 0.95 : 1,
-                            }}
-                            transition={{
-                              type: "spring",
-                              stiffness: 300,
-                              damping: 30,
-                            }}
-                          >
-                            <Weather />
-                          </motion.div> */}
                           <SearchBar className="mt-0 h-sm:mt-10 h-md:mt-12 h-xl:mt-0" onFocusChange={setIsSearchFocused} />
                         </div>
                       </div>
@@ -431,6 +415,18 @@ const Index = () => {
                         </section>
                       </div>
                     </div>
+
+                    {/* Black overlay for expanded widget - moved outside the widget container */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: expandedWidget ? 0.5 : 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className={cn(
+                        "fixed inset-0 bg-black/50",
+                        expandedWidget ? "pointer-events-auto -z-10" : "pointer-events-none z-0"
+                      )}
+                      onClick={() => expandedWidget && setExpandedWidget(null)}
+                    />
                   </motion.div>
 
                   {/* Motivation Phrase - Only visible on first slide */}
@@ -530,7 +526,7 @@ const Index = () => {
                           >
                             <Clock />
                             <div className="mt-4 w-60">
-                              {/* <Weather /> */}
+                              <Weather />
                             </div>
                           </motion.div>
                         </div>
@@ -548,24 +544,7 @@ const Index = () => {
                             }}
                           >
                             <TimeGreeting />
-                            {/* <SearchBar onFocusChange={setIsSearchFocused} /> */}
                           </motion.div>
-{/*                           <motion.div
-                            className="w-full max-w-xs mb-8 pt-4 h-xl:pt-0"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{
-                              opacity: isSearchFocused ? 0.6 : 1,
-                              y: isSearchFocused ? 60 : 0,
-                              scale: isSearchFocused ? 0.95 : 1,
-                            }}
-                            transition={{
-                              type: "spring",
-                              stiffness: 300,
-                              damping: 30,
-                            }}
-                          >
-                            <Weather />
-                          </motion.div> */}
                           <SearchBar className="mt-10" onFocusChange={setIsSearchFocused} />
                         </div>
                       </div>
@@ -601,6 +580,18 @@ const Index = () => {
                         </section>
                       </div>
                     </div>
+
+                    {/* Black overlay for expanded widget - moved outside the widget container */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: expandedWidget ? 0.5 : 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className={cn(
+                        "fixed inset-0 bg-black/50",
+                        expandedWidget ? "pointer-events-auto -z-10" : "pointer-events-none z-0"
+                      )}
+                      onClick={() => expandedWidget && setExpandedWidget(null)}
+                    />
                   </motion.div>
 
                   {/* Motivation Phrase - Only visible on first slide */}
@@ -693,9 +684,9 @@ const Index = () => {
                           transition={{ duration: 0.8, delay: 1.8 }}
                         >
                           <Clock />
-                       {/*    <div className="mt-4 w-60">
+                          <div className="mt-4 w-60">
                             <Weather />
-                          </div> */}
+                          </div>
                         </motion.div>
                       </div>
 
@@ -716,22 +707,6 @@ const Index = () => {
                         >
                           <TimeGreeting />
                         </motion.div>
-{/*                         <motion.div
-                           className="w-full max-w-xs mb-8 pt-4 h-xl:pt-0"
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{
-                            opacity: isSearchFocused ? 0.6 : 1,
-                            y: isSearchFocused ? 60 : 0,
-                            scale: isSearchFocused ? 0.95 : 1,
-                          }}
-                          transition={{
-                            type: "spring",
-                            stiffness: 300,
-                            damping: 30,
-                          }}
-                        >
-                          <Weather />
-                        </motion.div> */}
                         <SearchBar className="mt-0 h-sm:mt-10 h-md:mt-12 h-xl:mt-0" onFocusChange={setIsSearchFocused} />
                       </div>
                     </div>
@@ -766,6 +741,18 @@ const Index = () => {
                       </section>
                     </div>
                   </div>
+
+                  {/* Black overlay for expanded widget - moved outside the widget container */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: expandedWidget ? 0.5 : 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className={cn(
+                      "fixed inset-0 bg-black/50",
+                      expandedWidget ? "pointer-events-auto -z-10" : "pointer-events-none z-0"
+                    )}
+                    onClick={() => expandedWidget && setExpandedWidget(null)}
+                  />
                 </motion.div>
 
                 {/* Motivation Phrase - Only visible on first slide */}

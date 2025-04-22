@@ -1,9 +1,10 @@
 
 {
   "manifest_version": 3,
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGyFrc7fv05qwdi9WKNKBYKM92pxtqLHnQxfWM/HZUjd0JRZrJqDzi/Z2q8evqdXgOPZoUZ6qDzLIodsJkfFlp+Gf1d+qqbZd3aLYuOymjZbhps4TvJe4QnC4xsgJKnqqPBxWqads5hotQclb2CZgYM5J1FretHpkUlmVqJJ4BqVvZvQbBzPL0RIQaoAdRKZegl8FyeeQYO8RJsw0c0EjQoU4Im2ofnh6ujQFkIh3YrWO5tH746mza/ZGftCqmyTv1/qJDnBWKwOd4tupDGfAwgXbMdMdBlDmHC7BLbVADgBNwspMunhRoWLGg/nEVQ9eaZNPoe8PdECe3CCmJGaswIDAQAB",
   "name": "Evolve · Productivity Startpage",
   "short_name": "Evolve",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A beautifully crafted start page with smart widgets — tasks, notes, weather & more — synced seamlessly across your devices.",
   "icons": {
     "16": "icons/icon-16.png",
@@ -28,7 +29,7 @@
     "identity"
   ],
   "oauth2": {
-    "client_id": "1087836733582-8ldevaders2689t3q2qj1b89dgdobe4l.apps.googleusercontent.com",
+    "client_id": "1087836733582-j531mnv5idof6pp3j4q733tjhohcj57m.apps.googleusercontent.com",
     "scopes": ["openid", "email", "profile"]
   },
   "background": {

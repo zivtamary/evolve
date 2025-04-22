@@ -218,16 +218,13 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
 
     setLoading(true);
 
-    const manifest = chrome.runtime.getManifest();
-    const url = new URL("https://accounts.google.com/o/oauth2/auth");
-    url.searchParams.set("client_id", manifest.oauth2.client_id);
-    url.searchParams.set("response_type", "id_token");
-    url.searchParams.set("access_type", "offline");
-    url.searchParams.set(
-      "redirect_uri",
-      `https://f9e7-46-117-62-155.ngrok-free.app`
-    );
-    url.searchParams.set("scope", manifest.oauth2.scopes.join(" "));
+    const manifest = chrome.runtime.getManifest()
+    const url = new URL('https://accounts.google.com/o/oauth2/auth')
+    url.searchParams.set('client_id', manifest.oauth2.client_id)
+    url.searchParams.set('response_type', 'id_token')
+    url.searchParams.set('access_type', 'offline')
+    url.searchParams.set('redirect_uri', `https://${chrome.runtime.id}.chromiumapp.org`)
+    url.searchParams.set('scope', manifest.oauth2.scopes.join(' '))
     chrome.identity.launchWebAuthFlow(
       {
         url: url.href,
@@ -235,29 +232,54 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
       },
       async (redirectedTo) => {
         if (chrome.runtime.lastError) {
-          toast({
-            title: "Error",
-            description: "Google sign in failed",
-            variant: "destructive",
-          });
           // auth was not successful
         } else {
           // auth was successful, extract the ID token from the redirectedTo URL
-          const url = new URL(redirectedTo);
-          const params = new URLSearchParams(url.hash);
+          const url = new URL(redirectedTo)
+          const params = new URLSearchParams(url.hash.replace('#', ''))
           const { data, error } = await supabase.auth.signInWithIdToken({
-            provider: "google",
-            token: params.get("id_token"),
-          });
+            provider: 'google',
+            token: params.get('id_token'),
+          }).catch((error) => {
+            const errorMessage =
+              error instanceof Error
+                ? error.message
+                : "An error occurred during Google sign in";
+            toast({
+              title: "Google sign in failed",
+              description: errorMessage,
+              variant: "destructive",
+            });
+          }).finally(() => {
+            setLoading(false);
+          })
+          if (error) {
+            const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "An error occurred during Google sign in";
+        toast({
+          title: "Google sign in failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+          }
+          if (data.user) {
+            toast({
+              title: "Welcome back",
+              description: "You have been signed in successfully",
+            });
+            onOpenChange(false);
+          }
         }
       }
-    );
+    )
 
-    /*     supabase.auth
+/*         supabase.auth
       .signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: window.location.origin + "/",
+          redirectTo: `${window.location.origin}/`
         },
       })
       .catch((error) => {
@@ -516,6 +538,12 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                         ? "Signing in..."
                         : "Sign in with Google"}
                     </Button>
+                    {/* By continuing, you agree to the Terms of Service and Privacy Policy */}
+                    <p className="text-xs text-muted-foreground dark:text-gray-400 text-center">
+                        <span className="text-primary dark:text-primary/90">
+                            By continuing, you agree to the <a target="_blank" rel="noopener noreferrer" href="https://evolve-app.com/terms-of-service" className="hover:underline">Terms of Service</a> and <a target="_blank" rel="noopener noreferrer" href="https://evolve-app.com/privacy-policy" className="hover:underline">Privacy Policy</a>
+                        </span>
+                    </p>
                   </div>
                 </form>
               </motion.div>

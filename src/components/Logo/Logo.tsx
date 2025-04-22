@@ -34,7 +34,7 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', className = '' }) => {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className={`relative ${containerSizeClasses[size]} rounded-lg bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-100 dark:to-gray-200 shadow-lg flex items-center justify-center`}
+          className={`relative ${containerSizeClasses[size]} rounded-sm bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-100 dark:to-gray-200 shadow-lg flex items-center justify-center`}
         >
           <motion.div
             animate={{ 
