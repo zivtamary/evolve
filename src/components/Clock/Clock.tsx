@@ -200,9 +200,9 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
     const minuteDegrees = minutes * 6; // 6 degrees per minute
 
     return (
-      <div className="relative size-32 sm:size-40 lg:size-48 mx-auto">
+      <div className="relative size-32 sm:size-40 lg:size-40 mx-auto">
         {/* Clock face with subtle gradient */}
-        <div className="absolute inset-0 rounded-full border-2 border-white/20 bg-gradient-to-br from-white/10 to-transparent backdrop-blur-sm dark:from-black/10 dark:to-black/10"></div>
+        <div className="absolute inset-0 rounded-full border-2 border-white/50 bg-gradient-to-br from-white/10 to-transparent backdrop-blur-sm dark:from-black/10 dark:to-black/10"></div>
 
         {/* Hour markers - positioned around the clock */}
         {[...Array(12)].map((_, i) => {
@@ -228,7 +228,7 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
 
         {/* Hour hand - thicker and more elegant */}
         <div
-          className="absolute w-1.5 h-10 lg:h-12 bg-white rounded-full"
+          className="absolute w-1 h-10 lg:h-11 bg-white rounded-full"
           style={{
             left: "50%",
             bottom: "50%",

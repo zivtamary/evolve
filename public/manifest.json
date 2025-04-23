@@ -4,7 +4,7 @@
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqGyFrc7fv05qwdi9WKNKBYKM92pxtqLHnQxfWM/HZUjd0JRZrJqDzi/Z2q8evqdXgOPZoUZ6qDzLIodsJkfFlp+Gf1d+qqbZd3aLYuOymjZbhps4TvJe4QnC4xsgJKnqqPBxWqads5hotQclb2CZgYM5J1FretHpkUlmVqJJ4BqVvZvQbBzPL0RIQaoAdRKZegl8FyeeQYO8RJsw0c0EjQoU4Im2ofnh6ujQFkIh3YrWO5tH746mza/ZGftCqmyTv1/qJDnBWKwOd4tupDGfAwgXbMdMdBlDmHC7BLbVADgBNwspMunhRoWLGg/nEVQ9eaZNPoe8PdECe3CCmJGaswIDAQAB",
   "name": "Evolve · Productivity Startpage",
   "short_name": "Evolve",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A beautifully crafted start page with smart widgets — tasks, notes, weather & more — synced seamlessly across your devices.",
   "icons": {
     "16": "icons/icon-16.png",

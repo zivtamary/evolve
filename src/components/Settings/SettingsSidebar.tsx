@@ -37,6 +37,7 @@ import {
   FileDown,
   Monitor,
   MessageCircleHeart,
+  HelpCircle,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -253,7 +254,7 @@ const SettingsSidebar = () => {
       <SettingsButton onClick={() => setIsSettingsOpen(true)} />
 
       <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <DialogContent className="bg-white dark:bg-black/90 border border-white/0 dark:border-white/5 backdrop-blur-xl p-0 max-w-4xl max-h-[90vh]">
+        <DialogContent className="bg-white dark:bg-black/90 border border-white/0 dark:border-white/5 backdrop-blur-xl p-0 max-w-4xl max-h-[90vh] font-['Inter']">
           <div className="h-[min(60vh,calc(100vh-8rem))] flex">
             <Tabs defaultValue="widgets" className="w-full flex">
               <div className="w-64 border-r border-black/10 dark:border-white/10 p-4 flex flex-col h-full">
@@ -307,6 +308,16 @@ const SettingsSidebar = () => {
                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-black/0 dark:bg-white/0 data-[state=active]:bg-black/20 dark:data-[state=active]:bg-white/20 transition-colors rounded-tl-md rounded-bl-md"></div>
                       </TabsTrigger>
                     )}
+                  <TabsTrigger
+                    value="about"
+                    className="flex items-center gap-2 justify-start w-full py-3 px-3 rounded-lg transition-all duration-200 data-[state=active]:bg-black/5 dark:data-[state=active]:bg-white/10 data-[state=active]:shadow-sm hover:bg-black/5 dark:hover:bg-white/10 relative overflow-hidden group"
+                  >
+                    <div className="flex items-center justify-center w-8 h-8 rounded-md dark:group-hover:bg-white/20 transition-colors">
+                      <HelpCircle className="h-4 w-4 " />
+                    </div>
+                    <span className="font-medium">About</span>
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-black/0 dark:bg-white/0 data-[state=active]:bg-black/20 dark:data-[state=active]:bg-white/20 transition-colors rounded-tl-md rounded-bl-md"></div>
+                  </TabsTrigger>
                 </TabsList>
                 
                 {/* Spacer to push feedback button to bottom */}
@@ -621,19 +632,82 @@ const SettingsSidebar = () => {
                         </div>
                       </TabsContent>
                     )}
-                </div>
+                    
+                  <TabsContent value="about" className="mt-0">
+                    <h3 className="mb-4 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                      <HelpCircle className="h-4 w-4" />
+                      <span>About Evolve</span>
+                    </h3>
+                    
+                    <div className="flex flex-col space-y-5">
+                      <div className="border border-black/10 dark:border-white/10 rounded-lg overflow-hidden">
+                        <div className="p-5 text-sm text-black/80 dark:text-white/80 space-y-4 bg-black/5 dark:bg-white/5 dark:glass-dark">
+                          <p>
+                            Evolve was created by a single developer with a passion for productivity and organization. The goal was simple: to build a beautiful, intuitive dashboard that helps people stay focused and accomplish more.
+                          </p>
+                          
+                          <p>
+                            Unlike typical productivity apps that overwhelm you with features, Evolve focuses on what matters most—notes, todos, time management, and events—all in one clean interface.
+                          </p>
+                          
+{/*                           <div className="flex items-start gap-3 py-3 px-4 bg-amber-100/50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded-md">
+                            <Sparkles className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <p className="font-medium mb-1">Supporting Evolve</p>
+                              <p className="text-sm">
+                                Maintaining and improving Evolve requires significant time and resources. As a solo developer project, your Premium subscription directly supports ongoing development and server costs, helping to keep Evolve running and growing with new features.
+                              </p>
+                            </div>
+                          </div> */}
 
-                <div className="p-3 sm:p-6 border-t border-black/10 dark:border-white/10">
-                  <div className="flex flex-col items-center gap-2 sm:gap-4">
-                    <Logo className="h-6 w-6 sm:h-8 sm:w-8 flex justify-center items-center" />
-                    <div className="flex items-center gap-1 text-xs text-black/40 dark:text-white/50">
-                      <span>Version 1.0.3</span>
+                          <div className="relative mt-2 overflow-hidden rounded-lg border border-indigo-200 dark:border-indigo-900/50">
+                            {/* Gradient background */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50 dark:from-indigo-950/40 dark:via-purple-950/30 dark:to-blue-950/40"></div>
+                            
+                            {/* Animated subtle shimmer effect */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer opacity-50"></div>
+                            
+                            {/* Content */}
+                            <div className="relative p-5 flex flex-col gap-3">
+                              <div className="flex items-center gap-2">
+                                  <Sparkles className="h-4 w-4 text-indigo-700 dark:text-indigo-300" />
+                                <h4 className="font-semibold text-indigo-700 dark:text-indigo-300">Supporting Evolve</h4>
+                              </div>
+                              
+                              <p className="text-sm text-indigo-900/80 dark:text-indigo-200/90 leading-relaxed">
+                                Maintaining and improving Evolve requires significant time and resources. As a solo developer project, your Premium subscription directly supports ongoing development and server costs, helping to keep Evolve running and growing with new features.
+                              </p>
+                              
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="border border-black/10 dark:border-white/10 rounded-lg p-5 bg-black/5 dark:bg-white/5 dark:glass-dark">
+                        <h4 className="text-sm font-medium text-black dark:text-white mb-3">Have questions or need help?</h4>
+                        <p className="text-sm text-black/70 dark:text-white/70 mb-3">
+                          If you encounter any issues, have feature suggestions, or just want to share your thoughts, please don't hesitate to reach out.
+                        </p>
+                        <a 
+                          href="mailto:support@evolve-app.com" 
+                          className="inline-flex items-center gap-2 text-sm font-medium text-black/80 dark:text-white/80 hover:text-black dark:hover:text-white transition-colors"
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                          support@evolve-app.com
+                        </a>
+                      </div>
+                      
+                      <div className="flex flex-col items-center mt-auto pt-6">
+                        <Logo className="h-10 w-10 flex justify-center items-center mb-3" />
+                        <div className="text-sm text-black/50 dark:text-white/50">
+                          Version 1.0.4
+                        </div>
+                        <div className="text-xs text-black/40 dark:text-white/40 mt-1">
+                          © {new Date().getFullYear()} Evolve
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-xs text-black/40 dark:text-white/50 text-center">
-                      <div>© {new Date().getFullYear()} Evolve</div>
-                      <div className="hidden sm:block">Inquiries: <a href="mailto:support@evolve-app.com" className="hover:underline">support@evolve-app.com</a></div>
-                    </div>
-                  </div>
+                  </TabsContent>
                 </div>
               </div>
             </Tabs>
@@ -655,7 +729,7 @@ const SettingsSidebar = () => {
         open={showDeleteAccountDialog}
         onOpenChange={setShowDeleteAccountDialog}
       >
-        <AlertDialogContent className="">
+        <AlertDialogContent className="font-['Inter']">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
               <AlertTriangle className="h-5 w-5" />

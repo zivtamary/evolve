@@ -716,7 +716,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] border-0 p-0">
+      <DialogContent className="max-h-[90vh] border-0 p-0 font-['Inter']">
         <div className="light">
           <Card className="w-full h-full overflow-hidden border-0 bg-white/95 backdrop-blur-md shadow-lg shadow-black/10 dark:shadow-black/20 dark:bg-black/90">
             <CardHeader className="text-gray-900 dark:text-white">

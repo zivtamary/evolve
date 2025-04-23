@@ -150,7 +150,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   if (isLoading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-md bg-background">
+        <DialogContent className="sm:max-w-md bg-background font-['Inter']">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-center gap-2 text-xl">
               <Sparkles className="h-5 w-5 text-yellow-500" />
@@ -194,7 +194,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-background">
+      <DialogContent className="sm:max-w-md bg-background font-['Inter']">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-center gap-2 text-xl">
             <Sparkles className="h-5 w-5 text-yellow-500" />

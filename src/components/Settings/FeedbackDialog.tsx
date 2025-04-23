@@ -82,7 +82,7 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ open, onOpenChange }) =
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent closeButtonClassName='text-black dark:text-white' className="bg-white dark:bg-black border-white/10 shadow-xl">
+      <DialogContent closeButtonClassName='text-black dark:text-white' className="bg-white dark:bg-black border-white/10 shadow-xl font-['Inter']">
         <DialogHeader className="border-b border-white/10 pb-3">
           <DialogTitle className="dark:text-white text-xl font-semibold flex items-center gap-2">
             <MessageCircleHeart className="h-5 w-5" />
