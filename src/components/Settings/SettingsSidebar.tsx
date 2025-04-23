@@ -627,7 +627,7 @@ const SettingsSidebar = () => {
                   <div className="flex flex-col items-center gap-2 sm:gap-4">
                     <Logo className="h-6 w-6 sm:h-8 sm:w-8 flex justify-center items-center" />
                     <div className="flex items-center gap-1 text-xs text-black/40 dark:text-white/50">
-                      <span>Version 1.0.2</span>
+                      <span>Version 1.0.3</span>
                     </div>
                     <div className="text-xs text-black/40 dark:text-white/50 text-center">
                       <div>© {new Date().getFullYear()} Evolve</div>
