@@ -436,15 +436,9 @@ const TodoList: React.FC = () => {
 
   const getWidthByScreenSize = () => {
     if (height >= 1080) {
-      return isExpanded ? "800px" : "100%";
-    }
-    if (height >= 768) {
-      return isExpanded ? "800px" : "100%";
-    }
-    if (height >= 480) {
-      return isExpanded ? "100%" : "100%";
-    }
-    return isExpanded ? "100%" : "100%";
+      return isExpanded ? '800px' : '100%';
+    };
+    return isExpanded ? '100%' : '100%';
   };
 
   return (
