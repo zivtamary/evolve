@@ -38,6 +38,7 @@ const Notes: React.FC = () => {
   const { syncNotesOnBlur, isAuthenticated, userProfile, setExpandedWidget, expandedWidget, widgetPositions } = useSettings();
   const [notes, setNotes] = useLocalStorage<Note[]>('notes', []);
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
+  const [hoveredNoteId, setHoveredNoteId] = useState<string | null>(null);
   const [noteTitle, setNoteTitle] = useState<string>('');
   const [noteContent, setNoteContent] = useState<string>('');
   const [showCharLimitWarning, setShowCharLimitWarning] = useState<boolean>(false);
@@ -576,9 +577,15 @@ const Notes: React.FC = () => {
 
   const getWidthByScreenSize = () => {
     if (height >= 1080) {
-      return isExpanded ? '800px' : '100%';
-    };
-    return isExpanded ? '100%' : '100%';
+      return isExpanded ? "800px" : "100%";
+    }
+    if (height >= 768) {
+      return isExpanded ? "800px" : "100%";
+    }
+    if (height >= 480) {
+      return isExpanded ? "100%" : "100%";
+    }
+    return isExpanded ? "100%" : "100%";
   };
 
 
@@ -691,7 +698,9 @@ const Notes: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 onClick={() => selectNote(note.id)}
-                className={`p-4 cursor-pointer hover:bg-white/5 group relative h-[4.5rem] ${
+                onMouseEnter={() => setHoveredNoteId(note.id)}
+                onMouseLeave={() => setHoveredNoteId(null)}
+                className={`p-4 select-none cursor-pointer hover:bg-white/5 relative h-[4.5rem] ${
                   activeNoteId === note.id ? 'bg-white/10' : ''
                 }`}
                 transition={{ 
@@ -714,14 +723,24 @@ const Notes: React.FC = () => {
                     {note.title || note.content || 'Untitled Note'}
                   </div>
                 </div>
-                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={(e) => deleteNote(note.id, e)}
-                    className="text-white/50 hover:text-white p-1 rounded-full hover:bg-white/10 transition-all duration-200"
-                    title="Delete note"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
+                <div className="absolute top-3 right-3">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={(e) => deleteNote(note.id, e)}
+                          className={`transition-opacity text-white/50 hover:text-white p-1 rounded-full hover:bg-white/10 transition-all duration-200 ${
+                            hoveredNoteId === note.id ? 'opacity-100' : 'opacity-0'
+                          }`}
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        Delete note
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </motion.div>
             ))}

@@ -1,6 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useSettings } from "../context/SettingsContext";
+import { DndProvider, useDrag, useDrop } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { GripVertical } from "lucide-react";
 import BackgroundImage from "../components/Background/BackgroundImage";
 import BackgroundVideo from "../components/Background/BackgroundVideo";
 import BackgroundTypeToggle from "../components/Background/BackgroundTypeToggle";
@@ -22,10 +25,115 @@ import TimeGreeting from "../components/Greeting/TimeGreeting";
 import { AnimatePresence } from "framer-motion";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
+/**
+ * DraggableWidget Component
+ * 
+ * This component wraps each widget to make it draggable and droppable.
+ * It handles the drag-and-drop functionality and visual feedback during dragging.
+ * The grip handle is hidden when the widget is expanded.
+ */
+interface DraggableWidgetProps {
+  type: string;
+  component: React.ComponentType;
+  position: number;
+  onMoveWidget: (fromPosition: number, toPosition: number) => void;
+}
+
+const DraggableWidget: React.FC<DraggableWidgetProps> = ({ type, component: Component, position, onMoveWidget }) => {
+  const { expandedWidget } = useSettings();
+  const isExpanded = expandedWidget === type;
+
+  // Setup drag functionality
+  const [{ isDragging }, drag, preview] = useDrag({
+    type: 'widget',
+    item: { type, position },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
+  useEffect(() => {
+    if (isDragging) {
+      document.body.style.cursor = 'move';
+    } else {
+      document.body.removeAttribute('style');
+    }
+  }, [isDragging]);
+
+  // Setup drop functionality
+  const [{ isOver }, drop] = useDrop({
+    accept: 'widget',
+    drop: (item: { type: string; position: number }) => {
+      if (item.position !== position) {
+        onMoveWidget(item.position, position);
+      }
+    },
+    collect: (monitor) => ({
+      isOver: monitor.isOver(),
+    }),
+  });
+
+  return (
+    <div
+      ref={(node) => {
+        drop(node);
+        preview(node);
+      }}
+      className={cn(
+        "relative group",
+        isDragging ? "opacity-50" : "opacity-100",
+        isOver ? "ring-2 ring-white/50" : ""
+      )}
+      style={{
+        cursor: isDragging ? 'grabbing' : 'default'
+      }}
+    >
+      {!isExpanded && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                ref={drag}
+                className="absolute flex w-full -translate-y-2 group-hover:translate-y-0 transition-all duration-200 opacity-0 group-hover:opacity-100 justify-center items-center p-2 cursor-grab active:cursor-grabbing z-50"
+                style={{
+                  cursor: isDragging ? 'grabbing' : 'grab'
+                }}
+              >
+                <div className="h-1.5 w-16 bg-white/50 rounded-xl"/>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              Drag to reorder
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+      <Component />
+    </div>
+  );
+};
 
 const Index = () => {
   const { theme, setTheme } = useTheme();
-  const { widgetVisibility, expandedWidget, widgetPositions, setExpandedWidget } = useSettings();
+  const { widgetVisibility, expandedWidget, widgetPositions, setWidgetPositions, setExpandedWidget } = useSettings();
+  
+  // Persist widget positions in localStorage
+  const [storedWidgetPositions, setStoredWidgetPositions] = useLocalStorage("widget_positions", widgetPositions);
+  
+  // Load stored positions when component mounts
+  useEffect(() => {
+    if (storedWidgetPositions) {
+      setWidgetPositions(storedWidgetPositions);
+    }
+  }, []);
+
+  // Save positions to localStorage whenever they change
+  useEffect(() => {
+    setStoredWidgetPositions(widgetPositions);
+  }, [widgetPositions]);
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
   const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | null>(
@@ -293,8 +401,31 @@ const Index = () => {
     }
   }, [showMainContent]);
 
+  /**
+   * Handles widget reordering through drag and drop
+   * @param fromPosition - The original position of the dragged widget
+   * @param toPosition - The position where the widget is dropped
+   */
+  const handleMoveWidget = (fromPosition: number, toPosition: number) => {
+    const newPositions = { ...widgetPositions };
+    const widgetTypes = Object.keys(newPositions);
+    
+    // Find the widget types at the from and to positions
+    const fromType = widgetTypes.find(type => newPositions[type] === fromPosition);
+    const toType = widgetTypes.find(type => newPositions[type] === toPosition);
+    
+    if (fromType && toType) {
+      // Swap the positions
+      newPositions[fromType] = toPosition;
+      newPositions[toType] = fromPosition;
+      
+      // Update the positions in settings
+      setWidgetPositions(newPositions);
+    }
+  };
+
   return (
-    <>
+    <DndProvider backend={HTML5Backend}>
       <AnimatePresence>
         {showWelcome && (
           <WelcomeIntro
@@ -396,7 +527,15 @@ const Index = () => {
                                   ({ type, component: Component }) => {
                                     if (!widgetVisibility[type]) return null;
                                     if (expandedWidget !== type) return null;
-                                    return <Component key={type} />;
+                                    return (
+                                      <DraggableWidget
+                                        key={type}
+                                        type={type}
+                                        component={Component}
+                                        position={widgetPositions[type]}
+                                        onMoveWidget={handleMoveWidget}
+                                      />
+                                    );
                                   }
                                 )}
                               </div>
@@ -405,8 +544,16 @@ const Index = () => {
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 [&>*:only-child]:md:col-span-2 [&>*:last-child:nth-child(2n-1)]:md:col-span-2 w-full h-screen h-xl:h-max py-4">
                                 {getOrderedWidgets().map(
                                   ({ type, component: Component }) => {
-                                    if (!widgetVisibility?.[type]) return null;
-                                    return <Component key={type} />;
+                                    if (!widgetVisibility[type]) return null;
+                                    return (
+                                      <DraggableWidget
+                                        key={type}
+                                        type={type}
+                                        component={Component}
+                                        position={widgetPositions[type]}
+                                        onMoveWidget={handleMoveWidget}
+                                      />
+                                    );
                                   }
                                 )}
                               </div>
@@ -560,7 +707,15 @@ const Index = () => {
                                   ({ type, component: Component }) => {
                                     if (!widgetVisibility[type]) return null;
                                     if (expandedWidget !== type) return null;
-                                    return <Component key={type} />;
+                                    return (
+                                      <DraggableWidget
+                                        key={type}
+                                        type={type}
+                                        component={Component}
+                                        position={widgetPositions[type]}
+                                        onMoveWidget={handleMoveWidget}
+                                      />
+                                    );
                                   }
                                 )}
                               </div>
@@ -569,9 +724,16 @@ const Index = () => {
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 [&>*:only-child]:md:col-span-2 [&>*:last-child:nth-child(2n-1)]:md:col-span-2 w-full h-screen h-xl:h-max py-4">
                                 {getOrderedWidgets().map(
                                   ({ type, component: Component }) => {
-                                    // console.log(type, widgetVisibility[type], widgetVisibility);
                                     if (!widgetVisibility[type]) return null;
-                                    return <Component key={type} />;
+                                    return (
+                                      <DraggableWidget
+                                        key={type}
+                                        type={type}
+                                        component={Component}
+                                        position={widgetPositions[type]}
+                                        onMoveWidget={handleMoveWidget}
+                                      />
+                                    );
                                   }
                                 )}
                               </div>
@@ -722,7 +884,15 @@ const Index = () => {
                                 ({ type, component: Component }) => {
                                   if (!widgetVisibility[type]) return null;
                                   if (expandedWidget !== type) return null;
-                                  return <Component key={type} />;
+                                  return (
+                                    <DraggableWidget
+                                      key={type}
+                                      type={type}
+                                      component={Component}
+                                      position={widgetPositions[type]}
+                                      onMoveWidget={handleMoveWidget}
+                                    />
+                                  );
                                 }
                               )}
                             </div>
@@ -732,7 +902,15 @@ const Index = () => {
                               {getOrderedWidgets().map(
                                 ({ type, component: Component }) => {
                                   if (!widgetVisibility[type]) return null;
-                                  return <Component key={type} />;
+                                  return (
+                                    <DraggableWidget
+                                      key={type}
+                                      type={type}
+                                      component={Component}
+                                      position={widgetPositions[type]}
+                                      onMoveWidget={handleMoveWidget}
+                                    />
+                                  );
                                 }
                               )}
                             </div>
@@ -798,7 +976,7 @@ const Index = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </DndProvider>
   );
 };
 
