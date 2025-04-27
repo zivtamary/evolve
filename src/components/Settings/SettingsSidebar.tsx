@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "../../context/SettingsContext";
+import { useLanguage, Language } from "../../context/LanguageContext";
 import { supabase } from "../../integrations/supabase/client";
 import { Database } from "../../integrations/supabase/types";
 import { formatDistanceToNow, isToday, isYesterday, format } from "date-fns";
@@ -38,6 +39,7 @@ import {
   Monitor,
   MessageCircleHeart,
   HelpCircle,
+  Globe,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -59,12 +61,21 @@ import { TooltipProvider } from "../ui/tooltip";
 import { TooltipContent } from "../ui/tooltip";
 import { Tooltip } from "../ui/tooltip";
 import { TooltipTrigger } from "../ui/tooltip";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface SettingsButtonProps {
   onClick: () => void;
 }
 
 export const SettingsButton: React.FC<SettingsButtonProps> = ({ onClick }) => {
+  const { language, setLanguage, t } = useLanguage();
+
   return (
     <TooltipProvider>
     <Tooltip>
@@ -77,7 +88,7 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({ onClick }) => {
       <Settings className="size-4" />
     </button>
     </TooltipTrigger>
-    <TooltipContent side="left" children="Settings" />
+    <TooltipContent side="left" children={t('settings')} />
     </Tooltip>
     </TooltipProvider>
   );
@@ -99,6 +110,8 @@ const SettingsSidebar = () => {
     isSyncing,
     subscription,
   } = useSettings();
+
+  const { language, setLanguage, t } = useLanguage();
 
   const navigate = useNavigate();
   const [showSubscriptionModal, setShowSubscriptionModal] =
@@ -188,7 +201,7 @@ const SettingsSidebar = () => {
 
       if (error) {
         setDeleteAccountError(
-          error.message || "Failed to delete account. Please try again."
+          error.message || t('failedToDeleteAccount')
         );
         setIsDeletingAccount(false);
         return;
@@ -260,7 +273,7 @@ const SettingsSidebar = () => {
               <div className="w-64 border-r border-black/10 dark:border-white/10 p-4 flex flex-col h-full">
                 <DialogHeader className="mb-4">
                   <DialogTitle className="flex items-center gap-2 text-black dark:text-white text-xl font-medium tracking-tight">
-                    Settings
+                    {t('settings')}
                   </DialogTitle>
                 </DialogHeader>
 
@@ -270,9 +283,9 @@ const SettingsSidebar = () => {
                     className="flex items-center gap-2 justify-start w-full py-3 px-3 rounded-lg transition-all duration-200 data-[state=active]:bg-black/5 dark:data-[state=active]:bg-white/10 data-[state=active]:shadow-sm hover:bg-black/5 dark:hover:bg-white/10 relative overflow-hidden group"
                   >
                     <div className="flex items-center justify-center w-8 h-8 rounded-md dark:group-hover:bg-white/20 transition-colors">
-                      <Monitor className="h-4 w-4 " />
+                      <Monitor className="h-4 w-4" />
                     </div>
-                    <span className="font-medium">Display</span>
+                    <span className="font-medium">{t('display')}</span>
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-black/0 dark:bg-white/0 data-[state=active]:bg-black/20 dark:data-[state=active]:bg-white/20 transition-colors rounded-tl-md rounded-bl-md"></div>
                   </TabsTrigger>
                   <TabsTrigger
@@ -280,9 +293,9 @@ const SettingsSidebar = () => {
                     className="flex items-center gap-2 justify-start w-full py-3 px-3 rounded-lg transition-all duration-200 data-[state=active]:bg-black/5 dark:data-[state=active]:bg-white/10 data-[state=active]:shadow-sm hover:bg-black/5 dark:hover:bg-white/10 relative overflow-hidden group"
                   >
                     <div className="flex items-center justify-center w-8 h-8 rounded-md dark:group-hover:bg-white/20 transition-colors">
-                      <User className="h-4 w-4 " />
+                      <User className="h-4 w-4" />
                     </div>
-                    <span className="font-medium">Profile</span>
+                    <span className="font-medium">{t('profile')}</span>
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-black/0 dark:bg-white/0 data-[state=active]:bg-black/20 dark:data-[state=active]:bg-white/20 transition-colors rounded-tl-md rounded-bl-md"></div>
                   </TabsTrigger>
                   <TabsTrigger
@@ -290,9 +303,9 @@ const SettingsSidebar = () => {
                     className="flex items-center gap-2 justify-start w-full py-3 px-3 rounded-lg transition-all duration-200 data-[state=active]:bg-black/5 dark:data-[state=active]:bg-white/10 data-[state=active]:shadow-sm hover:bg-black/5 dark:hover:bg-white/10 relative overflow-hidden group"
                   >
                     <div className="flex items-center justify-center w-8 h-8 rounded-md dark:group-hover:bg-white/20 transition-colors">
-                      <Cloud className="h-4 w-4 " />
+                      <Cloud className="h-4 w-4" />
                     </div>
-                    <span className="font-medium">Data</span>
+                    <span className="font-medium">{t('data')}</span>
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-black/0 dark:bg-white/0 data-[state=active]:bg-black/20 dark:data-[state=active]:bg-white/20 transition-colors rounded-tl-md rounded-bl-md"></div>
                   </TabsTrigger>
                   {isAuthenticated &&
@@ -302,9 +315,9 @@ const SettingsSidebar = () => {
                         className="flex items-center gap-2 justify-start w-full py-3 px-3 rounded-lg transition-all duration-200 data-[state=active]:bg-black/5 dark:data-[state=active]:bg-white/10 data-[state=active]:shadow-sm hover:bg-black/5 dark:hover:bg-white/10 relative overflow-hidden group"
                       >
                         <div className="flex items-center justify-center w-8 h-8 rounded-md dark:group-hover:bg-white/20 transition-colors">
-                          <CreditCard className="h-4 w-4 " />
+                          <CreditCard className="h-4 w-4" />
                         </div>
-                        <span className="font-medium">Billing</span>
+                        <span className="font-medium">{t('billing')}</span>
                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-black/0 dark:bg-white/0 data-[state=active]:bg-black/20 dark:data-[state=active]:bg-white/20 transition-colors rounded-tl-md rounded-bl-md"></div>
                       </TabsTrigger>
                     )}
@@ -313,9 +326,9 @@ const SettingsSidebar = () => {
                     className="flex items-center gap-2 justify-start w-full py-3 px-3 rounded-lg transition-all duration-200 data-[state=active]:bg-black/5 dark:data-[state=active]:bg-white/10 data-[state=active]:shadow-sm hover:bg-black/5 dark:hover:bg-white/10 relative overflow-hidden group"
                   >
                     <div className="flex items-center justify-center w-8 h-8 rounded-md dark:group-hover:bg-white/20 transition-colors">
-                      <HelpCircle className="h-4 w-4 " />
+                      <HelpCircle className="h-4 w-4" />
                     </div>
-                    <span className="font-medium">About</span>
+                    <span className="font-medium">{t('about')}</span>
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-black/0 dark:bg-white/0 data-[state=active]:bg-black/20 dark:data-[state=active]:bg-white/20 transition-colors rounded-tl-md rounded-bl-md"></div>
                   </TabsTrigger>
                 </TabsList>
@@ -349,7 +362,7 @@ const SettingsSidebar = () => {
                       </div>
                       <div className="flex flex-col">
                         <h4 className="text-sm font-medium text-white">
-                          Feedback
+                          {t('feedback')}
                         </h4>
                       </div>
                     </div>
@@ -362,13 +375,13 @@ const SettingsSidebar = () => {
                   <TabsContent value="widgets" className="mt-0">
                     <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
                       <Layout className="h-4 w-4" />
-                      <span>Widget Visibility</span>
+                      <span>{t('widgetVisibility')}</span>
                     </h3>
                     <div className="space-y-0 border px-4 py-2 bg-black/5 dark:glass-dark select-none dark:bg-white/5 rounded-lg border-black/10 dark:border-white/10">
                       <div className="flex items-center justify-between py-3">
                         <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
                           <StickyNote className="h-4 w-4" />
-                          <span>Notes</span>
+                          <span>{t('notes')}</span>
                         </div>
                         <Switch
                           checked={widgetVisibility?.notes}
@@ -380,7 +393,7 @@ const SettingsSidebar = () => {
                       <div className="flex items-center justify-between py-3">
                         <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
                           <CheckSquare className="h-4 w-4" />
-                          <span>Todo List</span>
+                          <span>{t('todoList')}</span>
                         </div>
                         <Switch
                           checked={widgetVisibility?.todoList}
@@ -392,7 +405,7 @@ const SettingsSidebar = () => {
                       <div className="flex items-center justify-between py-3">
                         <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
                           <Timer className="h-4 w-4" />
-                          <span>Pomodoro Timer</span>
+                          <span>{t('pomodoroTimer')}</span>
                         </div>
                         <Switch
                           checked={widgetVisibility?.pomodoro}
@@ -404,7 +417,7 @@ const SettingsSidebar = () => {
                       <div className="flex items-center justify-between py-3">
                         <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
                           <CalendarDays className="h-4 w-4" />
-                          <span>Events</span>
+                          <span>{t('events')}</span>
                         </div>
                         <Switch
                           checked={widgetVisibility?.events}
@@ -412,12 +425,52 @@ const SettingsSidebar = () => {
                         />
                       </div>
                     </div>
+
+                    <div className="mt-6">
+                      <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                        <Monitor className="h-4 w-4" />
+                        <span>{t('interface')}</span>
+                      </h3>
+                      <div className="px-4 border select-none dark:bg-white/5 rounded-lg border-black/10 dark:border-white/10">
+                        <div className="flex items-center justify-between py-3">
+                          <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
+                            <Globe className="h-4 w-4" />
+                            <span>{t('language')}</span>
+                          </div>
+                          <Select
+                            value={language}
+                            onValueChange={(value) => setLanguage(value as Language)}
+                          >
+                            <SelectTrigger className="w-[120px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="en">{t('english')}</SelectItem>
+                              <SelectItem value="de">{t('german')}</SelectItem>
+                              <SelectItem value="es">{t('spanish')}</SelectItem>
+                              <SelectItem value="fr">{t('french')}</SelectItem>
+                              <SelectItem value="it">{t('italian')}</SelectItem>
+                              <SelectItem value="ru">{t('russian')}</SelectItem>
+                              <SelectItem value="ja">{t('japanese')}</SelectItem>
+                              {/* <SelectItem value="ko">{t('korean')}</SelectItem> */}
+                              {/* <SelectItem value="pt">{t('portuguese')}</SelectItem> */}
+                              {/* <SelectItem value="zh">{t('chinese')}</SelectItem> */}
+                              {/* <SelectItem value="hi">{t('hindi')}</SelectItem> */}
+                              {/* <SelectItem value="pl">{t('polish')}</SelectItem> */}
+                              {/* <SelectItem value="nl">{t('dutch')}</SelectItem> */}
+                              {/* <SelectItem value="ar">{t('arabic')}</SelectItem> */}
+                              {/* <SelectItem value="tr">{t('turkish')}</SelectItem> */}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
                   </TabsContent>
 
                   <TabsContent value="profile" className="mt-0">
                     <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
                       <User className="h-4 w-4" />
-                      <span>User Profile</span>
+                      <span>{t('userProfile')}</span>
                     </h3>
 
                     <div className="space-y-3 flex flex-col gap-2">
@@ -426,7 +479,7 @@ const SettingsSidebar = () => {
                           <div className="border px-4 py-2 bg-black/5 border-black/10 dark:border-white/10 dark:glass-dark dark:bg-white/5 rounded-lg mb-2">
                             <div className="flex items-center justify-between py-2">
                               <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
-                                <span>Email</span>
+                                <span>{t('email')}</span>
                               </div>
                               <span className="text-sm font-medium text-black/70 dark:text-white/70">
                                 {userEmail}
@@ -436,7 +489,7 @@ const SettingsSidebar = () => {
 
                             <div className="flex items-center justify-between py-2">
                               <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
-                                <span>Account Type</span>
+                                <span>{t('accountType')}</span>
                               </div>
                               <span
                                 className="text-sm text-black/70 dark:text-white/70 flex items-center gap-1"
@@ -459,13 +512,13 @@ const SettingsSidebar = () => {
                             disabled={isSyncing}
                           >
                             <LogOut className="h-4 w-4" />
-                            Sign Out
+                            {t('signOut')}
                           </Button>
 
                           <div className="mt-4 pt-4">
                             <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
                               <AlertTriangle className="h-4 w-4" />
-                              <span>Danger Area</span>
+                              <span>{t('dangerArea')}</span>
                             </h3>
 
                             <Button
@@ -475,7 +528,7 @@ const SettingsSidebar = () => {
                               disabled={isSyncing || isDeletingAccount}
                             >
                               {/* <Trash2 className="h-4 w-4" /> */}
-                              Delete Account
+                              {t('deleteAccount')}
                             </Button>
                           </div>
                         </div>
@@ -484,8 +537,8 @@ const SettingsSidebar = () => {
                           <div className="flex items-start gap-3 py-4 px-4 bg-black/5 dark:bg-white/5 rounded-lg dark:glass-dark border border-black/10 dark:border-white/10 shadow-sm">
                             <Info className="h-5 w-5 text-black/60 dark:text-white/60 mt-0.5 flex-shrink-0" />
                             <div className="flex flex-col gap-1">
-                              <p className="text-sm font-medium text-black/80 dark:text-white/80">Sign in to your account</p>
-                              <p className="text-sm text-black/60 dark:text-white/60">Access your profile and sync your data across devices</p>
+                              <p className="text-sm font-medium text-black/80 dark:text-white/80">{t('signInToAccount')}</p>
+                              <p className="text-sm text-black/60 dark:text-white/60">{t('accessProfile')}</p>
                             </div>
                           </div>
                           <Button
@@ -497,7 +550,7 @@ const SettingsSidebar = () => {
                             className="w-full bg-white dark:bg-black/50 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                           >
                             <LogIn className="h-4 w-4 mr-2" />
-                            Sign In
+                            {t('signIn')}
                           </Button>
                         </div>
                       )}
@@ -507,17 +560,17 @@ const SettingsSidebar = () => {
                   <TabsContent value="sync" className="mt-0">
                     <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
                       <Cloud className="h-4 w-4" />
-                      <span>Data Synchronization</span>
+                      <span>{t('dataSynchronization')}</span>
                     </h3>
 
                     <div className="space-y-3 flex flex-col gap-2">
                       <div className="flex flex-col space-y-2 border border-black/10 dark:border-white/10 px-4 py-2 bg-black/5 dark:glass-dark rounded-lg dark:bg-white/5">
                         <div className="flex items-center justify-between py-2">
                           <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
-                            <span>Cloud Sync</span>
+                            <span>{t('cloudSync')}</span>
                             {!isAuthenticated || !isPremium ? (
                               <span className="text-xs bg-black/10 text-black dark:text-white px-2 py-0.5 rounded select-none">
-                                Premium
+                                {t('premium')}
                               </span>
                             ) : null}
                           </div>
@@ -531,7 +584,7 @@ const SettingsSidebar = () => {
 
                         <div className="flex items-center justify-between py-2">
                           <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
-                            <span>Last synced</span>
+                            <span>{t('lastSynced')}</span>
                           </div>
                           <span
                             className={`text-sm ${
@@ -548,7 +601,7 @@ const SettingsSidebar = () => {
                       {isSyncing && (
                         <div className="flex items-center justify-center text-sm text-black/50 dark:text-white/50 bg-black/5 dark:bg-white/5 p-2 rounded-lg">
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          <span>Syncing data...</span>
+                          <span>{t('syncingData')}</span>
                         </div>
                       )}
 
@@ -558,8 +611,7 @@ const SettingsSidebar = () => {
                           <div className="flex items-start gap-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-500/10 p-2 rounded-lg">
                             <Cloud className="h-4 w-4 flex-shrink-0 mt-0.5" />
                             <span className="leading-tight">
-                              Cloud sync is currently disabled. Enable it to keep
-                              your data backed up and synchronized across devices.
+                              {t('cloudSyncIsCurrentlyDisabled')}
                             </span>
                           </div>
                         )}
@@ -568,7 +620,7 @@ const SettingsSidebar = () => {
                         <div className="mt-4 border-black/10 dark:border-white/10 pt-4">
                           <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
                             <FileDown className="h-4 w-4" />
-                            <span>Data Export</span>
+                            <span>{t('dataExport')}</span>
                           </h3>
 
                           <Button
@@ -577,7 +629,7 @@ const SettingsSidebar = () => {
                             onClick={handleExportData}
                           >
                             <FileDown className="h-4 w-4" />
-                            Export Data
+                            {t('exportData')}
                           </Button>
                         </div>
                       )}
@@ -589,7 +641,7 @@ const SettingsSidebar = () => {
                       <TabsContent value="billing" className="mt-0">
                         <h3 className="mb-4 text-base font-medium text-black dark:text-white flex items-center gap-2">
                           <CreditCard className="h-4 w-4" />
-                          <span>Billing</span>
+                          <span>{t('billing')}</span>
                         </h3>
 
                         <div className="space-y-4">
@@ -600,7 +652,7 @@ const SettingsSidebar = () => {
                             >
                               <Sparkles className="h-4 w-4 relative z-10" />
                               <span className="relative z-10">
-                                Upgrade to Premium
+                                {t('upgradeToPremium')}
                               </span>
                             </Button>
                           )}
@@ -626,7 +678,7 @@ const SettingsSidebar = () => {
                               className="w-full"
                             >
                               <CreditCard className="h-4 w-4" />
-                              Manage Billing
+                              {t('manageBilling')}
                             </Button>
                           )}
                         </div>
@@ -634,20 +686,20 @@ const SettingsSidebar = () => {
                     )}
                     
                   <TabsContent value="about" className="mt-0">
-                    <h3 className="mb-4 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                    <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
                       <HelpCircle className="h-4 w-4" />
-                      <span>About Evolve</span>
+                      <span>{t('aboutEvolve')}</span>
                     </h3>
                     
                     <div className="flex flex-col space-y-5">
-                      <div className="border border-black/10 dark:border-white/10 rounded-lg overflow-hidden">
+                      <div className="border border-black/15 dark:border-white/10 rounded-lg overflow-hidden">
                         <div className="p-5 text-sm text-black/80 dark:text-white/80 space-y-4 bg-black/5 dark:bg-white/5 dark:glass-dark">
                           <p>
-                            Evolve was created by a single developer with a passion for productivity and organization. The goal was simple: to build a beautiful, intuitive dashboard that helps people stay focused and accomplish more.
+                            {t('evolveCreated')}
                           </p>
                           
                           <p>
-                            Unlike typical productivity apps that overwhelm you with features, Evolve focuses on what matters most—notes, todos, time management, and events—all in one clean interface.
+                            {t('evolveFocus')}
                           </p>
                           
 {/*                           <div className="flex items-start gap-3 py-3 px-4 bg-amber-100/50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded-md">
@@ -660,33 +712,13 @@ const SettingsSidebar = () => {
                             </div>
                           </div> */}
 
-                          <div className="relative mt-2 overflow-hidden rounded-lg border border-indigo-200 dark:border-indigo-900/50">
-                            {/* Gradient background */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50 dark:from-indigo-950/40 dark:via-purple-950/30 dark:to-blue-950/40"></div>
-                            
-                            {/* Animated subtle shimmer effect */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer opacity-50"></div>
-                            
-                            {/* Content */}
-                            <div className="relative p-5 flex flex-col gap-3">
-                              <div className="flex items-center gap-2">
-                                  <Sparkles className="h-4 w-4 text-indigo-700 dark:text-indigo-300" />
-                                <h4 className="font-semibold text-indigo-700 dark:text-indigo-300">Supporting Evolve</h4>
-                              </div>
-                              
-                              <p className="text-sm text-indigo-900/80 dark:text-indigo-200/90 leading-relaxed">
-                                Maintaining and improving Evolve requires significant time and resources. As a solo developer project, your Premium subscription directly supports ongoing development and server costs, helping to keep Evolve running and growing with new features.
-                              </p>
-                              
-                            </div>
-                          </div>
                         </div>
                       </div>
                       
                       <div className="border border-black/10 dark:border-white/10 rounded-lg p-5 bg-black/5 dark:bg-white/5 dark:glass-dark">
-                        <h4 className="text-sm font-medium text-black dark:text-white mb-3">Have questions or need help?</h4>
+                        <h4 className="text-sm font-medium text-black dark:text-white mb-3">{t('haveQuestionsOrNeedHelp')}</h4>
                         <p className="text-sm text-black/70 dark:text-white/70 mb-3">
-                          If you encounter any issues, have feature suggestions, or just want to share your thoughts, please don't hesitate to reach out.
+                          {t('haveQuestionsOrNeedHelpDescription')}
                         </p>
                         <a 
                           href="mailto:support@evolve-app.com" 
@@ -700,7 +732,7 @@ const SettingsSidebar = () => {
                       <div className="flex flex-col items-center mt-auto pt-6">
                         <Logo className="h-10 w-10 flex justify-center items-center mb-3" />
                         <div className="text-sm text-black/50 dark:text-white/50">
-                          Version 1.0.4
+                          {t('version')}
                         </div>
                         <div className="text-xs text-black/40 dark:text-white/40 mt-1">
                           © {new Date().getFullYear()} Evolve
@@ -733,26 +765,23 @@ const SettingsSidebar = () => {
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
               <AlertTriangle className="h-5 w-5" />
-              <span>Delete Account</span>
+              <span>{t('deleteAccount')}</span>
             </AlertDialogTitle>
             <AlertDialogDescription className="text-black/70 dark:text-white/70">
               <p className="mb-2">
-                This action is <strong>irreversible</strong>. All your data will
-                be permanently deleted.
+                {t('deleteAccountWarning')}
               </p>
 
               {isPremium && (
                 <div className="p-3 mb-3 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded-md">
-                  <p className="font-medium">⚠️ Active Subscription Warning</p>
+                  <p className="font-medium">{t('activeSubscriptionWarning')}</p>
                   <p className="text-sm">
-                    You have an active subscription. Please cancel your
-                    subscription before deleting your account, otherwise you
-                    will continue to be billed.
+                    {t('activeSubscriptionWarningDescription')}
                   </p>
                 </div>
               )}
 
-              <p>Are you sure you want to proceed?</p>
+              <p>{t('areYouSureYouWantToProceed')}</p>
 
               {deleteAccountError && (
                 <div className="mt-3 p-3 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 rounded-md">
@@ -763,7 +792,7 @@ const SettingsSidebar = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="bg-gray-100 dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-700">
-              Cancel
+              {t('cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-red-800 shadow-sm hover:shadow-md dark:shadow-red-900/20 dark:hover:shadow-red-900/30 transition-all duration-300"
@@ -773,12 +802,12 @@ const SettingsSidebar = () => {
               {isDeletingAccount ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Deleting...
+                  {t('deleting')}
                 </>
               ) : (
                 <>
                   <Trash2 className="h-4 w-4" />
-                  Delete Account
+                  {t('deleteAccount')}
                 </>
               )}
             </AlertDialogAction>

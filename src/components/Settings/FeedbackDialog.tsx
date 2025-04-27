@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useSettings } from '@/context/SettingsContext';
 import { PostgrestError } from '@supabase/supabase-js';
 import { Textarea } from '../ui/textarea';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface FeedbackDialogProps {
   open: boolean;
@@ -18,7 +19,7 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ open, onOpenChange }) =
   const [isSubmitted, setIsSubmitted] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const { isAuthenticated } = useSettings();
-
+  const { t } = useLanguage();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -86,17 +87,17 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ open, onOpenChange }) =
         <DialogHeader className="border-b border-white/10 pb-3">
           <DialogTitle className="dark:text-white text-xl font-semibold flex items-center gap-2">
             <MessageCircleHeart className="h-5 w-5" />
-            Leave Feedback
+            {t('leaveFeedback')}
           </DialogTitle>
           <DialogDescription className="mt-1">
-            Your feedback is invaluable to us! It helps us understand your needs, improve our features, and create a better experience for everyone. We read every submission and use your insights to shape the future of Evolve.
+            {t('feedbackDescription')}
           </DialogDescription>
         </DialogHeader>
         
         {isSubmitted ? (
           <div className="py-8 text-center">
-            <div className="text-green-500 text-lg font-medium">Thank you for your feedback!</div>
-            <div className="text-white/70 text-sm mt-2">We appreciate your input and will review it shortly.</div>
+            <div className="text-green-500 text-lg font-medium">{t('thankYouForFeedback')}</div>
+            <div className="text-gray-500 dark:text-white/70 text-sm mt-2">{t('weAppreciateYourInput')}</div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
@@ -107,13 +108,13 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ open, onOpenChange }) =
             )}
             
             <div className="space-y-2">
-              <label htmlFor="feedback" className="text-sm dark:text-white/80 font-medium">Your Feedback</label>
+              <label htmlFor="feedback" className="text-sm dark:text-white/80 font-medium">{t('yourFeedback')}</label>
               <Textarea
                 id="feedback"
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
                 className="w-full h-32 dark:bg-black/20 dark:border-white/10"
-                placeholder="Share your thoughts, suggestions, or report issues..."
+                placeholder={t('feedbackPlaceholder')}
                 required
               />
             </div>
@@ -126,7 +127,7 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ open, onOpenChange }) =
                   onClick={() => onOpenChange(false)}
                   disabled={isSubmitting}
                 >
-                  Cancel
+                  {t('cancel')}
                 </Button>
                 <Button
                   type="submit"
@@ -137,10 +138,10 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ open, onOpenChange }) =
                     {isSubmitting ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Submitting...
+                        {t('submitting')}
                       </>
                     ) : (
-                      'Submit Feedback'
+                      t('submitFeedback')
                     )}
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-0 hover:opacity-100 transition-opacity duration-300" />

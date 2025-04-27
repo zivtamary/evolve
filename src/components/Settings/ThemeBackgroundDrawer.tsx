@@ -23,6 +23,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Slider } from "@/components/ui/slider";
+import { useLanguage } from "@/context/LanguageContext";
 
 // Theme options
 const THEME_OPTIONS = [
@@ -158,6 +159,8 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
     "image" | "gradient" | "solid" | "dynamic" | null
   >(null);
 
+  const { language, setLanguage, t } = useLanguage();
+
   // Sync stored values with props when component mounts
   useEffect(() => {
     // Only update if stored values are different from props
@@ -238,7 +241,7 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
           <PaletteIcon className="h-4 w-4" />
         </button>
         </TooltipTrigger>
-        <TooltipContent side="left" children="Theme & Background Settings" />
+        <TooltipContent side="left" children={t('themeAndBackgroundSettings')} />
         </Tooltip>
         </TooltipProvider>
 
@@ -246,12 +249,12 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
       <DrawerContent className="bg-transparent backdrop-blur-xl border-t border-white/5">
         <div className="max-w-md mx-auto px-6 py-4">
           <h3 className="text-base font-medium text-white text-center mb-8">
-            Theme & Background Settings
+            {t('themeAndBackground')}
           </h3>
 
           {/* Theme Selection */}
           <div className="mb-8">
-            <h4 className="text-sm font-medium text-white/70 mb-3">Theme</h4>
+            <h4 className="text-sm font-medium text-white/70 mb-3">{t('theme')}</h4>
             <div className="flex gap-3">
               {THEME_OPTIONS.map((option) => (
                 <TooltipProvider key={option.value}>
@@ -271,7 +274,7 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                       </button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Set theme to {option.name.toLowerCase()}</p>
+                      <p>{t('setThemeTo')} {t(option.value as keyof typeof t)}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -284,7 +287,7 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
           {/* Background Type Selection */}
           <div className="mb-8">
             <h4 className="text-sm font-medium text-white/70 mb-3">
-              Background Type
+              {t('backgroundType')}
             </h4>
             <div className="flex gap-3">
               {BACKGROUND_TYPE_OPTIONS.map((option) => (
@@ -343,12 +346,12 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                         {/* Content with z-index to appear above the preview */}
                         <div className="relative z-10 flex flex-col items-center">
                           {option.icon}
-                          <span className="mt-2 text-xs">{option.name}</span>
+                          <span className="mt-2 text-xs">{t(option.value as keyof typeof t)}</span>
                         </div>
                       </button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Use {option.name.toLowerCase()} background</p>
+                      <p>{t('use')} {t(option.value as keyof typeof t)} {t('background')}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -360,12 +363,12 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
           <div>
             <h4 className="text-sm font-medium text-white/70 mb-3">
               {displayBackgroundType === "image"
-                ? "Image Options"
+                ? t('imageOptions')
                 : displayBackgroundType === "gradient"
-                ? "Gradient Options"
+                ? t('gradientOptions')
                 : displayBackgroundType === "dynamic"
-                ? "Dynamic Options"
-                : "Color Options"}
+                ? t('dynamicOptions')
+                : t('colorOptions')}
             </h4>
 
             <div className="-mx-6 px-6 overflow-x-auto w-full min-w-[40rem] max-w-md">
@@ -400,7 +403,7 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                           </button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>Shuffle background image</p>
+                          <p>{t('shuffleBackgroundImage')}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -462,7 +465,7 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Shuffle Dynamic Background</p>
+                        <p>{t('shuffleDynamicBackground')}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -507,7 +510,7 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
               
               <div className="mb-4">
                 <h4 className="text-sm font-medium text-white/70 mb-3">
-                  Extra Options
+                  {t('extraOptions')}
                 </h4>
                 
                 <div className="space-y-6">
@@ -516,7 +519,7 @@ const ThemeBackgroundDrawer: React.FC<ThemeBackgroundDrawerProps> = ({
                     <div className="flex justify-between">
                       <label className="text-sm text-white/70">Blur</label>
                       <span className="text-sm text-white/70">
-                        {storedBlurLevel === 0 ? "None" : storedBlurLevel === 1 ? "Low" : storedBlurLevel === 2 ? "Medium" : "High"}
+                        {storedBlurLevel === 0 ? t('none') : storedBlurLevel === 1 ? t('low') : storedBlurLevel === 2 ? t('medium') : t('high')}
                       </span>
                     </div>
                     <Slider

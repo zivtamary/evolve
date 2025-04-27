@@ -28,12 +28,14 @@ import {
   CloudFog,
   MoonStar,
 } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface WeatherData {
   temperature: number;
   description: string;
   city: string;
   icon: string;
+  weather_code: number;
 }
 
 const FloatingStar = ({ delay, size, x, y }) => (
@@ -112,13 +114,43 @@ const TimeGreeting = () => {
   const [nameError, setNameError] = useState('');
   const [weather] = useLocalStorage<WeatherData | null>('weather-data', null);
   const [tempUnit, setTempUnit] = useLocalStorage<'C' | 'F'>('temp-unit', 'C');
+
+  const { language, setLanguage, t } = useLanguage();
+
+  const weatherDescriptions: Record<number, string> = {
+    0: t('clearSky'),
+    1: t('mainlyClear'),
+    2: t('partlyCloudy'),
+    3: t('overcast'),
+    45: t('fog'),
+    48: t('depositingRimeFog'),
+    51: t('lightDrizzle'),
+    53: t('moderateDrizzle'),
+    55: t('denseDrizzle'),
+    61: t('slightRain'),
+    63: t('moderateRain'),
+    65: t('heavyRain'),
+    71: t('slightSnow'),
+    73: t('moderateSnow'),
+    75: t('heavySnow'),
+    77: t('snowGrains'),
+    80: t('slightRainShowers'),
+    81: t('moderateRainShowers'),
+    82: t('violentRainShowers'),
+    85: t('slightSnowShowers'),
+    86: t('heavySnowShowers'),
+    95: t('thunderstorm'),
+    96: t('thunderstormWithSlightHail'),
+    99: t('thunderstormWithHeavyHail')
+  }
+
   
   const getGreetingAndIcon = () => {
     const hour = new Date().getHours();
     
     if (hour >= 5 && hour < 12) {
       return {
-        greeting: `Good morning${displayName ? ',' : '.'}`,
+        greeting: `${t('goodMorning')}${displayName ? ',' : '.'}`,
         icon: (
           <div className="relative">
             <motion.div
@@ -141,7 +173,7 @@ const TimeGreeting = () => {
       };
     } else if (hour >= 12 && hour < 17) {
       return {
-        greeting: `Good afternoon${displayName ? ',' : '.'}`,
+        greeting: `${t('goodAfternoon')}${displayName ? ',' : '.'}`,
         icon: (
           <div className="relative">
             <motion.div
@@ -164,7 +196,7 @@ const TimeGreeting = () => {
       };
     } else if (hour >= 17 && hour < 22) {
       return {
-        greeting: `Good evening${displayName ? ',' : '.'}`,
+        greeting: `${t('goodEvening')}${displayName ? ',' : '.'}`,
         icon: (
           <div className="relative">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{
@@ -191,7 +223,7 @@ const TimeGreeting = () => {
       };
     } else {
       return {
-        greeting: `Good night${displayName ? ',' : '.'}`,
+        greeting: `${t('goodNight')}${displayName ? ',' : '.'}`,
         icon: (
           <div className="relative">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{
@@ -301,7 +333,7 @@ const TimeGreeting = () => {
           </Tooltip>
         </TooltipProvider>
         <span className="opacity-80">{getWeatherIcon(weather.icon)}</span>
-        <span className="capitalize opacity-80 select-none">{weather.description}</span>
+        <span className="capitalize opacity-80 select-none">{weatherDescriptions[weather.weather_code]}</span>
       </motion.div>
     );
   };
@@ -340,7 +372,7 @@ const TimeGreeting = () => {
                 </span>
               </motion.span>
               </TooltipTrigger>
-              <TooltipContent children={`Click to edit your name`} />
+              <TooltipContent children={`${t('clickToEditYourName')}`} />
               </Tooltip>
               </TooltipProvider>
               <span className="ml-0">.</span>
@@ -355,7 +387,7 @@ const TimeGreeting = () => {
           <DialogHeader className="border-b border-white/10 pb-3">
             <DialogTitle className="text-white text-xl font-semibold flex items-center gap-2">
               <Pencil className="h-5 w-5" />
-              <span>Edit Your Name</span>
+              <span>{t('editYourName')}</span>
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={(e) => {
@@ -367,7 +399,7 @@ const TimeGreeting = () => {
                 htmlFor="name-input" 
                 className="block text-sm mb-1.5 text-white/80 font-medium cursor-pointer hover:text-white transition-colors"
               >
-                Name
+                {t('name')}
               </label>
               <input
                 id="name-input"
@@ -377,7 +409,7 @@ const TimeGreeting = () => {
                   setNewName(e.target.value);
                   setNameError('');
                 }}
-                placeholder="Enter your name"
+                placeholder={t('namePlaceholder')}
                 className="w-full bg-black/10 dark:bg-black/20 px-4 py-2.5 rounded-lg outline-none border border-white/10 focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all duration-200 text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               />
               {nameError && (
@@ -396,7 +428,7 @@ const TimeGreeting = () => {
                 onClick={() => setIsEditing(false)}
                 className="flex items-center gap-2 px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded transition-colors"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 type="submit"

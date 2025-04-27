@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface SubscriptionModalProps {
   open: boolean;
@@ -41,7 +42,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { userProfile } = useSettings();
-
+  const { t } = useLanguage();
   const calculateSavings = (yearlyPrice: number, monthlyPrice: number) => {
     const monthlyCost = monthlyPrice * 12; // Cost if paid monthly for a year
     const savings = monthlyCost - yearlyPrice; // Total savings in dollars
@@ -141,10 +142,10 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   };
 
   const benefits = [
-    "Cloud synchronization",
-    "Early access to new features",
-    "No ads or interruptions",
-    "Priority support",
+    t('cloudSynchronization'),
+    t('earlyAccessToNewFeatures'),
+    t('noAdsOrInteruptions'),
+    t('prioritySupport'),
   ];
 
   if (isLoading) {
@@ -198,10 +199,10 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center justify-center gap-2 text-xl">
             <Sparkles className="h-5 w-5 text-yellow-500" />
-            Upgrade to Premium
+            {t('upgradeToPremium')}
           </DialogTitle>
           <DialogDescription className="text-center pt-2">
-            Unlock all features and sync your data across devices.
+            {t('premiumDescription')}
           </DialogDescription>
         </DialogHeader>
 
@@ -269,7 +270,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             className="sm:w-auto w-full"
             disabled={isProcessing}
           >
-            Cancel
+            {t('cancel')}
           </Button>
           <Button
             onClick={handleSubscribe}
@@ -279,12 +280,12 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             {isProcessing ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Processing...
+                {t('processing')}
               </>
             ) : (
               <>
                 <CreditCard className="h-4 w-4 mr-2" />
-                Subscribe Now
+                {t('subscribeNow')}
               </>
             )}
           </Button>

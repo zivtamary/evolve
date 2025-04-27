@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { useClickOutside } from '../../hooks/use-click-outside';
 import useWindowSize from '@/hooks/use-window-size';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { useLanguage } from '@/context/LanguageContext';
 
 // Maximum character limit for todo items
 const TODO_CHAR_LIMIT = 100;
@@ -43,8 +44,10 @@ const TodoList: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const todoListRef = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
-  const isExpanded = expandedWidget === 'todoList';
-  
+  const isExpanded = expandedWidget === "todoList";
+
+  const { t } = useLanguage();
+
   // Function to fetch todos from cloud
   const fetchCloudTodos = async () => {
     if (!isAuthenticated || !userProfile?.cloud_sync_enabled) return;
@@ -489,11 +492,11 @@ const TodoList: React.FC = () => {
           className="text-xl select-none font-semibold flex items-center gap-2 cursor-pointer hover:text-white/80 transition-colors"
         >
           <CheckSquare className="h-5 w-5" />
-          <span>Todo List</span>
+          <span>{t("todoList")}</span>
         </h2>
         <div className="flex items-center gap-2">
           <div className="text-xs text-white/70">
-            {activeTodosCount} items left
+            {activeTodosCount} {t("itemsLeft")}
           </div>
         </div>
       </motion.div>
@@ -521,7 +524,7 @@ const TodoList: React.FC = () => {
               type="text"
               value={newTodo}
               onChange={(e) => setNewTodo(e.target.value)}
-              placeholder="What needs to be done?"
+              placeholder={t("whatNeedsToBeDone")}
               className="flex-grow bg-black/20 px-4 py-2 rounded-l outline-none placeholder:text-white/50"
               maxLength={TODO_CHAR_LIMIT}
             />
@@ -529,12 +532,12 @@ const TodoList: React.FC = () => {
               type="submit"
               className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-r text-white transition-colors"
             >
-              Add
+              {t("add")}
             </button>
           </div>
           <div className="flex justify-end mt-1">
             <span className={`text-xs ${charCount >= TODO_CHAR_LIMIT ? 'text-red-400' : 'text-white/50'}`}>
-              {charCount}/{TODO_CHAR_LIMIT} characters
+              {charCount}/{TODO_CHAR_LIMIT} {t("characters")}
             </span>
           </div>
         </div>
@@ -647,7 +650,7 @@ const TodoList: React.FC = () => {
                     </button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          Delete todo
+                          {t("deleteTodo")}
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -678,19 +681,19 @@ const TodoList: React.FC = () => {
               onClick={() => setFilter('all')}
               className={`px-2 py-1 rounded ${filter === 'all' ? 'bg-white/20' : 'hover:bg-white/10'}`}
             >
-              All
+              {t("all")}
             </button>
             <button
               onClick={() => setFilter('active')}
               className={`px-2 py-1 rounded ${filter === 'active' ? 'bg-white/20' : 'hover:bg-white/10'}`}
             >
-              Active
+              {t("active")}
             </button>
             <button
               onClick={() => setFilter('completed')}
               className={`px-2 py-1 rounded ${filter === 'completed' ? 'bg-white/20' : 'hover:bg-white/10'}`}
             >
-              Completed
+              {t("completed")}
             </button>
           </div>
         </motion.div>

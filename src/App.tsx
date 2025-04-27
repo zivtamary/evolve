@@ -13,6 +13,7 @@ import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import ParticlesAnimation from "./components/Background/ParticlesAnimation";
+import { LanguageProvider } from './context/LanguageContext';
 
 const queryClient = new QueryClient();
 
@@ -95,19 +96,21 @@ const AppRoutes = () => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <SettingsProvider>
-        <AuthWrapper>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <AppRoutes />
-          </TooltipProvider>
-        </AuthWrapper>
-      </SettingsProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+  <LanguageProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <SettingsProvider>
+          <AuthWrapper>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <AppRoutes />
+            </TooltipProvider>
+          </AuthWrapper>
+        </SettingsProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  </LanguageProvider>
 );
 
 export default App;

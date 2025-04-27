@@ -4,6 +4,7 @@ import { TooltipProvider } from '../ui/tooltip';
 import { TooltipContent } from '../ui/tooltip';
 import { Tooltip } from '../ui/tooltip';
 import { TooltipTrigger } from '../ui/tooltip';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface BackgroundImageProps {
   children: React.ReactNode;
@@ -18,6 +19,8 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({
   const [lastUsedIndex, setLastUsedIndex] = useLocalStorage<number>('last-image-index', -1);
   const [loading, setLoading] = useState<boolean>(true);
   const [isSpinning, setIsSpinning] = useState<boolean>(false);
+
+  const { t } = useLanguage();
 
   const defaultImages = [
     'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
@@ -113,7 +116,7 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({
           </svg>
         </button>
         </TooltipTrigger>
-        <TooltipContent children="Refresh Background" />
+        <TooltipContent children={t('refreshBackground')} />
         </Tooltip>
         </TooltipProvider>
       </div>

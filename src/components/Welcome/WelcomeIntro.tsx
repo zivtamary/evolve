@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SplashScreen from './SplashScreen';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useLanguage } from '@/context/LanguageContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Language } from '@/translations';
 
 interface WelcomeIntroProps {
   onComplete: () => void;
@@ -13,6 +16,29 @@ const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete, onStartFadeOut 
   const [name, setName] = useState('');
   const [displayName, setDisplayName] = useLocalStorage('display_name', '');
   const [nameError, setNameError] = useState('');
+  const { language, setLanguage, t } = useLanguage();
+  const [currentLanguageText, setCurrentLanguageText] = useState('Choose your language');
+  const [languageIndex, setLanguageIndex] = useState(0);
+
+  const languageTexts = [
+    'Choose your language',
+    'Wähle deine Sprache',
+    'Elige tu idioma',
+    'Choisissez votre langue',
+    'Scegli la tua lingua',
+    '言語を選択してください',
+    'Выберите язык'
+  ];
+
+  useEffect(() => {
+    if (step === 1) {
+      const interval = setInterval(() => {
+        setLanguageIndex((prev) => (prev + 1) % languageTexts.length);
+        setCurrentLanguageText(languageTexts[languageIndex]);
+      }, 2000);
+      return () => clearInterval(interval);
+    }
+  }, [step, languageIndex]);
 
   // Add class to body when component mounts and remove when it unmounts
   useEffect(() => {
@@ -23,21 +49,19 @@ const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete, onStartFadeOut 
   }, []);
 
   const handleNext = () => {
-    if (step < 3) {
-      if (step === 2 && (!name || name.trim() === '')) {
+    if (step < 4) {
+      if (step === 3 && (!name || name.trim() === '')) {
         setNameError('Please enter your name');
         return;
       }
       
-      if (step === 2) {
+      if (step === 3) {
         setDisplayName(name.trim());
       }
 
       if (step === 0) {
         // Set splash screen to seen if user has name in local storage
         if (displayName) {
-            // console.log('Now setting splash screen to seen');
-            // console.log('User has name: ', displayName);
             onComplete();
             return;
         }
@@ -56,13 +80,55 @@ const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete, onStartFadeOut 
       case 1:
         return (
           <div className='flex flex-col items-center justify-center'>
+            <motion.div
+              key={currentLanguageText}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+              className="h-20 flex items-center"
+            >
+              <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
+                {currentLanguageText}
+              </h1>
+            </motion.div>
+            
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="mb-8"
+            >
+              <Select
+                value={language}
+                onValueChange={(value) => setLanguage(value as Language)}
+              >
+                <SelectTrigger className="w-[200px] bg-white/10 text-white border-white/20">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="en">English 🇬🇧</SelectItem>
+                  <SelectItem value="de">Deutsch 🇩🇪</SelectItem>
+                  <SelectItem value="es">Español 🇪🇸</SelectItem>
+                  <SelectItem value="fr">Français 🇫🇷</SelectItem>
+                  <SelectItem value="it">Italiano 🇮🇹</SelectItem>
+                  <SelectItem value="ja">日本語 🇯🇵</SelectItem>
+                  <SelectItem value="ru">Русский 🇷🇺</SelectItem>
+                </SelectContent>
+              </Select>
+            </motion.div>
+          </div>
+        );
+      case 2:
+        return (
+          <div className='flex flex-col items-center justify-center'>
             <motion.h1
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5 }}
-              className="text-4xl md:text-6xl font-bold text-white mb-4"
+              className="select-none text-4xl md:text-6xl font-bold text-white mb-4"
             >
-              Welcome 👋
+              Welcome to Evolve! 👋
             </motion.h1>
             
             <motion.p
@@ -75,7 +141,7 @@ const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete, onStartFadeOut 
             </motion.p>
           </div>
         );
-      case 2:
+      case 3:
         return (
           <>
             <motion.h2
@@ -120,7 +186,7 @@ const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete, onStartFadeOut 
             </motion.div>
           </>
         );
-      case 3:
+      case 4:
         return (
           <>
             <motion.h2
@@ -204,7 +270,7 @@ const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete, onStartFadeOut 
               onClick={handleNext}
               className="px-6 py-3 bg-white text-black rounded-lg font-medium hover:bg-white/90 transition-colors"
             >
-              {step === 3 ? 'Get Started' : 'Next'}
+              {step === 4 ? 'Get Started' : 'Next'}
             </motion.button>
           </motion.div>
         )}
@@ -216,7 +282,7 @@ const WelcomeIntro: React.FC<WelcomeIntroProps> = ({ onComplete, onStartFadeOut 
             transition={{ delay: 0.8 }}
             className="flex justify-center gap-2 mt-8"
           >
-            {[1, 2, 3].map((dot) => (
+            {[1, 2, 3, 4].map((dot) => (
               <div
                 key={dot}
                 className={`w-2 h-2 rounded-full transition-all duration-300 ${

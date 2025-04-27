@@ -21,6 +21,7 @@ import {
   Moon,
   MoonStar,
 } from 'lucide-react';
+import { useLanguage } from "@/context/LanguageContext";
 
 interface ClockProps {
   className?: string;
@@ -80,6 +81,8 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
   );
   const [weather] = useLocalStorage<WeatherData | null>('weather-data', null);
   const [tempUnit] = useLocalStorage<'C' | 'F'>('temp-unit', 'C');
+
+  const { language, setLanguage, t } = useLanguage();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -182,11 +185,11 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
   const getClockTypeTitle = (): string => {
     switch (clockType) {
       case "digital-12h":
-        return "Switch to 24h format";
+        return t('switchTo24hClock');
       case "digital-24h":
-        return "Switch to analog clock";
+        return t('switchToAnalogClock');
       case "analog":
-        return "Switch to 12h format";
+        return t('switchTo12hClock');
       default:
         return "";
     }
@@ -268,7 +271,7 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
     <DrawerContent className="bg-transparent backdrop-blur-xl border-t border-white/5">
       <div className="max-w-md mx-auto px-6 py-4">
         <h3 className="text-base font-medium text-white text-center mb-8">
-          Font & Color
+          {t('fontAndColor')}
         </h3>
         <div className="space-y-4">
           <div>
@@ -420,7 +423,7 @@ const Clock: React.FC<ClockProps> = ({ className = "" }) => {
                           <Settings2 className="w-4 h-4" />
                         </button>
                       </TooltipTrigger>
-                      <TooltipContent children={`Font and color settings`} />
+                      <TooltipContent children={t('fontAndColorSettings')} />
                     </Tooltip>
                   </TooltipProvider>
                 </div>

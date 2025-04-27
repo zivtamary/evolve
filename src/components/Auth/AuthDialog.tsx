@@ -32,6 +32,7 @@ import { FcGoogle } from "react-icons/fc";
 import { motion, AnimatePresence } from "framer-motion";
 import TermsDialog from "@/components/Dialogs/TermsDialog";
 import PrivacyDialog from "@/components/Dialogs/PrivacyDialog";
+import { useLanguage } from "@/context/LanguageContext";
 
 const slideAnimation = {
   initial: { opacity: 0, x: 20 },
@@ -61,7 +62,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
   const isSigningIn = useRef(false);
   const navigate = useNavigate();
   const { isAuthenticated } = useSettings();
-
+  const { t } = useLanguage();
   useEffect(() => {
     if (isAuthenticated) {
       onOpenChange(false);
@@ -75,8 +76,8 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
 
       if (!email || !password) {
         toast({
-          title: "Error",
-          description: "Please fill in all fields",
+          title: t('error'),
+          description: t('pleaseFillInAllFields'),
           variant: "destructive",
         });
         return;
@@ -84,9 +85,8 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
 
       if (!agreedToTerms) {
         toast({
-          title: "Error",
-          description:
-            "You must agree to the Terms of Service and Privacy Policy",
+          title: t('error'),
+          description: t('youMustAgreeToTheTermsOfServiceAndPrivacyPolicy'),
           variant: "destructive",
         });
         return;
@@ -104,17 +104,17 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
       if (data.user) {
         setView("success");
         toast({
-          title: "Account created",
-          description: "Please check your email to confirm your account",
+          title: t('accountCreated'),
+          description: t('pleaseCheckYourEmailToConfirmYourAccount'),
         });
       }
     } catch (error) {
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "An error occurred during sign up";
+          : t('signUpError');
       toast({
-        title: "Sign up failed",
+        title: t('signUpFailed'),
         description: errorMessage,
         variant: "destructive",
       });
@@ -130,8 +130,8 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
 
       if (!email || !password) {
         toast({
-          title: "Error",
-          description: "Please fill in all fields",
+          title: t('error'),
+          description: t('pleaseFillInAllFields'),
           variant: "destructive",
         });
         return;
@@ -148,8 +148,8 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
 
       if (data.user && data.session) {
         toast({
-          title: "Welcome back",
-          description: "You have been signed in successfully",
+          title: t('welcomeBack'),
+          description: t('signedInSuccessfully'),
           action: <Sparkles className="size-5" />,
         });
 
@@ -159,9 +159,9 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "An error occurred during sign in";
+          : t('signInError');
       toast({
-        title: "Sign in failed",
+        title: t('signInFailed'),
         description: errorMessage,
         variant: "destructive",
       });
@@ -177,8 +177,8 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
 
       if (!resetEmail) {
         toast({
-          title: "Error",
-          description: "Please enter your email address",
+          title: t('error'),
+          description: t('pleaseEnterYourEmailAddress'),
           variant: "destructive",
         });
         return;
@@ -193,8 +193,8 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
       }
 
       toast({
-        title: "Password reset email sent",
-        description: "Please check your email for the password reset link",
+        title: t('passwordResetEmailSent'),
+        description: t('pleaseCheckYourEmailForThePasswordResetLink'),
       });
 
       setView("signin");
@@ -204,7 +204,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           ? error.message
           : "An error occurred during password reset";
       toast({
-        title: "Password reset failed",
+        title: t('passwordResetFailed'),
         description: errorMessage,
         variant: "destructive",
       });
@@ -244,9 +244,9 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             const errorMessage =
               error instanceof Error
                 ? error.message
-                : "An error occurred during Google sign in";
+                : t('googleSignInError');
             toast({
-              title: "Google sign in failed",
+              title: t('googleSignInFailed'),
               description: errorMessage,
               variant: "destructive",
             });
@@ -257,17 +257,17 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             const errorMessage =
           error instanceof Error
             ? error.message
-            : "An error occurred during Google sign in";
+            : t('googleSignInError');
         toast({
-          title: "Google sign in failed",
+          title: t('googleSignInFailed'),
           description: errorMessage,
           variant: "destructive",
         });
           }
           if (data.user) {
             toast({
-              title: "Welcome back",
-              description: "You have been signed in successfully",
+              title: t('welcomeBack'),
+              description: t('signedInSuccessfully'),
             });
             onOpenChange(false);
           }
@@ -301,26 +301,26 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
       view === "reset_password" ? (
         <>
           <CardTitle className="text-xl font-semibold">
-            Reset Password
+            {t('resetPassword')}
           </CardTitle>
           <CardDescription className="text-sm text-gray-500">
-            Enter your email to receive a password reset link
+            {t('enterYourEmailToReceiveAPasswordResetLink')}
           </CardDescription>
         </>
       ) : view === "signup" ? (
         <>
           <CardTitle className="text-xl font-semibold">
-            Create Account
+            {t('createAccount')}
           </CardTitle>
           <CardDescription className="text-sm text-gray-500">
-            Sign up to sync your data across all your devices, and more!
+            {t('signUpToSyncYourDataAcrossAllYourDevices')}
           </CardDescription>
         </>
       ) : (
         <>
-          <CardTitle className="text-xl font-semibold">Welcome Back</CardTitle>
+          <CardTitle className="text-xl font-semibold">{t('welcomeBack')}</CardTitle>
           <CardDescription className="text-sm text-gray-500">
-            Sign in to continue to your dashboard
+            {t('signInToContinueToYourDashboard')}
           </CardDescription>
         </>
       );
@@ -362,12 +362,12 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             >
               <CheckCircle className="h-16 w-16 text-green-500" />
             </motion.div>
-            <h2 className="text-2xl font-bold">Account Created!</h2>
+            <h2 className="text-2xl font-bold">{t('accountCreated')}</h2>
             <p className="text-muted-foreground">
-              Please check your email to confirm your account before logging in.
+              {t('pleaseCheckYourEmailToConfirmYourAccountBeforeLoggingIn')}
             </p>
             <Button onClick={() => setView("signin")} className="mt-4">
-              Return to Sign In
+              {t('returnToSignIn')}
             </Button>
           </div>
         </motion.div>
@@ -402,7 +402,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
               disabled={loading}
               variant="link"
             >
-              {loading ? "Sending reset email..." : "Send Reset Link"}
+              {loading ? t('sendingResetEmail') : t('sendResetLink')}
             </Button>
           </form>
         </motion.div>
@@ -423,13 +423,13 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
               value="signin"
               className="dark:data-[state=active]:bg-white/10 h-full rounded-r-none dark:data-[state=active]:text-white dark:text-gray-300 dark:hover:text-white dark:border-white/10 data-[state=active]:text-black/80 data-[state=active]:bg-black/10 text-black/50"
             >
-              Sign In
+              {t('signIn')}
             </TabsTrigger>
             <TabsTrigger
               value="signup"
               className="dark:data-[state=active]:bg-white/10 h-full rounded-l-none dark:data-[state=active]:text-white dark:text-gray-300 dark:hover:text-white dark:border-white/10 data-[state=active]:text-black data-[state=active]:bg-black/10 text-black/50"
             >
-              Create Account
+              {t('createAccount')}
             </TabsTrigger>
           </TabsList>
 
@@ -448,7 +448,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                         htmlFor="signin-email"
                         className="dark:text-gray-200"
                       >
-                        Email
+                        {t('email')}
                       </Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
@@ -470,14 +470,14 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                           htmlFor="signin-password"
                           className="dark:text-gray-200"
                         >
-                          Password
+                          {t('password')}
                         </Label>
                         <Button
                           variant="link"
                           className="p-0 h-auto text-xs dark:text-gray-300 dark:hover:text-gray-100"
                           onClick={() => setView("reset_password")}
                         >
-                          Forgot password?
+                          {t('forgotPassword')}
                         </Button>
                       </div>
                       <div className="relative">
@@ -512,7 +512,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                       className="w-full transition-colors dark:border dark:border-white/10 dark:hover:border-white dark:hover:bg-black/60 dark:text-white dark:hover:text-white"
                       disabled={loading}
                     >
-                      {loading ? "Signing in..." : "Sign In"}
+                      {loading ? t('signingIn') : t('signIn')}
                     </Button>
 
                     <div className="relative">
@@ -521,7 +521,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                       </div>
                       <div className="relative flex justify-center text-xs uppercase">
                         <span className="bg-background px-2 text-muted-foreground dark:bg-black/40 dark:text-gray-400 dark:border dark:border-white/10 rounded-md">
-                          Or continue with
+                          {t('orContinueWith')}
                         </span>
                       </div>
                     </div>
@@ -535,13 +535,13 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                     >
                       <FcGoogle className="mr-2 h-4 w-4" />
                       {loading || isPending
-                        ? "Signing in..."
-                        : "Sign in with Google"}
+                        ? t('signingIn')
+                        : t('signInWithGoogle')}
                     </Button>
                     {/* By continuing, you agree to the Terms of Service and Privacy Policy */}
                     <p className="text-xs text-muted-foreground dark:text-gray-400 text-center">
                         <span className="text-primary dark:text-primary/90">
-                            By continuing, you agree to the <a target="_blank" rel="noopener noreferrer" href="https://evolve-app.com/terms-of-service" className="hover:underline">Terms of Service</a> and <a target="_blank" rel="noopener noreferrer" href="https://evolve-app.com/privacy-policy" className="hover:underline">Privacy Policy</a>
+                            {t('byContinuingYouAgreeToThe')} <a target="_blank" rel="noopener noreferrer" href="https://evolve-app.com/terms-of-service" className="hover:underline">{t('termsOfService')}</a> {t('and')} <a target="_blank" rel="noopener noreferrer" href="https://evolve-app.com/privacy-policy" className="hover:underline">{t('privacyPolicy')}</a>
                         </span>
                     </p>
                   </div>
@@ -563,7 +563,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                         htmlFor="signup-email"
                         className="dark:text-gray-200"
                       >
-                        Email
+                        {t('email')}
                       </Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
@@ -584,7 +584,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                         htmlFor="signup-password"
                         className="dark:text-gray-200"
                       >
-                        Password
+                        {t('password')}
                       </Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
@@ -611,7 +611,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                         </Button>
                       </div>
                       <p className="text-xs text-muted-foreground dark:text-gray-400">
-                        Password must be at least 6 characters
+                        {t('passwordMustBeAtLeast6Characters')}
                       </p>
                     </div>
 
@@ -628,21 +628,20 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                         htmlFor="terms"
                         className="text-xs leading-tight dark:text-gray-300"
                       >
-                        I agree to the{" "}
-                        <button
+                        {t('iAgreeToThe')} <button
                           type="button"
                           onClick={() => setTermsDialogOpen(true)}
                           className="text-primary hover:underline dark:text-primary/90"
                         >
-                          Terms of Service
+                          {t('termsOfService')}
                         </button>{" "}
-                        and{" "}
+                        {t('and')}
                         <button
                           type="button"
                           onClick={() => setPrivacyDialogOpen(true)}
                           className="text-primary hover:underline dark:text-primary/90"
                         >
-                          Privacy Policy
+                          {t('privacyPolicy')}
                         </button>
                       </Label>
                     </div>
@@ -652,7 +651,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                       className="w-full transition-colors dark:bg-black/60 dark:hover:bg-black/80 dark:text-white dark:border dark:border-white/10"
                       disabled={loading || !agreedToTerms}
                     >
-                      {loading ? "Creating account..." : "Create Account"}
+                      {loading ? t('creatingAccount') : t('createAccount')}
                     </Button>
                   </div>
                 </form>
@@ -671,7 +670,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
         >
           <h3 className="text-lg font-medium flex items-center">
             <Sparkles className="h-5 w-5 mr-2 text-yellow-500" />
-            Premium Benefits
+            {t('premiumBenefits')}
           </h3>
 
           <ul className="space-y-2">
@@ -683,7 +682,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             >
               <Cloud className="h-5 w-5 mr-2 text-primary flex-shrink-0 mt-0.5" />
               <span className="text-sm">
-                Cloud sync across all your devices
+                {t('cloudSyncAcrossAllYourDevices')}
               </span>
             </motion.li>
             <motion.li
@@ -694,7 +693,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             >
               <CheckCircle className="h-5 w-5 mr-2 text-primary flex-shrink-0 mt-0.5" />
               <span className="text-sm">
-                Secure backup of all your notes, todos and events
+                {t('secureBackupOfAllYourNotesTodosAndEvents')}
               </span>
             </motion.li>
             <motion.li
@@ -705,7 +704,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             >
               <ArrowRight className="h-5 w-5 mr-2 text-primary flex-shrink-0 mt-0.5" />
               <span className="text-sm">
-                Access your productivity dashboard from anywhere
+                {t('accessYourProductivityDashboardFromAnywhere')}
               </span>
             </motion.li>
           </ul>

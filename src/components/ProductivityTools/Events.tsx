@@ -40,6 +40,7 @@ import { cn } from "@/lib/utils";
 import { useClickOutside } from "../../hooks/use-click-outside";
 import useWindowSize from "@/hooks/use-window-size";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";   
+import { useLanguage } from "@/context/LanguageContext";
 interface Event {
   id: string;
   title: string;
@@ -105,6 +106,8 @@ const Events = () => {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const eventsRef = useRef<HTMLDivElement>(null);
   const isExpanded = expandedWidget === "events";
+
+  const { t } = useLanguage();
 
   // Filter events based on active tab
   const getFilteredEvents = () => {
@@ -180,9 +183,9 @@ const Events = () => {
       );
 
       if (weekDiff === 0) {
-        return "This Week";
+        return t("thisWeek");
       } else if (weekDiff === 1) {
-        return "Next Week";
+        return t("nextWeek");
       } else {
         return `In ${weekDiff} Weeks`;
       }
@@ -224,26 +227,26 @@ const Events = () => {
       );
 
       if (weekDiff === 0) {
-        return "This Week";
+        return t("thisWeek");
       } else if (weekDiff === 1) {
-        return "Next Week";
+        return t("nextWeek");
       } else if (weekDiff <= 4) {
-        return "Later this month";
+        return t("laterThisMonth");
       } else {
         // For events beyond this month, show the month and year
         const monthNames = [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-          "August",
-          "September",
-          "October",
-          "November",
-          "December",
+          t("january"),
+          t("february"),
+          t("march"),
+          t("april"),
+          t("may"),
+          t("june"),
+          t("july"),
+          t("august"),
+          t("september"),
+          t("october"),
+          t("november"),
+          t("december"),
         ];
         return `${monthNames[eventDate.getMonth()]} ${eventDate.getFullYear()}`;
       }
@@ -778,7 +781,7 @@ const Events = () => {
                 sideOffset={5} 
                 className="z-[9999]"
               >
-                <p>New event</p>
+                <p>{t("newEvent")}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -802,7 +805,7 @@ const Events = () => {
           <DialogHeader className="border-b border-white/10 pb-3">
             <DialogTitle className="text-white text-xl font-semibold flex items-center gap-2">
               <CalendarDays className="h-5 w-5" />
-              {dialogState === "edit" ? "Edit Event" : "Create New Event"}
+              {dialogState === "edit" ? t("editEvent") : t("createNewEvent")}
             </DialogTitle>
           </DialogHeader>
           <form
@@ -811,7 +814,7 @@ const Events = () => {
           >
             <div className="mb-4">
               <label className="block text-sm mb-1.5 text-white/80 font-medium">
-                Title
+                {t("title")}
               </label>
               <div className="relative">
                 <input
@@ -826,7 +829,7 @@ const Events = () => {
                   }}
                   onBlur={handleEventBlur}
                   className="w-full bg-black/10 dark:bg-black/20 px-4 py-2.5 rounded-lg outline-none border border-white/10 focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all duration-200 text-white placeholder-white/40 pl-12"
-                  placeholder="Event title"
+                  placeholder={t("titlePlaceholder")}
                   required
                 />
                 {newEvent.icon ? (
@@ -852,7 +855,7 @@ const Events = () => {
                       <button
                         type="button"
                         className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center justify-center w-6 h-6 text-white/50 hover:text-white/70 transition-colors"
-                        title="Add emoji"
+                        title={t("addIcon")}
                       >
                         <Smile className="h-5 w-5" />
                       </button>
@@ -872,7 +875,7 @@ const Events = () => {
             </div>
             <div>
               <label className="block text-sm mb-1.5 text-white/80 font-medium">
-                Date
+                {t("date")}
               </label>
               <Popover
                 open={isDatePickerOpen}
@@ -886,7 +889,7 @@ const Events = () => {
                   >
                     {newEvent.date
                       ? format(new Date(newEvent.date), "PPP")
-                      : "Pick a date"}
+                      : t("pickADate")}
                     <CalendarIcon className="h-4 w-4 opacity-70" />
                   </button>
                 </PopoverTrigger>
@@ -944,7 +947,7 @@ const Events = () => {
             </div>
             <div>
               <label className="block text-sm mb-1.5 text-white/80 font-medium">
-                Time (optional)
+                {t("timeOptional")}
               </label>
               <input
                 type="time"
@@ -958,7 +961,7 @@ const Events = () => {
             </div>
             <div>
               <label className="block text-sm mb-1.5 text-white/80 font-medium">
-                Description
+                {t("description")}
               </label>
               <textarea
                 value={newEvent.description}
@@ -970,7 +973,7 @@ const Events = () => {
                 }}
                 onBlur={handleEventBlur}
                 className="w-full bg-black/10 dark:bg-black/20 px-4 py-2.5 rounded-lg outline-none border border-white/10 focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all duration-200 text-white placeholder-white/40"
-                placeholder="Event description"
+                placeholder={t("descriptionPlaceholder")}
                 rows={3}
               />
               <div className="text-xs text-white/50 mt-1.5 text-right">
@@ -984,13 +987,13 @@ const Events = () => {
                   onClick={resetForm}
                   className="flex items-center gap-2 px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded transition-colors"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
                 <button
                   type="submit"
                   className="flex items-center gap-2 px-4 py-2 text-sm bg-white/20 hover:bg-white/30 rounded text-white transition-colors"
                 >
-                  {dialogState === "edit" ? "Save Changes" : "Create Event"}
+                  {dialogState === "edit" ? t("saveChanges") : t("createEvent")}
                 </button>
               </div>
             </DialogFooter>
@@ -1024,19 +1027,19 @@ const Events = () => {
               value="all"
               className="text-white/70 data-[state=active]:text-white data-[state=active]:bg-white/20"
             >
-              All
+              {t("all")}
             </TabsTrigger>
             <TabsTrigger
               value="week"
               className="text-white/70 data-[state=active]:text-white data-[state=active]:bg-white/20"
             >
-              This Week
+              {t("thisWeek")}
             </TabsTrigger>
             <TabsTrigger
               value="month"
               className="text-white/70 data-[state=active]:text-white data-[state=active]:bg-white/20"
             >
-              This Month
+              {t("thisMonth")}
             </TabsTrigger>
           </TabsList>
 
@@ -1110,7 +1113,7 @@ const Events = () => {
               </div>
             ) : (
               <div className="py-8 text-center text-white/50">
-                No events scheduled for this period
+                {t("noEventsScheduled")}
               </div>
             )}
           </TabsContent>

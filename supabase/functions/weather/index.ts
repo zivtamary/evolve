@@ -105,6 +105,7 @@ serve(async (req) => {
     const weatherData = {
       temperature: Math.round(data.current.temperature_2m),
       description: weatherDescriptions[data.current.weather_code] || 'Unknown weather',
+      weather_code: data.current.weather_code,
       city: city,
       icon: weatherIconMap[data.current.weather_code] || '03d'
     }

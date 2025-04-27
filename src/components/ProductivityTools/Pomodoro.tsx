@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Timer, Play, Pause, RotateCcw, Settings } from 'lucide-react';
+import { Timer, Play, Pause, RotateCcw, Settings, Settings2 } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useSettings } from '../../context/SettingsContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
@@ -9,6 +9,7 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/context/LanguageContext';
 
 type TimerMode = 'work' | 'shortBreak' | 'longBreak';
 
@@ -64,7 +65,7 @@ const Pomodoro: React.FC = () => {
   const intervalRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
-  
+  const { t } = useLanguage();
   // Initialize audio element
   useEffect(() => {
     audioRef.current = new Audio(settings.alarmSound);
@@ -269,10 +270,10 @@ const Pomodoro: React.FC = () => {
       <div className="flex items-center justify-between p-4 border-b border-white/10">
         <div className="flex items-center gap-2">
           <Timer className="h-5 w-5" />
-          <h2 className="text-xl font-semibold select-none">Focus Timer</h2>
+          <h2 className="text-xl font-semibold select-none">{t("focusTimer")}</h2>
         </div>
         <div className="text-xs text-white/70">
-          Session {sessionCount + 1}
+          {t("session")} {sessionCount + 1}
         </div>
       </div>
 
@@ -291,19 +292,19 @@ const Pomodoro: React.FC = () => {
               value="work" 
               className="data-[state=active]:bg-white/20 data-[state=active]:text-white hover:text-white hover:bg-white/10 text-white/70"
             >
-              Focus
+              {t("focus")}
             </TabsTrigger>
             <TabsTrigger 
               value="shortBreak"
               className="data-[state=active]:bg-white/20 data-[state=active]:text-white hover:text-white hover:bg-white/10 text-white/70"
             >
-              Short Break
+              {t("shortBreak")}
             </TabsTrigger>
             <TabsTrigger 
               value="longBreak"
               className="data-[state=active]:bg-white/20 data-[state=active]:text-white hover:text-white hover:bg-white/10 text-white/70"
             >
-              Long Break
+              {t("longBreak")}
             </TabsTrigger>
           </TabsList>
           
@@ -317,26 +318,25 @@ const Pomodoro: React.FC = () => {
                 className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded text-white transition-colors"
               >
                 {isActive ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                {isActive ? 'Pause' : 'Start'}
+                {isActive ? t("pause") : t("start")}
               </button>
               <button
                 onClick={resetTimer}
                 className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded text-white transition-colors"
               >
                 <RotateCcw className="h-4 w-4" />
-                Reset
+                {t("reset")}
               </button>
               <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
                 <DialogTrigger asChild>
                   <button className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded text-white transition-colors">
                     <Settings className="h-4 w-4" />
-                    Settings
                   </button>
                 </DialogTrigger>
-                <DialogContent className="glass dark:glass-dark border-white/10 backdrop-blur-md shadow-xl">
+                <DialogContent className="glass dark:glass-dark border-white/10 backdrop-blur-md shadow-xl w-full max-w-2xl">
                   <DialogHeader className="border-b border-white/10 pb-3">
-                    <DialogTitle className="text-white text-xl font-semibold">Pomodoro Settings</DialogTitle>
-                    <p className="text-sm text-white/70">Customize your timer and notification preferences</p>
+                    <DialogTitle className="text-white text-xl font-semibold">{t('pomodoroSettings')}</DialogTitle>
+                    <p className="text-sm text-white/70">{t('pomodoroSettingsDescription')}</p>
                   </DialogHeader>
                   <form onSubmit={(e) => {
                     e.preventDefault();
@@ -344,10 +344,10 @@ const Pomodoro: React.FC = () => {
                   }}>
                     <div className="space-y-8 py-6">
                       <div className="space-y-4">
-                        <h3 className="text-sm font-medium text-white/90">Timer Durations</h3>
+                        <h3 className="text-sm font-medium text-white/90">{t('timerDurations')}</h3>
                         <div className="grid gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="workDuration" className="text-sm text-white/80">Focus Duration (minutes)</Label>
+                            <Label htmlFor="workDuration" className="text-sm text-white/80">{t('focusDuration')}</Label>
                             <input
                               id="workDuration"
                               type="number"
@@ -359,7 +359,7 @@ const Pomodoro: React.FC = () => {
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="breakDuration" className="text-sm text-white/80">Short Break Duration (minutes)</Label>
+                            <Label htmlFor="breakDuration" className="text-sm text-white/80">{t('shortBreakDuration')}</Label>
                             <input
                               id="breakDuration"
                               type="number"
@@ -371,7 +371,7 @@ const Pomodoro: React.FC = () => {
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="longBreakDuration" className="text-sm text-white/80">Long Break Duration (minutes)</Label>
+                            <Label htmlFor="longBreakDuration" className="text-sm text-white/80">{t('longBreakDuration')}</Label>
                             <input
                               id="longBreakDuration"
                               type="number"
@@ -386,10 +386,10 @@ const Pomodoro: React.FC = () => {
                       </div>
 
                       <div className="space-y-4">
-                        <h3 className="text-sm font-medium text-white/90">Notification Settings</h3>
+                        <h3 className="text-sm font-medium text-white/90">{t('notificationSettings')}</h3>
                         <div className="space-y-4">
                           <div className="space-y-2">
-                            <Label htmlFor="alarmSound" className="text-sm text-white/80">Alarm Sound</Label>
+                            <Label htmlFor="alarmSound" className="text-sm text-white/80">{t('alarmSound')}</Label>
                             <Select
                               value={tempSettings.alarmSound}
                               onValueChange={(value) => {
@@ -422,7 +422,7 @@ const Pomodoro: React.FC = () => {
                               className="w-full mt-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors flex items-center justify-center gap-2 border border-white/10"
                             >
                               {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                              <span className="text-sm">{isPlaying ? 'Stop' : 'Preview'} Sound</span>
+                              <span className="text-sm">{t(isPlaying ? 'stop' : 'preview')} Sound</span>
                             </button>
                           </div>
                           <div className="space-y-2">
@@ -450,7 +450,7 @@ const Pomodoro: React.FC = () => {
                             onClick={handleResetToDefault}
                             className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded text-white transition-colors"
                           >
-                            Reset
+                            {t('resetSettings')}
                           </button>
                         </div>
                         <div className="flex gap-2">
@@ -459,14 +459,14 @@ const Pomodoro: React.FC = () => {
                             onClick={handleCancelSettings}
                             className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded text-white transition-colors"
                           >
-                            Cancel
+                            {t('cancel')}
                           </button>
                           <Button
                           type="submit"
                           variant="outline" 
                           onClick={handleSaveSettings}
                           className="bg-white/20 px-4 py-2 text-white rounded border-white/10 hover:bg-white/30">
-                            Save
+                            {t('save')}
                           </Button>
                         </div>
                       </div>
