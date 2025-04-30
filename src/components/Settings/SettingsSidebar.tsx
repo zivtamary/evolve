@@ -386,7 +386,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                     </h3>
                     <div className="space-y-0 border px-4 py-2 bg-black/5 dark:glass-dark select-none dark:bg-white/5 rounded-lg border-black/10 dark:border-white/10">
                       <div className="flex items-center justify-between py-3">
-                        <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
+                        <div className="flex items-center space-x-2 text-black/70 dark:text-white/70 text-base">
                           <StickyNote className="h-4 w-4" />
                           <span>{t("notes")}</span>
                         </div>
@@ -398,7 +398,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                       <Separator className="bg-black/10 dark:bg-white/10" />
 
                       <div className="flex items-center justify-between py-3">
-                        <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
+                        <div className="flex items-center space-x-2 text-black/70 dark:text-white/70 text-base">
                           <CheckSquare className="h-4 w-4" />
                           <span>{t("todoList")}</span>
                         </div>
@@ -410,7 +410,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                       <Separator className="bg-black/10 dark:bg-white/10" />
 
                       <div className="flex items-center justify-between py-3">
-                        <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
+                        <div className="flex items-center space-x-2 text-black/70 dark:text-white/70 text-base">
                           <Timer className="h-4 w-4" />
                           <span>{t("pomodoroTimer")}</span>
                         </div>
@@ -422,7 +422,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                       <Separator className="bg-black/10 dark:bg-white/10" />
 
                       <div className="flex items-center justify-between py-3">
-                        <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
+                        <div className="flex items-center space-x-2 text-black/70 dark:text-white/70 text-base">
                           <CalendarDays className="h-4 w-4" />
                           <span>{t("events")}</span>
                         </div>
@@ -441,7 +441,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                       <div className="flex flex-col gap-2">
                         <div className="px-4 border select-none dark:bg-white/5 rounded-lg border-black/10 dark:border-white/10">
                           <div className="flex items-center justify-between py-3">
-                            <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
+                            <div className="flex items-center space-x-2 text-black/70 dark:text-white/70 text-base">
                               <Globe className="h-4 w-4" />
                               <span>{t("language")}</span>
                             </div>
@@ -490,7 +490,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                         </div>
                         <div className="px-4 border select-none dark:bg-white/5 rounded-lg border-black/10 dark:border-white/10">
                           <div className="flex items-center justify-between py-3">
-                            <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
+                            <div className="flex items-center space-x-2 text-black/70 dark:text-white/70 text-base">
                               <Quote className="h-4 w-4" />
                               <span>Show quote</span>
                             </div>
@@ -511,7 +511,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                         </div>
                         <div className="px-4 border select-none dark:bg-white/5 rounded-lg border-black/10 dark:border-white/10">
                           <div className="flex items-center justify-between py-3">
-                            <div className="flex items-center space-x-2 text-black/70 dark:text-white/70">
+                            <div className="flex items-center space-x-2 text-black/70 dark:text-white/70 text-base">
                               <UserIcon className="h-4 w-4" />
                               <span>Show display name</span>
                             </div>
@@ -545,7 +545,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                         <div className="flex flex-col space-y-2">
                           <div className="border px-4 py-2 bg-black/5 border-black/10 dark:border-white/10 dark:glass-dark dark:bg-white/5 rounded-lg mb-2">
                             <div className="flex items-center justify-between py-2">
-                              <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
+                              <div className="flex items-center gap-2 text-black/70 dark:text-white/70 text-base">
                                 <span>{t("email")}</span>
                               </div>
                               <span className="text-sm font-medium text-black/70 dark:text-white/70">
@@ -555,7 +555,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                             <Separator className="bg-black/10 dark:bg-white/10" />
 
                             <div className="flex items-center justify-between py-2">
-                              <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
+                              <div className="flex items-center gap-2 text-black/70 dark:text-white/70 text-base">
                                 <span>{t("accountType")}</span>
                               </div>
                               <span className="text-sm text-black/70 dark:text-white/70 flex items-center gap-1">
@@ -629,7 +629,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                     <div className="space-y-3 flex flex-col gap-2">
                       <div className="flex flex-col space-y-2 border border-black/10 dark:border-white/10 px-4 py-2 bg-black/5 dark:glass-dark rounded-lg dark:bg-white/5">
                         <div className="flex items-center justify-between py-2">
-                          <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
+                          <div className="flex items-center gap-2 text-black/70 dark:text-white/70 text-base">
                             <span>{t("cloudSync")}</span>
                             {!isAuthenticated || !isPremium ? (
                               <span className="text-xs bg-black/10 text-black dark:text-white px-2 py-0.5 rounded select-none">
@@ -648,7 +648,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                         <Separator className="bg-black/10 dark:bg-white/10" />
 
                         <div className="flex items-center justify-between py-2">
-                          <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
+                          <div className="flex items-center gap-2 text-black/70 dark:text-white/70 text-base">
                             <span>{t("lastSynced")}</span>
                           </div>
                           <span
@@ -675,7 +675,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                         !userProfile?.cloud_sync_enabled && (
                           <div className="flex items-start gap-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-500/10 p-2 rounded-lg">
                             <Cloud className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                            <span className="leading-tight">
+                            <span className="leading-tight text-base">
                               {t("cloudSyncIsCurrentlyDisabled")}
                             </span>
                           </div>

@@ -748,7 +748,7 @@ const Notes: React.FC = () => {
                   <div className="text-sm text-white/70">
                     {new Date(note.updatedAt).toLocaleDateString()}
                   </div>
-                  <div className="font-medium text-white truncate">
+                  <div className="text-base font-medium text-white truncate">
                     {note.title || note.content || "Untitled Note"}
                   </div>
                 </div>

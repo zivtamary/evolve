@@ -41,6 +41,8 @@ import { useClickOutside } from "../../hooks/use-click-outside";
 import useWindowSize from "@/hooks/use-window-size";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";   
 import { useLanguage } from "@/context/LanguageContext";
+import EmojiPickerReact from 'emoji-picker-react';
+
 interface Event {
   id: string;
   title: string;
@@ -663,21 +665,10 @@ const Events = () => {
     ];
 
     return (
-      <div className="grid grid-cols-5 gap-2 p-2 bg-black/20 dark:bg-black/40 rounded-lg border border-white/10">
-        {commonEmojis.map((emoji, index) => (
-          <button
-            key={index}
-            type="button"
-            className="w-8 h-8 flex items-center justify-center text-lg hover:bg-white/10 rounded transition-colors"
-            onClick={() => {
-              setNewEvent({ ...newEvent, icon: emoji });
-              setIsEmojiPickerOpen(false);
-            }}
-          >
-            {emoji}
-          </button>
-        ))}
-      </div>
+      <EmojiPickerReact open onEmojiClick={(emoji) => {
+        setNewEvent({ ...newEvent, icon: emoji.emoji });
+        setIsEmojiPickerOpen(false);
+      }} />
     );
   };
 
@@ -828,7 +819,7 @@ const Events = () => {
                     }
                   }}
                   onBlur={handleEventBlur}
-                  className="w-full bg-black/10 dark:bg-black/20 px-4 py-2.5 rounded-lg outline-none border border-white/10 focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all duration-200 text-white placeholder-white/40 pl-12"
+                  className="w-full bg-black/10 dark:bg-black/20 px-4 py-2.5 rounded-lg outline-none border border-white/10 focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all duration-200 text-white placeholder-white/40 pl-12 text-base"
                   placeholder={t("titlePlaceholder")}
                   required
                 />
@@ -847,6 +838,7 @@ const Events = () => {
                     <span className="text-lg">{newEvent.icon}</span>
                   </button>
                 ) : (
+                    <>
                   <Popover
                     open={isEmojiPickerOpen}
                     onOpenChange={setIsEmojiPickerOpen}
@@ -867,6 +859,8 @@ const Events = () => {
                       <EmojiPicker />
                     </PopoverContent>
                   </Popover>
+                  </>
+
                 )}
               </div>
               <div className="text-xs text-white/50 mt-1.5 text-right">
@@ -885,7 +879,7 @@ const Events = () => {
                   <button
                     type="button"
                     onClick={() => setIsDatePickerOpen(true)}
-                    className="w-full bg-black/10 dark:bg-black/20 px-4 py-2.5 rounded-lg outline-none border border-white/10 focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all duration-200 flex items-center justify-between text-white"
+                    className="w-full bg-black/10 dark:bg-black/20 px-4 py-2.5 rounded-lg outline-none border border-white/10 focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all duration-200 flex items-center justify-between text-white text-base"
                   >
                     {newEvent.date
                       ? format(new Date(newEvent.date), "PPP")
@@ -956,7 +950,7 @@ const Events = () => {
                   setNewEvent({ ...newEvent, time: e.target.value })
                 }
                 onBlur={handleEventBlur}
-                className="w-full bg-black/10 dark:bg-black/20 px-4 py-2.5 rounded-lg outline-none border border-white/10 focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all duration-200 text-white [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-70 [&::-webkit-calendar-picker-indicator]:hover:opacity-100 [&::-webkit-calendar-picker-indicator]:w-4 [&::-webkit-calendar-picker-indicator]:h-4"
+                className="w-full bg-black/10 dark:bg-black/20 px-4 py-2.5 rounded-lg outline-none border border-white/10 focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all duration-200 text-white [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-70 [&::-webkit-calendar-picker-indicator]:hover:opacity-100 [&::-webkit-calendar-picker-indicator]:w-4 [&::-webkit-calendar-picker-indicator]:h-4 text-base"
               />
             </div>
             <div>
@@ -972,7 +966,7 @@ const Events = () => {
                   }
                 }}
                 onBlur={handleEventBlur}
-                className="w-full bg-black/10 dark:bg-black/20 px-4 py-2.5 rounded-lg outline-none border border-white/10 focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all duration-200 text-white placeholder-white/40"
+                className="w-full bg-black/10 dark:bg-black/20 px-4 py-2.5 rounded-lg outline-none border border-white/10 focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all duration-200 text-white placeholder-white/40 text-base"
                 placeholder={t("descriptionPlaceholder")}
                 rows={3}
               />
@@ -1068,7 +1062,7 @@ const Events = () => {
                                   {event.icon}
                                 </span>
                               )}
-                              <span className="truncate">{event.title}</span>
+                              <span className="truncate text-base">{event.title}</span>
                             </div>
                             <div className="flex items-center justify-between text-sm text-white/70 mt-1">
                               <div className="flex items-center gap-1 min-w-0">

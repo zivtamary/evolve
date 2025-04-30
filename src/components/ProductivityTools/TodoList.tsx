@@ -57,10 +57,11 @@ interface SortableTodoItemProps {
   todo: TodoItem;
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
+  onEdit: (id: string, newText: string) => void;
   t: (key: string) => string;
 }
 
-const SortableTodoItem: React.FC<SortableTodoItemProps> = ({ todo, onToggle, onDelete, t }) => {
+const SortableTodoItem: React.FC<SortableTodoItemProps> = ({ todo, onToggle, onDelete, onEdit, t }) => {
   const {
     attributes,
     listeners,
@@ -69,10 +70,41 @@ const SortableTodoItem: React.FC<SortableTodoItemProps> = ({ todo, onToggle, onD
     transition,
   } = useSortable({ id: todo.id });
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(todo.text);
+  const editInputRef = useRef<HTMLInputElement>(null);
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditText(todo.text);
+  };
+
+  const handleSave = () => {
+    if (editText.trim()) {
+      onEdit(todo.id, editText.trim());
+      setIsEditing(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSave();
+    } else if (e.key === 'Escape') {
+      setIsEditing(false);
+      setEditText(todo.text);
+    }
+  };
+
+  useEffect(() => {
+    if (isEditing && editInputRef.current) {
+      editInputRef.current.focus();
+    }
+  }, [isEditing]);
 
   return (
     <motion.li
@@ -111,32 +143,66 @@ const SortableTodoItem: React.FC<SortableTodoItemProps> = ({ todo, onToggle, onD
         >
           <Check className="h-4 w-4" />
         </Checkbox>
-        <label
-          htmlFor={todo.id}
-          className={`flex-1 cursor-pointer transition-all duration-200 ${
-            todo.completed
-              ? 'line-through text-white/50'
-              : 'hover:text-white'
-          }`}
-        >
-          {todo.text}
-        </label>
+        {isEditing ? (
+          <input
+            ref={editInputRef}
+            type="text"
+            value={editText}
+            onChange={(e) => setEditText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onBlur={handleSave}
+            className="flex-1 bg-white/10 px-2 py-1 rounded outline-none"
+            maxLength={TODO_CHAR_LIMIT}
+          />
+        ) : (
+          <label
+            htmlFor={todo.id}
+            className={`flex-1 text-base cursor-pointer transition-all duration-200 ${
+              todo.completed
+                ? 'line-through text-white/50'
+                : 'hover:text-white'
+            }`}
+          >
+            {todo.text}
+          </label>
+        )}
       </div>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={() => onDelete(todo.id)}
-              className="opacity-0 group-hover:opacity-100 text-white/50 hover:text-white ml-2 p-1 rounded-md hover:bg-white/10 transition-all duration-200"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            {t("deleteTodo")}
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <div className="flex items-center gap-2">
+        {!isEditing && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleEdit}
+                  className="opacity-0 group-hover:opacity-100 text-white/50 hover:text-white p-1 rounded-md hover:bg-white/10 transition-all duration-200"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                  </svg>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {t("editTodo")}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => onDelete(todo.id)}
+                className="opacity-0 group-hover:opacity-100 text-white/50 hover:text-white p-1 rounded-md hover:bg-white/10 transition-all duration-200"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {t("deleteTodo")}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
     </motion.li>
   );
 };
@@ -481,6 +547,36 @@ const TodoList: React.FC = () => {
     }
   };
   
+  const editTodo = async (id: string, newText: string) => {
+    const updatedTodos = todos.map(todo =>
+      todo.id === id ? { ...todo, text: newText, updatedAt: Date.now() } : todo
+    );
+    setTodos(updatedTodos);
+
+    try {
+      if (isAuthenticated && userProfile?.cloud_sync_enabled) {
+        const todo = updatedTodos.find(t => t.id === id);
+        if (todo) {
+          const { error } = await supabase
+            .from('todos')
+            .update({
+              title: todo.text,
+              updated_at: new Date(todo.updatedAt).toISOString()
+            })
+            .eq('id', id)
+            .eq('user_id', userProfile.id);
+            
+          if (error) throw error;
+          await updateLastSynced();
+        }
+      } else {
+        await syncTodosOnBlur();
+      }
+    } catch (error) {
+      console.error('Error updating todo:', error);
+    }
+  };
+  
   // Get filtered todos
   const filteredTodos = todos.filter(todo => {
     if (filter === 'active') return !todo.completed;
@@ -654,12 +750,12 @@ const TodoList: React.FC = () => {
               value={newTodo}
               onChange={(e) => setNewTodo(e.target.value)}
               placeholder={t("whatNeedsToBeDone")}
-              className="flex-grow bg-black/20 px-4 py-2 rounded-l outline-none placeholder:text-white/50"
+              className="flex-grow text-base bg-black/20 px-4 py-2 rounded-l outline-none placeholder:text-white/50"
               maxLength={TODO_CHAR_LIMIT}
             />
             <button
               type="submit"
-              className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-r text-white transition-colors"
+              className="text-base px-4 py-2 bg-white/20 hover:bg-white/30 rounded-r text-white transition-colors"
             >
               {t("add")}
             </button>
@@ -742,6 +838,7 @@ const TodoList: React.FC = () => {
                         todo={todo}
                         onToggle={toggleTodo}
                         onDelete={deleteTodo}
+                        onEdit={editTodo}
                         t={t}
                       />
                     ))}
