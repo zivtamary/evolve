@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useSettings } from '../../context/SettingsContext';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Check, CheckSquare, X } from 'lucide-react';
+import { Check, CheckSquare, X, GripVertical } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -10,6 +10,23 @@ import { useClickOutside } from '../../hooks/use-click-outside';
 import useWindowSize from '@/hooks/use-window-size';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useLanguage } from '@/context/LanguageContext';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 // Maximum character limit for todo items
 const TODO_CHAR_LIMIT = 100;
@@ -35,6 +52,94 @@ interface StoredTodos {
   value: TodoItem[];
   timestamp: number;
 }
+
+interface SortableTodoItemProps {
+  todo: TodoItem;
+  onToggle: (id: string) => void;
+  onDelete: (id: string) => void;
+  t: (key: string) => string;
+}
+
+const SortableTodoItem: React.FC<SortableTodoItemProps> = ({ todo, onToggle, onDelete, t }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: todo.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <motion.li
+      ref={setNodeRef}
+      style={style}
+      layout="position"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="flex items-center px-4 py-3 border-b border-white/10 group hover:bg-white/5 transition-colors"
+      transition={{
+        duration: 0.2,
+        layout: {
+          type: "spring",
+          stiffness: 200,
+          damping: 25,
+          duration: 0.4,
+          bounce: 0,
+          mass: 1
+        }
+      }}
+    >
+      <div 
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing mr-2 text-white/50 hover:text-white transition-colors"
+      >
+        <GripVertical className="h-4 w-4" />
+      </div>
+      <div className="flex items-center flex-1 gap-3">
+        <Checkbox
+          id={todo.id}
+          checked={todo.completed}
+          onCheckedChange={() => onToggle(todo.id)}
+          className="h-5 w-5 border-white/30 bg-white/10 hover:bg-white/20 data-[state=checked]:bg-white/20 data-[state=checked]:text-white transition-colors"
+        >
+          <Check className="h-4 w-4" />
+        </Checkbox>
+        <label
+          htmlFor={todo.id}
+          className={`flex-1 cursor-pointer transition-all duration-200 ${
+            todo.completed
+              ? 'line-through text-white/50'
+              : 'hover:text-white'
+          }`}
+        >
+          {todo.text}
+        </label>
+      </div>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => onDelete(todo.id)}
+              className="opacity-0 group-hover:opacity-100 text-white/50 hover:text-white ml-2 p-1 rounded-md hover:bg-white/10 transition-all duration-200"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {t("deleteTodo")}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </motion.li>
+  );
+};
 
 const TodoList: React.FC = () => {
   const { syncTodosOnBlur, isAuthenticated, userProfile, setExpandedWidget, expandedWidget, widgetPositions } = useSettings();
@@ -444,6 +549,30 @@ const TodoList: React.FC = () => {
     return isExpanded ? '100%' : '100%';
   };
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = todos.findIndex((todo) => todo.id === active.id);
+      const newIndex = todos.findIndex((todo) => todo.id === over.id);
+
+      const newTodos = arrayMove(todos, oldIndex, newIndex);
+      setTodos(newTodos);
+
+      // Sync with cloud if needed
+      if (isAuthenticated && userProfile?.cloud_sync_enabled) {
+        syncTodosOnBlur();
+      }
+    }
+  };
+
   return (
     <motion.div
       ref={todoListRef}
@@ -596,68 +725,30 @@ const TodoList: React.FC = () => {
                   : 'No completed todos'}
             </motion.div>
           ) : (
-            <motion.ul layout="position">
-              <AnimatePresence mode="wait">
-                {filteredTodos.map(todo => (
-                  <motion.li 
-                    key={todo.id}
-                    layout="position"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="flex items-center px-4 py-3 border-b border-white/10 group hover:bg-white/5 transition-colors"
-                    transition={{ 
-                      duration: 0.2,
-                      layout: {
-                        type: "spring",
-                        stiffness: 200,
-                        damping: 25,
-                        duration: 0.4,
-                        bounce: 0,
-                        mass: 1
-                      }
-                    }}
-                  >
-                    <div className="flex items-center flex-1 gap-3">
-                      <Checkbox
-                        id={todo.id}
-                        checked={todo.completed}
-                        onCheckedChange={() => toggleTodo(todo.id)}
-                        className="h-5 w-5 border-white/30 bg-white/10 hover:bg-white/20 data-[state=checked]:bg-white/20 data-[state=checked]:text-white transition-colors"
-                      >
-                        <Check className="h-4 w-4" />
-                      </Checkbox>
-                      <label 
-                        htmlFor={todo.id}
-                        className={`flex-1 cursor-pointer transition-all duration-200 ${
-                          todo.completed 
-                            ? 'line-through text-white/50' 
-                            : 'hover:text-white'
-                        }`}
-                      >
-                        {todo.text}
-                      </label>
-                    </div>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            onClick={() => deleteTodo(todo.id)}
-                      className="opacity-0 group-hover:opacity-100 text-white/50 hover:text-white ml-2 p-1 rounded-md hover:bg-white/10 transition-all duration-200"
-                        
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {t("deleteTodo")}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </motion.li>
-                ))}
-              </AnimatePresence>
-            </motion.ul>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={filteredTodos.map(todo => todo.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <motion.ul layout="position">
+                  <AnimatePresence mode="wait">
+                    {filteredTodos.map(todo => (
+                      <SortableTodoItem
+                        key={todo.id}
+                        todo={todo}
+                        onToggle={toggleTodo}
+                        onDelete={deleteTodo}
+                        t={t}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </motion.ul>
+              </SortableContext>
+            </DndContext>
           )}
         </motion.div>
         

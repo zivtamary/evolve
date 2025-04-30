@@ -114,7 +114,8 @@ const TimeGreeting = () => {
   const [nameError, setNameError] = useState('');
   const [weather] = useLocalStorage<WeatherData | null>('weather-data', null);
   const [tempUnit, setTempUnit] = useLocalStorage<'C' | 'F'>('temp-unit', 'C');
-
+  const storage = localStorage.getItem("evolve_data");
+  const displayNameObj = JSON.parse(storage || "{}")?.display_name;
   const { language, setLanguage, t } = useLanguage();
 
   const weatherDescriptions: Record<number, string> = {
@@ -150,7 +151,7 @@ const TimeGreeting = () => {
     
     if (hour >= 5 && hour < 12) {
       return {
-        greeting: `${t('goodMorning')}${displayName ? ',' : '.'}`,
+        greeting: `${t('goodMorning')}${displayNameObj?.show !== false ? ',' : '.'}`,
         icon: (
           <div className="relative">
             <motion.div
@@ -173,7 +174,7 @@ const TimeGreeting = () => {
       };
     } else if (hour >= 12 && hour < 17) {
       return {
-        greeting: `${t('goodAfternoon')}${displayName ? ',' : '.'}`,
+        greeting: `${t('goodAfternoon')}${displayNameObj?.show !== false ? ',' : '.'}`,
         icon: (
           <div className="relative">
             <motion.div
@@ -196,7 +197,7 @@ const TimeGreeting = () => {
       };
     } else if (hour >= 17 && hour < 22) {
       return {
-        greeting: `${t('goodEvening')}${displayName ? ',' : '.'}`,
+        greeting: `${t('goodEvening')}${displayNameObj?.show !== false ? ',' : '.'}`,
         icon: (
           <div className="relative">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{
@@ -223,7 +224,7 @@ const TimeGreeting = () => {
       };
     } else {
       return {
-        greeting: `${t('goodNight')}${displayName ? ',' : '.'}`,
+        greeting: `${t('goodNight')}${displayNameObj?.show !== false ? ',' : '.'}`,
         icon: (
           <div className="relative">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{
@@ -355,7 +356,7 @@ const TimeGreeting = () => {
             textShadow: "1px 1px 10px rgba(0,0,0, 0.2), 0 0 10px rgba(0,0,0, 0.2)",
         }} className="flex items-center whitespace-nowrap select-none">
           <span>{greeting}</span>
-          {displayName && (
+          {displayNameObj?.show !== false && (
             <>
               <span className="ml-2">{/* Add space after comma */}</span>
               <TooltipProvider>

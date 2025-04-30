@@ -94,7 +94,7 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({
       />
       
       {/* Overlay for better text readability */}
-      <div className="absolute inset-0 bg-black/20 dark:bg-black/50" />
+      <div className="absolute inset-0 bg-black/20 dark:bg-black/20" />
       
       {/* Content */}
       <div className="relative z-10 min-h-screen">

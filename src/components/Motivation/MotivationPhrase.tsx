@@ -60,16 +60,16 @@ const MotivationPhrase = () => {
   const [quote, setQuote] = useState(motivationalQuotes[0]);
   const { language, setLanguage, t } = useLanguage();
 
+  // Check if we already have a quote for today in localStorage
+  const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
+  const storedQuoteData = evolveData?.dailyQuote;
+  
   useEffect(() => {
     // Get today's date as a string (YYYY-MM-DD)
     const today = new Date();
     
-    // Check if we already have a quote for today in localStorage
-    const evolveData = JSON.parse(localStorage.getItem('evolve_data') || '{}');
-    const storedQuoteData = evolveData.dailyQuote;
-    
     if (storedQuoteData) {
-      const { date, quoteIndex } = JSON.parse(storedQuoteData);
+      const { date, quoteIndex } = storedQuoteData;
       
       // If the stored quote is from today, use it
       if (date === today.toISOString().split('T')[0]) {
@@ -83,11 +83,12 @@ const MotivationPhrase = () => {
     setQuote(motivationalQuotes[randomIndex]);
     
     // Store the new quote and today's date in localStorage
-    evolveData.dailyQuote = JSON.stringify({
+    evolveData.dailyQuote = {
       quote: motivationalQuotes[randomIndex][language],
       author: motivationalQuotes[randomIndex].author,
-      date: today.toISOString()
-    });
+      date: today.toISOString(),
+      show: true
+    };
     localStorage.setItem('evolve_data', JSON.stringify(evolveData));
   }, []);
 
@@ -96,6 +97,7 @@ const MotivationPhrase = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.5 }}
+      style={{ display: storedQuoteData?.show !== false ? 'block' : 'none' }}
       className="relative group"
     >
       <motion.div

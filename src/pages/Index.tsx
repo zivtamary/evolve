@@ -53,7 +53,7 @@ const Index = () => {
   const [isBackgroundOptionsOpen, setIsBackgroundOptionsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-
+  const [refreshKey, setRefreshKey] = useState(Math.random());
   const toggleTheme = () => {
     if (theme === "light") setTheme("dark");
     else if (theme === "dark") setTheme("system");
@@ -317,7 +317,7 @@ const Index = () => {
                   className="min-h-screen relative overflow-hidden"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: backgroundLoaded ? 1 : 0 }}
-                  transition={{ duration: 1, ease: "easeInOut", delay: 1.5 }}
+                  transition={{ duration: 1, ease: "easeInOut", delay: 0 }}
                 >
                   {/* Theme and Background Settings Drawer */}
                   <ThemeBackgroundDrawer
@@ -333,7 +333,7 @@ const Index = () => {
                   />
 
                   {/* Settings sidebar */}
-                  <SettingsSidebar />
+                  <SettingsSidebar setRefreshKey={setRefreshKey} />
 
                   {/* Slides container */}
                   <motion.div
@@ -500,7 +500,7 @@ const Index = () => {
                   />
 
                   {/* Settings sidebar */}
-                  <SettingsSidebar />
+                  <SettingsSidebar setRefreshKey={setRefreshKey} />
 
                   {/* Slides container */}
                   <motion.div
@@ -661,7 +661,7 @@ const Index = () => {
                 />
 
                 {/* Settings sidebar */}
-                <SettingsSidebar />
+                <SettingsSidebar setRefreshKey={setRefreshKey} />
 
                 {/* Slides container */}
                 <motion.div

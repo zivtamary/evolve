@@ -27,7 +27,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, onStartFadeOut 
       setTimeout(() => {
         onComplete();
       }, 1000);
-    }, 3000);
+    }, 0);
 
     return () => {
       clearTimeout(timer);
