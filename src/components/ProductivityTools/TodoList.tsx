@@ -18,6 +18,9 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  UniqueIdentifier,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -59,9 +62,10 @@ interface SortableTodoItemProps {
   onDelete: (id: string) => void;
   onEdit: (id: string, newText: string) => void;
   t: (key: string) => string;
+  todoRefs: React.MutableRefObject<Map<string, HTMLLIElement>>;
 }
 
-const SortableTodoItem: React.FC<SortableTodoItemProps> = ({ todo, onToggle, onDelete, onEdit, t }) => {
+const SortableTodoItem: React.FC<SortableTodoItemProps> = ({ todo, onToggle, onDelete, onEdit, t, todoRefs }) => {
   const {
     attributes,
     listeners,
@@ -106,9 +110,18 @@ const SortableTodoItem: React.FC<SortableTodoItemProps> = ({ todo, onToggle, onD
     }
   }, [isEditing]);
 
+  const combinedRef = (node: HTMLLIElement | null) => {
+    setNodeRef(node);
+    if (node) {
+      todoRefs.current.set(todo.id, node);
+    } else {
+      todoRefs.current.delete(todo.id);
+    }
+  };
+
   return (
     <motion.li
-      ref={setNodeRef}
+      ref={combinedRef}
       style={style}
       layout="position"
       initial={{ opacity: 0, y: 20 }}
@@ -216,8 +229,23 @@ const TodoList: React.FC = () => {
   const todoListRef = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
   const isExpanded = expandedWidget === "todoList";
+  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
+  const { width, height } = useWindowSize();
+  const todoRefs = useRef<Map<string, HTMLLIElement>>(new Map());
 
   const { t } = useLanguage();
+
+  const getDragOverlayTransform = () => {
+    if (!activeId) return 'translate(0, 0)';
+    
+    const activeTodoElement = todoRefs.current.get(String(activeId));
+    if (!activeTodoElement) return 'translate(0, 0)';
+
+    const todoRect = activeTodoElement.getBoundingClientRect();
+    const todoListRect = todoListRef.current?.getBoundingClientRect();
+
+    return `translate(${-todoListRect.x - 16}px, ${-todoListRect.y}px)`;
+  };
 
   // Function to fetch todos from cloud
   const fetchCloudTodos = async () => {
@@ -622,8 +650,6 @@ const TodoList: React.FC = () => {
     we need to create a function that returns the height based on the screen size
   */
 
-  const { width,height } = useWindowSize();
-
   const getHeightByScreenSize = () => {
     if (height >= 1080) {
       return isExpanded ? '800px' : '400px';
@@ -652,7 +678,12 @@ const TodoList: React.FC = () => {
     })
   );
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id);
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
+    setActiveId(null);
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
@@ -824,6 +855,7 @@ const TodoList: React.FC = () => {
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
             >
               <SortableContext
@@ -840,11 +872,52 @@ const TodoList: React.FC = () => {
                         onDelete={deleteTodo}
                         onEdit={editTodo}
                         t={t}
+                        todoRefs={todoRefs}
                       />
                     ))}
                   </AnimatePresence>
                 </motion.ul>
               </SortableContext>
+              <DragOverlay 
+                dropAnimation={{
+                  duration: 200,
+                  easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+                }}
+                adjustScale={true}
+              >
+                {activeId ? (
+                  <div 
+                    className="glass dark:glass-dark rounded-lg p-4 shadow-lg opacity-50"
+                    style={{
+                      transform: getDragOverlayTransform(),
+                      cursor: 'grabbing',
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="cursor-grabbing mr-2 text-white/50">
+                        <GripVertical className="h-4 w-4" />
+                      </div>
+                      <Checkbox
+                        id={`overlay-${activeId}`}
+                        checked={todos.find(t => t.id === activeId)?.completed}
+                        className="h-5 w-5 border-white/30 bg-white/10 hover:bg-white/20 data-[state=checked]:bg-white/20 data-[state=checked]:text-white transition-colors"
+                      >
+                        <Check className="h-4 w-4" />
+                      </Checkbox>
+                      <label
+                        htmlFor={`overlay-${activeId}`}
+                        className={`flex-1 text-base cursor-grabbing ${
+                          todos.find(t => t.id === activeId)?.completed
+                            ? 'line-through text-white/50'
+                            : 'text-white'
+                        }`}
+                      >
+                        {todos.find(t => t.id === activeId)?.text}
+                      </label>
+                    </div>
+                  </div>
+                ) : null}
+              </DragOverlay>
             </DndContext>
           )}
         </motion.div>
