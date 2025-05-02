@@ -13,9 +13,9 @@ const buttonVariants = cva(
         destructive:
           "bg-red-500 dark:bg-red-600 text-white shadow-lg shadow-red-500/10 dark:shadow-red-500/20 hover:bg-red-600 dark:hover:bg-red-700 hover:shadow-red-500/20 dark:hover:shadow-red-500/30 active:bg-red-700 dark:active:bg-red-800 active:shadow-red-500/10 dark:active:shadow-red-500/20",
         outline:
-          "border dark:border-white/10 bg-white dark:bg-gradient-to-r dark:from-black dark:via-black/95 dark:to-black text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gradient-to-r dark:hover:from-black dark:hover:via-black/80 transition-all duration-300 dark:hover:to-black shadow-sm active:bg-gray-200 dark:active:opacity-90",
+          "border dark:border-white/10 bg-white dark:bg-white/5 dark:hover:bg-white/5 text-gray-900 dark:text-gray-100 hover:bg-gray-100 transition-all duration-300 dark:hover:to-black shadow-sm active:bg-gray-200 dark:active:opacity-90",
         secondary:
-          "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-md shadow-gray-200/20 dark:shadow-gray-900/20 hover:bg-gray-200 dark:hover:bg-gray-700 hover:shadow-gray-300/30 dark:hover:shadow-gray-800/30 active:bg-gray-300 dark:active:bg-gray-600",
+          "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-gray-200/20 dark:shadow-gray-900/20 hover:bg-gray-200 dark:hover:bg-gray-700 hover:shadow-gray-300/30 dark:hover:shadow-gray-800/30 active:bg-gray-300 dark:active:bg-gray-600",
         ghost: "text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700",
         link: "text-black dark:text-white underline-offset-4 hover:underline",
       },

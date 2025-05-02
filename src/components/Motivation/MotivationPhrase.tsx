@@ -87,7 +87,7 @@ const MotivationPhrase = () => {
       quote: motivationalQuotes[randomIndex][language],
       author: motivationalQuotes[randomIndex].author,
       date: today.toISOString(),
-      show: true
+      show: "show" in evolveData.dailyQuote ? evolveData.dailyQuote.show : true
     };
     localStorage.setItem('evolve_data', JSON.stringify(evolveData));
   }, []);

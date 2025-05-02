@@ -64,8 +64,9 @@ export const translations = {
     today: "Today at",
     yesterday: "Yesterday at",
     syncingData: "Syncing data...",
-    cloudSyncIsCurrentlyDisabled:
-      "Cloud sync is currently disabled. Enable it to keep your data backed up and synchronized across devices.",
+    cloudSyncIsCurrentlyDisabled: "Cloud sync is currently disabled",
+    enableCloudSyncToKeepYourDataBackedUp: "Enable cloud sync to keep your data backed up and synchronized across devices",
+    enableCloudSync: "Enable Cloud Sync",
     dataExport: "Data Export",
     exportData: "Export Data",
     upgradeToPremium: "Upgrade to Premium",
@@ -84,7 +85,7 @@ export const translations = {
     version: "Version 1.0.5",
     deleteAccountWarning:
       "This action is irreversible. All your data will be permanently deleted.",
-    activeSubscriptionWarning: "⚠️ Active Subscription Warning",
+    activeSubscriptionWarning: "Active Subscription Warning",
     activeSubscriptionWarningDescription:
       "You have an active subscription. Please cancel your subscription before deleting your account, otherwise you will continue to be billed.",
     areYouSureYouWantToProceed: "Are you sure you want to proceed?",
@@ -349,8 +350,9 @@ export const translations = {
     today: "Heute um",
     yesterday: "Gestern um",
     syncingData: "Daten werden synchronisiert...",
-    cloudSyncIsCurrentlyDisabled:
-      "Die Cloud-Synchronisierung ist derzeit deaktiviert. Aktivieren Sie sie, um Ihre Daten zu sichern und über alle Geräte zu synchronisieren.",
+    cloudSyncIsCurrentlyDisabled: "Die Cloud-Synchronisierung ist derzeit deaktiviert. Aktivieren Sie sie, um Ihre Daten zu sichern und über alle Geräte zu synchronisieren.",
+    enableCloudSyncToKeepYourDataBackedUp: "Cloud sync aktivieren, um Ihre Daten zu sichern und über alle Geräte zu synchronisieren",
+    enableCloudSync: "Cloud Sync aktivieren",
     dataExport: "Datenexport",
     exportData: "Daten exportieren",
     upgradeToPremium: "Auf Premium upgraden",
@@ -369,7 +371,7 @@ export const translations = {
     version: "Version 1.0.5",
     deleteAccountWarning:
       "Diese Aktion ist unumkehrbar. Alle Ihre Daten werden dauerhaft gelöscht.",
-    activeSubscriptionWarning: "⚠️ Warnung: Aktives Abonnement",
+    activeSubscriptionWarning: "Warnung: Aktives Abonnement",
     activeSubscriptionWarningDescription:
       "Sie haben ein aktives Abonnement. Bitte kündigen Sie Ihr Abonnement, bevor Sie Ihr Konto löschen, sonst werden Ihnen weiterhin Kosten in Rechnung gestellt.",
     areYouSureYouWantToProceed: "Sind Sie sicher, dass Sie fortfahren möchten?",
@@ -643,6 +645,8 @@ export const translations = {
     syncingData: "Sincronizando datos...",
     cloudSyncIsCurrentlyDisabled:
       "La sincronización en la nube está actualmente desactivada. Actívala para mantener tus datos respaldados y sincronizados en todos los dispositivos.",
+    enableCloudSyncToKeepYourDataBackedUp: "Habilitar sincronización en la nube para mantener tus datos respaldados y sincronizados en todos los dispositivos",
+    enableCloudSync: "Habilitar Sincronización en la Nube",
     dataExport: "Exportación de Datos",
     exportData: "Exportar Datos",
     upgradeToPremium: "Actualizar a Premium",
@@ -661,7 +665,7 @@ export const translations = {
     version: "Versión 1.0.5",
     deleteAccountWarning:
       "Esta acción es irreversible. Todos tus datos serán eliminados permanentemente.",
-    activeSubscriptionWarning: "⚠️ Advertencia de Suscripción Activa",
+    activeSubscriptionWarning: "Advertencia de Suscripción Activa",
     activeSubscriptionWarningDescription:
       "Tienes una suscripción activa. Por favor, cancela tu suscripción antes de eliminar tu cuenta, de lo contrario seguirás siendo facturado.",
     areYouSureYouWantToProceed: "¿Estás seguro de que quieres continuar?",
@@ -934,6 +938,8 @@ export const translations = {
     syncingData: "Synchronisation des données...",
     cloudSyncIsCurrentlyDisabled:
       "La synchronisation cloud est actuellement désactivée. Activez-la pour sauvegarder vos données et les synchroniser sur tous vos appareils.",
+    enableCloudSyncToKeepYourDataBackedUp: "Activer la synchronisation cloud pour sauvegarder vos données et les synchroniser sur tous vos appareils",
+    enableCloudSync: "Activer la Synchronisation Cloud",
     dataExport: "Exportation des données",
     exportData: "Exporter les données",
     upgradeToPremium: "Passer à Premium",
@@ -952,7 +958,7 @@ export const translations = {
     version: "Version 1.0.5",
     deleteAccountWarning:
       "Cette action est irréversible. Toutes vos données seront définitivement supprimées.",
-    activeSubscriptionWarning: "⚠️ Avertissement d'abonnement actif",
+    activeSubscriptionWarning: "Avertissement d'abonnement actif",
     activeSubscriptionWarningDescription:
       "Vous avez un abonnement actif. Veuillez annuler votre abonnement avant de supprimer votre compte, sinon vous continuerez à être facturé.",
     areYouSureYouWantToProceed: "Êtes-vous sûr de vouloir continuer ?",
@@ -1224,6 +1230,8 @@ export const translations = {
     syncingData: "Sincronizzazione dati in corso...",
     cloudSyncIsCurrentlyDisabled:
       "La sincronizzazione cloud è attualmente disabilitata. Abilitala per mantenere i tuoi dati salvati e sincronizzati su tutti i dispositivi.",
+    enableCloudSyncToKeepYourDataBackedUp: "Abilita la sincronizzazione cloud per mantenere i tuoi dati salvati e sincronizzati su tutti i dispositivi",
+    enableCloudSync: "Abilita la Sincronizzazione Cloud",
     dataExport: "Esportazione Dati",
     exportData: "Esporta Dati",
     upgradeToPremium: "Passa a Premium",
@@ -1242,7 +1250,7 @@ export const translations = {
     version: "Versione 1.0.5",
     deleteAccountWarning:
       "Questa azione è irreversibile. Tutti i tuoi dati saranno eliminati permanentemente.",
-    activeSubscriptionWarning: "⚠️ Avviso di Abbonamento Attivo",
+    activeSubscriptionWarning: "Avviso di Abbonamento Attivo",
     activeSubscriptionWarningDescription:
       "Hai un abbonamento attivo. Per favore cancella il tuo abbonamento prima di eliminare il tuo account, altrimenti continuerai ad essere addebitato.",
     areYouSureYouWantToProceed: "Sei sicuro di voler procedere?",
@@ -1506,6 +1514,8 @@ export const translations = {
     yesterday: "昨日",
     syncingData: "データ同期中...",
     cloudSyncIsCurrentlyDisabled: "クラウド同期は現在無効です。有効にすると、データをバックアップし、複数のデバイスで同期できます。",
+    enableCloudSyncToKeepYourDataBackedUp: "Cloud sync aktivieren, um Ihre Daten zu sichern und über alle Geräte zu synchronisieren",
+    enableCloudSync: "Cloud Sync aktivieren",
     dataExport: "データエクスポート",
     exportData: "データをエクスポート",
     upgradeToPremium: "プレミアムにアップグレード",
@@ -1519,7 +1529,7 @@ export const translations = {
     haveQuestionsOrNeedHelpDescription: "問題が発生した場合、機能の提案がある場合、または単に考えを共有したい場合は、遠慮なくご連絡ください。",
     version: "バージョン 1.0.5",
     deleteAccountWarning: "この操作は元に戻せません。すべてのデータが完全に削除されます。",
-    activeSubscriptionWarning: "⚠️ アクティブなサブスクリプションの警告",
+    activeSubscriptionWarning: "アクティブなサブスクリプションの警告",
     activeSubscriptionWarningDescription: "アクティブなサブスクリプションがあります。アカウントを削除する前にサブスクリプションをキャンセルしてください。そうしないと、引き続き請求されます。",
     areYouSureYouWantToProceed: "本当に続行しますか？",
     cancel: "キャンセル",
@@ -1766,6 +1776,8 @@ export const translations = {
     "yesterday": "Вчера в",
     "syncingData": "Синхронизация данных...",
     "cloudSyncIsCurrentlyDisabled": "Облачная синхронизация в настоящее время отключена. Включите ее, чтобы сохранить резервную копию данных и синхронизировать их между устройствами.",
+    "enableCloudSyncToKeepYourDataBackedUp": "Включить облачную синхронизацию для сохранения резервной копии данных и синхронизации между устройствами",
+    "enableCloudSync": "Включить Облачную Синхронизацию",
     "dataExport": "Экспорт данных",
     "exportData": "Экспортировать данные",
     "upgradeToPremium": "Перейти на Премиум",
@@ -1779,7 +1791,7 @@ export const translations = {
     "haveQuestionsOrNeedHelpDescription": "Если вы столкнулись с какими-либо проблемами, у вас есть предложения по функциям или вы просто хотите поделиться своими мыслями, пожалуйста, не стесняйтесь обращаться.",
     "version": "Версия 1.0.5",
     "deleteAccountWarning": "Это действие необратимо. Все ваши данные будут удалены навсегда.",
-    "activeSubscriptionWarning": "⚠️ Предупреждение об активной подписке",
+    "activeSubscriptionWarning": "Предупреждение об активной подписке",
     "activeSubscriptionWarningDescription": "У вас активная подписка. Пожалуйста, отмените вашу подписку перед удалением аккаунта, иначе с вас продолжат взимать плату.",
     "areYouSureYouWantToProceed": "Вы уверены, что хотите продолжить?",
     "cancel": "Отмена",

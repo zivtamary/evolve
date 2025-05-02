@@ -101,7 +101,11 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({ onClick }) => {
 
 type Subscription = Database["public"]["Tables"]["subscriptions"]["Row"];
 
-const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => void }) => {
+const SettingsSidebar = ({
+  setRefreshKey,
+}: {
+  setRefreshKey: (key: number) => void;
+}) => {
   const {
     isSettingsOpen,
     setIsSettingsOpen,
@@ -134,7 +138,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
   const storage = localStorage.getItem("evolve_data");
   const displayNameObj = JSON.parse(storage || "{}")?.display_name;
   const dailyQuoteObj = JSON.parse(storage || "{}")?.dailyQuote;
-  const [displayName, setDisplayName] = useLocalStorage('display_name', '');
+  const [displayName, setDisplayName] = useLocalStorage("display_name", "");
   React.useEffect(() => {
     const getUserEmail = async () => {
       if (isAuthenticated) {
@@ -279,7 +283,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
             <Tabs defaultValue="widgets" className="w-full flex">
               <div className="w-64 border-r border-black/10 dark:border-white/10 p-4 flex flex-col h-full">
                 <DialogHeader className="mb-4">
-                  <DialogTitle className="flex items-center gap-2 text-black dark:text-white text-xl font-medium tracking-tight">
+                  <DialogTitle className="flex items-center gap-2 text-black dark:text-white text-xl font-medium tracking-tight select-none">
                     {t("settings")}
                   </DialogTitle>
                 </DialogHeader>
@@ -289,7 +293,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                     value="widgets"
                     className="flex items-center gap-2 justify-start w-full py-3 px-3 rounded-lg transition-all duration-200 data-[state=active]:bg-black/5 dark:data-[state=active]:bg-white/10 data-[state=active]:shadow-sm hover:bg-black/5 dark:hover:bg-white/10 relative overflow-hidden group"
                   >
-                    <div className="flex items-center justify-center w-8 h-8 rounded-md dark:group-hover:bg-white/20 transition-colors">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-md transition-colors">
                       <Monitor className="h-4 w-4" />
                     </div>
                     <span className="font-medium">{t("display")}</span>
@@ -299,7 +303,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                     value="profile"
                     className="flex items-center gap-2 justify-start w-full py-3 px-3 rounded-lg transition-all duration-200 data-[state=active]:bg-black/5 dark:data-[state=active]:bg-white/10 data-[state=active]:shadow-sm hover:bg-black/5 dark:hover:bg-white/10 relative overflow-hidden group"
                   >
-                    <div className="flex items-center justify-center w-8 h-8 rounded-md dark:group-hover:bg-white/20 transition-colors">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-md transition-colors">
                       <User className="h-4 w-4" />
                     </div>
                     <span className="font-medium">{t("profile")}</span>
@@ -309,7 +313,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                     value="sync"
                     className="flex items-center gap-2 justify-start w-full py-3 px-3 rounded-lg transition-all duration-200 data-[state=active]:bg-black/5 dark:data-[state=active]:bg-white/10 data-[state=active]:shadow-sm hover:bg-black/5 dark:hover:bg-white/10 relative overflow-hidden group"
                   >
-                    <div className="flex items-center justify-center w-8 h-8 rounded-md dark:group-hover:bg-white/20 transition-colors">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-md transition-colors">
                       <Cloud className="h-4 w-4" />
                     </div>
                     <span className="font-medium">{t("data")}</span>
@@ -321,7 +325,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                         value="billing"
                         className="flex items-center gap-2 justify-start w-full py-3 px-3 rounded-lg transition-all duration-200 data-[state=active]:bg-black/5 dark:data-[state=active]:bg-white/10 data-[state=active]:shadow-sm hover:bg-black/5 dark:hover:bg-white/10 relative overflow-hidden group"
                       >
-                        <div className="flex items-center justify-center w-8 h-8 rounded-md dark:group-hover:bg-white/20 transition-colors">
+                        <div className="flex items-center justify-center w-8 h-8 rounded-md transition-colors">
                           <CreditCard className="h-4 w-4" />
                         </div>
                         <span className="font-medium">{t("billing")}</span>
@@ -332,7 +336,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                     value="about"
                     className="flex items-center gap-2 justify-start w-full py-3 px-3 rounded-lg transition-all duration-200 data-[state=active]:bg-black/5 dark:data-[state=active]:bg-white/10 data-[state=active]:shadow-sm hover:bg-black/5 dark:hover:bg-white/10 relative overflow-hidden group"
                   >
-                    <div className="flex items-center justify-center w-8 h-8 rounded-md dark:group-hover:bg-white/20 transition-colors">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-md transition-colors">
                       <HelpCircle className="h-4 w-4" />
                     </div>
                     <span className="font-medium">{t("about")}</span>
@@ -353,19 +357,10 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                       border border-white/10 dark:border-zinc-900 dark:hover:border-zinc-800 hover:border-white/20
                       relative overflow-hidden group shadow-md hover:shadow-lg"
                   >
-                    {/* Animated gradient background */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-white/10 animate-shimmer" />
-
-                    {/* Sparkle effects - only show on larger screens */}
-                    <div className="absolute inset-0 hidden sm:block">
-                      {/* Small sparkles */}
-                      <div className="absolute top-1/3 right-1/4 h-1 w-1 bg-white/60 rounded-full animate-[sparkle_3s_ease-in-out_infinite_0.7s]" />
-                      <div className="absolute bottom-1/3 left-1/4 h-1 w-1 bg-white/60 rounded-full animate-[sparkle_3.5s_ease-in-out_infinite_1.2s]" />
-                    </div>
 
                     <div className="relative z-10 flex items-center gap-2">
-                      <div className="p-1 bg-white/10 rounded-full group-hover:bg-white/20 transition-colors">
-                        <MessageCircleHeart className="h-4 w-4 text-white" />
+                      <div className="p-1 rounded-full transition-colors">
+                        <MessageCircle className="h-4 w-4 text-white" />
                       </div>
                       <div className="flex flex-col">
                         <h4 className="text-sm font-medium text-white">
@@ -380,11 +375,11 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
               <div className="flex-1 flex flex-col">
                 <div className="flex-1 overflow-y-auto p-6">
                   <TabsContent value="widgets" className="mt-0">
-                    <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                    <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2 select-none">
                       <Layout className="h-4 w-4" />
                       <span>{t("widgetVisibility")}</span>
                     </h3>
-                    <div className="space-y-0 border px-4 py-2 bg-black/5 dark:glass-dark select-none dark:bg-white/5 rounded-lg border-black/10 dark:border-white/10">
+                    <div className="space-y-0 border px-4 py-2 bg-black/5 select-none rounded-lg border-black/10 dark:bg-white/5 dark:border-white/10 ">
                       <div className="flex items-center justify-between py-3">
                         <div className="flex items-center space-x-2 text-black/70 dark:text-white/70 text-base">
                           <StickyNote className="h-4 w-4" />
@@ -434,12 +429,12 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                     </div>
 
                     <div className="mt-6">
-                      <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                      <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2 select-none">
                         <Monitor className="h-4 w-4" />
                         <span>{t("interface")}</span>
                       </h3>
                       <div className="flex flex-col gap-2">
-                        <div className="px-4 border select-none dark:bg-white/5 rounded-lg border-black/10 dark:border-white/10">
+                        <div className="px-4 border select-none dark:bg-white/5 dark:border-white/10 rounded-lg border-black/10 ">
                           <div className="flex items-center justify-between py-3">
                             <div className="flex items-center space-x-2 text-black/70 dark:text-white/70 text-base">
                               <Globe className="h-4 w-4" />
@@ -497,13 +492,19 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                             <Switch
                               checked={dailyQuoteObj?.show !== false}
                               onCheckedChange={() => {
-                                localStorage.setItem("evolve_data", JSON.stringify({
-                                  ...JSON.parse(localStorage.getItem("evolve_data") || "{}"),
-                                  dailyQuote: {
-                                    ...dailyQuoteObj,
-                                    show: dailyQuoteObj?.show ? false : true
-                                  },
-                                }));
+                                localStorage.setItem(
+                                  "evolve_data",
+                                  JSON.stringify({
+                                    ...JSON.parse(
+                                      localStorage.getItem("evolve_data") ||
+                                        "{}"
+                                    ),
+                                    dailyQuote: {
+                                      ...dailyQuoteObj,
+                                      show: dailyQuoteObj?.show ? false : true,
+                                    },
+                                  })
+                                );
                                 setRefreshKey(Math.random());
                               }}
                             />
@@ -518,13 +519,19 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                             <Switch
                               checked={displayNameObj?.show !== false}
                               onCheckedChange={() => {
-                                localStorage.setItem("evolve_data", JSON.stringify({
-                                  ...JSON.parse(localStorage.getItem("evolve_data") || "{}"),
-                                  display_name: {
-                                    ...displayNameObj,
-                                    show: displayNameObj?.show ? false : true
-                                  },
-                                }));
+                                localStorage.setItem(
+                                  "evolve_data",
+                                  JSON.stringify({
+                                    ...JSON.parse(
+                                      localStorage.getItem("evolve_data") ||
+                                        "{}"
+                                    ),
+                                    display_name: {
+                                      ...displayNameObj,
+                                      show: displayNameObj?.show ? false : true,
+                                    },
+                                  })
+                                );
                                 setRefreshKey(Math.random());
                               }}
                             />
@@ -535,7 +542,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                   </TabsContent>
 
                   <TabsContent value="profile" className="mt-0">
-                    <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                    <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2 select-none">
                       <User className="h-4 w-4" />
                       <span>{t("userProfile")}</span>
                     </h3>
@@ -543,9 +550,9 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                     <div className="space-y-3 flex flex-col gap-2">
                       {isAuthenticated ? (
                         <div className="flex flex-col space-y-2">
-                          <div className="border px-4 py-2 bg-black/5 border-black/10 dark:border-white/10 dark:glass-dark dark:bg-white/5 rounded-lg mb-2">
+                          <div className="border px-4 py-2 bg-black/5 border-black/10 dark:border-white/10 dark:bg-white/5 rounded-lg mb-2">
                             <div className="flex items-center justify-between py-2">
-                              <div className="flex items-center gap-2 text-black/70 dark:text-white/70 text-base">
+                              <div className="flex items-center gap-2 text-black/70 dark:text-white/70 text-base select-none">
                                 <span>{t("email")}</span>
                               </div>
                               <span className="text-sm font-medium text-black/70 dark:text-white/70">
@@ -555,7 +562,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                             <Separator className="bg-black/10 dark:bg-white/10" />
 
                             <div className="flex items-center justify-between py-2">
-                              <div className="flex items-center gap-2 text-black/70 dark:text-white/70 text-base">
+                              <div className="flex items-center gap-2 text-black/70 dark:text-white/70 text-base select-none">
                                 <span>{t("accountType")}</span>
                               </div>
                               <span className="text-sm text-black/70 dark:text-white/70 flex items-center gap-1">
@@ -575,7 +582,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                           </Button>
 
                           <div className="mt-4 pt-4">
-                            <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                            <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2 select-none">
                               <AlertTriangle className="h-4 w-4" />
                               <span>{t("dangerArea")}</span>
                             </h3>
@@ -621,7 +628,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                   </TabsContent>
 
                   <TabsContent value="sync" className="mt-0">
-                    <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                    <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2 select-none">
                       <Cloud className="h-4 w-4" />
                       <span>{t("dataSynchronization")}</span>
                     </h3>
@@ -664,7 +671,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                       </div>
 
                       {isSyncing && (
-                        <div className="flex items-center justify-center text-sm text-black/50 dark:text-white/50 bg-black/5 dark:bg-white/5 p-2 rounded-lg">
+                        <div className="flex items-center justify-center text-sm text-black/50 dark:text-white/50 p-2 rounded-lg select-none">
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                           <span>{t("syncingData")}</span>
                         </div>
@@ -673,17 +680,24 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                       {isAuthenticated &&
                         isPremium &&
                         !userProfile?.cloud_sync_enabled && (
-                          <div className="flex items-start gap-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-500/10 p-2 rounded-lg">
-                            <Cloud className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                            <span className="leading-tight text-base">
-                              {t("cloudSyncIsCurrentlyDisabled")}
-                            </span>
+                          <div className="flex flex-col gap-3 p-4 rounded-lg bg-amber-500/10 dark:bg-amber-900/30 border border-amber-500/20 dark:border-amber-500/30">
+                            <div className="flex items-start gap-3">
+                              <Cloud className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                              <div className="flex flex-col gap-1">
+                                <h4 className="text-base font-medium text-amber-800 dark:text-amber-200">
+                                  {t("cloudSyncIsCurrentlyDisabled")}
+                                </h4>
+                                <p className="text-sm text-amber-700/90 dark:text-amber-300/90">
+                                  {t("enableCloudSyncToKeepYourDataBackedUp")}
+                                </p>
+                              </div>
+                            </div>
                           </div>
                         )}
 
                       {isAuthenticated && (
                         <div className="mt-4 border-black/10 dark:border-white/10 pt-4">
-                          <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                          <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2 select-none">
                             <FileDown className="h-4 w-4" />
                             <span>{t("dataExport")}</span>
                           </h3>
@@ -704,7 +718,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                   {isAuthenticated &&
                     (!isPremium || userProfile?.polar_customer_id) && (
                       <TabsContent value="billing" className="mt-0">
-                        <h3 className="mb-4 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                        <h3 className="mb-4 text-base font-medium text-black dark:text-white flex items-center gap-2 select-none">
                           <CreditCard className="h-4 w-4" />
                           <span>{t("billing")}</span>
                         </h3>
@@ -752,14 +766,14 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
                     )}
 
                   <TabsContent value="about" className="mt-0">
-                    <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2">
+                    <h3 className="mb-3 text-base font-medium text-black dark:text-white flex items-center gap-2 select-none">
                       <HelpCircle className="h-4 w-4" />
                       <span>{t("aboutEvolve")}</span>
                     </h3>
 
                     <div className="flex flex-col space-y-5">
-                      <div className="border border-black/15 dark:border-white/10 rounded-lg overflow-hidden">
-                        <div className="p-5 text-sm text-black/80 dark:text-white/80 space-y-4 bg-black/5 dark:bg-white/5 dark:glass-dark">
+                      <div className="overflow-hidden">
+                        <div className="p-2 font-medium font-mono text-sm text-black/80 dark:text-white/80 space-y-4 select-none">
                           <p>{t("evolveCreated")}</p>
 
                           <p>{t("evolveFocus")}</p>
@@ -794,10 +808,10 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
 
                       <div className="flex flex-col items-center mt-auto pt-6">
                         <Logo className="h-10 w-10 flex justify-center items-center mb-3" />
-                        <div className="text-sm text-black/50 dark:text-white/50">
+                        <div className="text-sm text-black/50 dark:text-white/50 select-none">
                           {t("version")}
                         </div>
-                        <div className="text-xs text-black/40 dark:text-white/40 mt-1">
+                        <div className="text-xs text-black/40 dark:text-white/40 mt-1 select-none">
                           © {new Date().getFullYear()} Evolve
                         </div>
                       </div>
@@ -834,13 +848,20 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
               <p className="mb-2">{t("deleteAccountWarning")}</p>
 
               {isPremium && (
-                <div className="p-3 mb-3 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded-md">
-                  <p className="font-medium">
-                    {t("activeSubscriptionWarning")}
-                  </p>
-                  <p className="text-sm">
-                    {t("activeSubscriptionWarningDescription")}
-                  </p>
+                <div className="p-4 mb-4 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/40 dark:to-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-lg shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-amber-100 dark:bg-amber-800/50 rounded-lg">
+                      <CreditCard className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <h4 className="text-base font-medium text-amber-800 dark:text-amber-200">
+                        {t("activeSubscriptionWarning")}
+                      </h4>
+                      <p className="text-sm text-amber-700/90 dark:text-amber-300/90 leading-relaxed">
+                        {t("activeSubscriptionWarningDescription")}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -858,7 +879,7 @@ const SettingsSidebar = ({ setRefreshKey }: { setRefreshKey: (key: number) => vo
               {t("cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-red-800 shadow-sm hover:shadow-md dark:shadow-red-900/20 dark:hover:shadow-red-900/30 transition-all duration-300"
+              className="bg-destructive hover:bg-destructive/90 text-white border-red-800 transition-all duration-300"
               onClick={handleDeleteAccount}
               disabled={isDeletingAccount}
             >

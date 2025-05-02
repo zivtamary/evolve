@@ -46,7 +46,7 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', className = '' }) => {
               ease: "easeInOut"
             }}
           >
-            <Sparkles className={`${sizeClasses[size]} text-white dark:text-gray-900`} />
+            <img src="/icons/logo-small.png" alt="Evolve Logo" />
           </motion.div>
           {/* Enhanced Sparkles */}
           {[...Array(5)].map((_, i) => (

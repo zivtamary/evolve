@@ -85,11 +85,11 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ open, onOpenChange }) =
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent closeButtonClassName='text-black dark:text-white' className="bg-white dark:bg-black border-white/10 shadow-xl font-['Inter']">
         <DialogHeader className="border-b border-white/10 pb-3">
-          <DialogTitle className="dark:text-white text-xl font-semibold flex items-center gap-2">
+          <DialogTitle className="dark:text-white text-xl font-semibold flex items-center gap-2 select-none">
             <MessageCircleHeart className="h-5 w-5" />
             {t('leaveFeedback')}
           </DialogTitle>
-          <DialogDescription className="mt-1">
+          <DialogDescription className="mt-1 select-none">
             {t('feedbackDescription')}
           </DialogDescription>
         </DialogHeader>
@@ -123,7 +123,7 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ open, onOpenChange }) =
               <div className="flex justify-end space-x-3">
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="link"
                   onClick={() => onOpenChange(false)}
                   disabled={isSubmitting}
                 >

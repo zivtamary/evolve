@@ -164,7 +164,7 @@ const SortableTodoItem: React.FC<SortableTodoItemProps> = ({ todo, onToggle, onD
             onChange={(e) => setEditText(e.target.value)}
             onKeyDown={handleKeyDown}
             onBlur={handleSave}
-            className="flex-1 bg-white/10 px-2 py-1 rounded outline-none"
+            className="flex-1 bg-white/10 px-2 py-1 rounded outline-none text-base"
             maxLength={TODO_CHAR_LIMIT}
           />
         ) : (
